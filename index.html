@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LifeOS">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>LifeOS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --bg3: #1a1a24;
+  --bg4: #22222f;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0efe8;
+  --text2: #9896a0;
+  --text3: #5a5870;
+  --accent: #c8b8ff;
+  --accent2: #8b5cf6;
+  --gold: #f5c842;
+  --teal: #4ecdc4;
+  --coral: #ff6b6b;
+  --green: #6bcb77;
+  --amber: #ffa62b;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'Outfit', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* SETUP SCREEN */
+#setup {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+.setup-card {
+  width: 100%; max-width: 440px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+}
+.setup-logo {
+  font-family: var(--serif);
+  font-size: 2rem;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+.setup-sub {
+  font-size: 0.8rem;
+  color: var(--text3);
+  margin-bottom: 2rem;
+  font-family: var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.setup-field { margin-bottom: 1.25rem; }
+.setup-label {
+  font-size: 0.75rem;
+  color: var(--text2);
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.setup-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.setup-input:focus { border-color: var(--accent2); }
+.setup-hint {
+  font-size: 0.72rem;
+  color: var(--text3);
+  margin-top: 0.4rem;
+  line-height: 1.5;
+}
+.setup-btn {
+  width: 100%;
+  background: var(--accent2);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.875rem;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: opacity 0.2s;
+}
+.setup-btn:hover { opacity: 0.88; }
+
+/* APP SHELL */
+#app { display: none; height: 100vh; height: 100dvh; flex-direction: column; }
+#app.visible { display: flex; }
+
+/* TOP BAR */
+.topbar {
+  padding: calc(var(--safe-top) + 0.75rem) 1.25rem 0.75rem;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.topbar-logo {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+.topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+.sync-btn {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text3);
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.04em;
+}
+.sync-btn:hover { color: var(--text2); border-color: var(--border2); }
+.sync-btn.saving { color: var(--gold); border-color: var(--gold); }
+.sync-btn.saved { color: var(--green); border-color: var(--green); }
+
+/* CONTENT */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.25rem;
+  padding-bottom: calc(var(--safe-bottom) + 5rem);
+}
+
+/* NAV */
+.nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 0.5rem 0.5rem calc(var(--safe-bottom) + 0.5rem);
+  background: rgba(10,10,15,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around;
+  z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.15s;
+  min-width: 52px;
+}
+.nav-item:hover { background: var(--bg3); }
+.nav-item.active .nav-icon { color: var(--accent); }
+.nav-item.active .nav-label { color: var(--accent); }
+.nav-icon { font-size: 1.2rem; color: var(--text3); transition: color 0.15s; }
+.nav-label { font-size: 0.6rem; color: var(--text3); font-family: var(--mono); letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.15s; }
+
+/* SECTIONS */
+.section { display: none; }
+.section.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.card-title {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1rem;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+/* HOME / OVERVIEW */
+.greeting {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+.greeting-date {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  margin-bottom: 1.5rem;
+}
+.day-type-selector {
+  display: flex; gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.day-type-btn {
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: none;
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.day-type-btn.active { background: var(--accent2); border-color: var(--accent2); color: white; }
+
+.today-targets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.target-tile {
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  border: 1px solid var(--border);
+}
+.target-tile-label {
+  font-size: 0.68rem;
+  font-family: var(--mono);
+  color: var(--text3);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+.target-tile-val {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.target-tile-sub {
+  font-size: 0.72rem;
+  color: var(--text2);
+  margin-top: 0.2rem;
+}
+
+/* PROGRESS BAR */
+.progress-wrap { margin: 0.75rem 0; }
+.progress-label {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.4rem;
+}
+.progress-label span { font-size: 0.78rem; color: var(--text2); }
+.progress-label strong { font-size: 0.78rem; color: var(--text); font-weight: 500; }
+.progress-bar {
+  height: 6px;
+  background: var(--bg4);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* WEEK DOTS */
+.week-dots { display: flex; gap: 6px; margin-top: 0.5rem; }
+.dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem;
+  font-family: var(--mono);
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  transition: all 0.15s;
+}
+.dot.filled { background: var(--accent2); border-color: var(--accent2); color: white; }
+.dot.today { border-color: var(--accent); color: var(--accent); }
+
+/* STATS ROW */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.stat-box {
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 0.875rem 0.75rem;
+  text-align: center;
+}
+.stat-val {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--mono);
+}
+.stat-label {
+  font-size: 0.62rem;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+}
+
+/* MILESTONE LIST */
+.milestone-list { list-style: none; }
+.milestone-item {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.milestone-item:last-child { border-bottom: none; }
+.milestone-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.milestone-item.done .milestone-check {
+  background: var(--green);
+  border-color: var(--green);
+}
+.milestone-item.done .milestone-check::after { content: '✓'; font-size: 0.65rem; color: white; }
+.milestone-item.done .milestone-text { color: var(--text3); text-decoration: line-through; }
+.milestone-text { font-size: 0.85rem; color: var(--text2); }
+
+/* LOG ENTRY */
+.log-form { display: flex; flex-direction: column; gap: 0.75rem; }
+.field-label {
+  font-size: 0.72rem;
+  font-family: var(--mono);
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+.field-input, .field-textarea, .field-select {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.875rem;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.field-input:focus, .field-textarea:focus, .field-select:focus { border-color: var(--accent2); }
+.field-textarea { resize: vertical; min-height: 72px; }
+
+.btn {
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--accent2); color: white; }
+.btn-primary:hover { opacity: 0.88; }
+.btn-ghost { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+.btn-danger { background: rgba(255,107,107,0.15); color: var(--coral); border: 1px solid rgba(255,107,107,0.3); }
+
+.btn-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.5rem; }
+
+/* HEALTH LOG */
+.health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.rating-row { display: flex; gap: 0.5rem; margin-top: 0.35rem; }
+.rating-dot {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
+  font-family: var(--mono);
+  cursor: pointer;
+  color: var(--text3);
+  transition: all 0.15s;
+}
+.rating-dot.selected { background: var(--accent2); border-color: var(--accent2); color: white; }
+
+/* WEIGHT CHART */
+.chart-area {
+  width: 100%; height: 140px;
+  position: relative;
+  margin-top: 0.5rem;
+}
+.chart-area canvas { width: 100% !important; height: 100% !important; }
+
+/* FINANCE */
+.finance-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.finance-row:last-child { border-bottom: none; }
+.finance-name { font-size: 0.875rem; color: var(--text); }
+.finance-sub { font-size: 0.72rem; color: var(--text3); margin-top: 1px; }
+.finance-val { font-family: var(--mono); font-size: 0.9rem; color: var(--text); text-align: right; }
+.finance-monthly { font-size: 0.7rem; color: var(--text3); text-align: right; }
+
+.badge {
+  font-size: 0.62rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.badge-mf { background: rgba(139,92,246,0.15); color: var(--accent); }
+.badge-stock { background: rgba(78,205,196,0.15); color: var(--teal); }
+.badge-debt { background: rgba(245,200,66,0.15); color: var(--gold); }
+.badge-rd { background: rgba(107,203,119,0.15); color: var(--green); }
+
+/* SUBSCRIPTION TRACKER */
+.sub-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.sub-item:last-child { border-bottom: none; }
+.sub-due { font-family: var(--mono); font-size: 0.72rem; }
+.sub-due.soon { color: var(--amber); }
+.sub-due.overdue { color: var(--coral); }
+.sub-due.ok { color: var(--text3); }
+
+/* TASK LIST */
+.task-item {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.task-item:last-child { border-bottom: none; }
+.task-status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.status-pending { background: var(--amber); }
+.status-inprogress { background: var(--teal); }
+.status-done { background: var(--green); }
+.task-text { font-size: 0.875rem; color: var(--text); }
+.task-next { font-size: 0.72rem; color: var(--text3); margin-top: 3px; }
+.task-owner { font-size: 0.65rem; font-family: var(--mono); color: var(--accent); margin-top: 3px; }
+
+/* VAULT PIN */
+.vault-locked {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+.vault-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.pin-input-row { display: flex; gap: 0.5rem; justify-content: center; margin: 1rem 0; }
+.pin-digit {
+  width: 44px; height: 52px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-size: 1.3rem;
+  font-family: var(--mono);
+  color: var(--text);
+  outline: none;
+}
+.pin-digit:focus { border-color: var(--accent2); }
+
+/* WEEKLY REVIEW */
+.review-section { margin-bottom: 1.25rem; }
+.review-q {
+  font-size: 0.85rem;
+  color: var(--text2);
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+.score-row { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.score-btn {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  background: none;
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.score-btn.selected { background: var(--accent2); border-color: var(--accent2); color: white; }
+
+/* PLAYBOOK SECTION */
+.playbook-phase {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.6rem;
+  overflow: hidden;
+}
+.playbook-header {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.playbook-header:hover { background: var(--bg3); }
+.playbook-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--bg4);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.playbook-title { font-size: 0.875rem; font-weight: 500; color: var(--text); flex: 1; }
+.playbook-sub { font-size: 0.72rem; color: var(--text3); }
+.playbook-body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--border);
+  display: none;
+}
+.playbook-body.open { display: block; }
+.script {
+  background: var(--bg3);
+  border-left: 2px solid var(--accent2);
+  padding: 0.875rem 1rem;
+  margin: 0.75rem 0;
+  font-size: 0.83rem;
+  color: var(--text2);
+  font-style: italic;
+  line-height: 1.65;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.note-text {
+  font-size: 0.75rem;
+  color: var(--text3);
+  line-height: 1.55;
+  margin-top: 0.5rem;
+}
+.branch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.75rem; }
+.branch-card {
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  border-top: 2px solid var(--border2);
+}
+.branch-label { font-size: 0.68rem; font-family: var(--mono); color: var(--text3); margin-bottom: 0.4rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.branch-trigger { font-size: 0.75rem; color: var(--text3); margin-bottom: 0.5rem; line-height: 1.4; font-style: italic; }
+.branch-response { font-size: 0.75rem; color: var(--text2); line-height: 1.5; }
+
+/* ADD FORM MODAL */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 500;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding-bottom: calc(var(--safe-bottom) + 1.5rem);
+}
+.modal-title {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1.25rem;
+}
+
+/* DIET TABLE */
+.diet-day {
+  margin-bottom: 1rem;
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.diet-day-header {
+  background: var(--bg4);
+  padding: 0.5rem 0.875rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text3);
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer;
+}
+.diet-meals { padding: 0.5rem 0.875rem; }
+.diet-meal-row {
+  display: flex; gap: 0.75rem; align-items: flex-start;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.diet-meal-row:last-child { border-bottom: none; }
+.diet-meal-label {
+  font-size: 0.68rem;
+  font-family: var(--mono);
+  color: var(--text3);
+  min-width: 70px;
+  letter-spacing: 0.04em;
+  padding-top: 2px;
+}
+.diet-meal-val { font-size: 0.82rem; color: var(--text2); }
+
+/* ACCURACY */
+.accuracy-ring {
+  width: 80px; height: 80px;
+  position: relative;
+  flex-shrink: 0;
+}
+.accuracy-ring svg { transform: rotate(-90deg); }
+.accuracy-center {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 5.5rem);
+  left: 50%; transform: translateX(-50%);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8rem;
+  color: var(--text2);
+  font-family: var(--mono);
+  z-index: 600;
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 0; }
+
+/* SECTION HEADING */
+.section-heading {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+.section-sub {
+  font-size: 0.75rem;
+  color: var(--text3);
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
+  margin-bottom: 1.25rem;
+}
+
+/* WISHLIST */
+.wish-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.wish-item:last-child { border-bottom: none; }
+.wish-text { font-size: 0.875rem; color: var(--text2); flex: 1; }
+.wish-done { color: var(--text3); text-decoration: line-through; }
+
+/* FIRE PROGRESS */
+.fire-number {
+  font-family: var(--mono);
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--gold);
+}
+.fire-label { font-size: 0.72rem; color: var(--text3); font-family: var(--mono); letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* EQUIPMENT */
+.equip-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.equip-item:last-child { border-bottom: none; }
+.equip-name { font-size: 0.83rem; color: var(--text2); }
+.equip-badge {
+  font-size: 0.62rem; font-family: var(--mono);
+  padding: 0.15rem 0.5rem; border-radius: 4px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.equip-ready { background: rgba(107,203,119,0.15); color: var(--green); }
+.equip-storage { background: rgba(255,166,43,0.15); color: var(--amber); }
+.equip-installed { background: rgba(139,92,246,0.15); color: var(--accent); }
+
+@media (max-width: 380px) {
+  .branch-grid { grid-template-columns: 1fr; }
+  .health-grid { grid-template-columns: 1fr; }
+  .today-targets { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup">
+  <div class="setup-card">
+    <div class="setup-logo">LifeOS</div>
+    <div class="setup-sub">First-time setup</div>
+    <div class="setup-field">
+      <label class="setup-label">GitHub Username</label>
+      <input class="setup-input" id="cfg-user" placeholder="your-github-username" autocapitalize="none">
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Repository Name</label>
+      <input class="setup-input" id="cfg-repo" placeholder="lifeos-data" autocapitalize="none">
+      <div class="setup-hint">Create a private GitHub repo with this name. Add data.json to it.</div>
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">GitHub Personal Access Token</label>
+      <input class="setup-input" id="cfg-token" type="password" placeholder="ghp_xxxxxxxxxxxx">
+      <div class="setup-hint">Settings → Developer settings → Personal access tokens → Fine-grained. Give Contents: Read & Write on your repo.</div>
+    </div>
+    <button class="setup-btn" onclick="saveConfig()">Connect & Launch →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">LifeOS</div>
+    <div class="topbar-right">
+      <button class="sync-btn" id="sync-btn" onclick="saveData()">↑ sync</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="section active" id="sec-home">
+      <div class="greeting" id="greeting">Good morning, Aabhas</div>
+      <div class="greeting-date" id="today-date"></div>
+
+      <div class="day-type-selector">
+        <button class="day-type-btn active" onclick="setDayType('music',this)">🎵 Music day</button>
+        <button class="day-type-btn" onclick="setDayType('gym',this)">💪 Gym day</button>
+        <button class="day-type-btn" onclick="setDayType('work',this)">🔥 Heavy work</button>
+      </div>
+
+      <div id="day-protocol" class="card" style="border-color: rgba(139,92,246,0.3)">
+        <div class="card-title">Today's protocol</div>
+        <div id="protocol-content"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Weekly pulse</div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Music sessions</span><strong id="home-music-prog">0 / 3</strong></div>
+          <div class="progress-bar"><div class="progress-fill" id="home-music-bar" style="background:var(--accent2); width:0%"></div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Upskilling sessions</span><strong id="home-skill-prog">0 / 2</strong></div>
+          <div class="progress-bar"><div class="progress-fill" id="home-skill-bar" style="background:var(--teal); width:0%"></div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Gym days</span><strong id="home-gym-prog">0 / 4</strong></div>
+          <div class="progress-bar"><div class="progress-fill" id="home-gym-bar" style="background:var(--green); width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Upcoming obligations</div>
+        <div class="finance-row">
+          <div><div class="finance-name">Health insurance</div><div class="finance-sub">Port window closes</div></div>
+          <div class="finance-val" style="color:var(--amber)">Jul 31</div>
+        </div>
+        <div class="finance-row">
+          <div><div class="finance-name">Crypto tax (ETH)</div><div class="finance-sub">₹21,000 at ITR filing</div></div>
+          <div class="finance-val" style="color:var(--amber)">Jul 31</div>
+        </div>
+        <div class="finance-row">
+          <div><div class="finance-name">Raise conversation</div><div class="finance-sub">Growth conversation with manager</div></div>
+          <div id="raise-status" class="finance-val" style="color:var(--coral)">Pending</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORK -->
+    <div class="section" id="sec-work">
+      <div class="section-heading">Work</div>
+      <div class="section-sub">raise · boundaries · growth</div>
+
+      <div class="card">
+        <div class="card-title">Raise tracker</div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-val" style="color:var(--text3); font-size:0.9rem;">₹30.9L</div>
+            <div class="stat-label">Current CTC</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color:var(--gold);">₹40L</div>
+            <div class="stat-label">Target</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color:var(--green);">+29%</div>
+            <div class="stat-label">Gap</div>
+          </div>
+        </div>
+        <div class="progress-wrap" style="margin-top:0.5rem">
+          <div class="progress-label"><span>Conversation status</span><strong id="conv-status-label">Not done</strong></div>
+          <div class="progress-bar"><div class="progress-fill" id="conv-bar" style="background:var(--amber); width:10%"></div></div>
+        </div>
+        <div class="btn-row" style="margin-top:1rem">
+          <button class="btn btn-primary" onclick="markConversationDone()">Mark conversation done</button>
+          <button class="btn btn-ghost" onclick="openModal('modal-win')">+ Add win</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Pre-conversation checklist</div>
+        <ul class="milestone-list" id="raise-checklist">
+          <li class="milestone-item" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text">Take 2–3 recruiter calls — get real market number</div></li>
+          <li class="milestone-item" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text">Write 2 concrete project contributions with business impact</div></li>
+          <li class="milestone-item" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text">Rehearse saying "40 LPA" out loud until voice doesn't waver</div></li>
+          <li class="milestone-item" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text">Request 1:1 — frame as "growth direction" conversation</div></li>
+          <li class="milestone-item" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text">Choose a low-stress day — not Monday morning, not before deadline</div></li>
+        </ul>
+      </div>
+
+      <!-- PLAYBOOK -->
+      <div class="card">
+        <div class="card-title">Conversation playbook</div>
+
+        <div class="playbook-phase">
+          <div class="playbook-header" onclick="togglePlaybook(this)">
+            <div class="playbook-num">0</div>
+            <div><div class="playbook-title">Mindset before you walk in</div><div class="playbook-sub">Hold these three things</div></div>
+            <span style="color:var(--text3); font-size:0.8rem;">▾</span>
+          </div>
+          <div class="playbook-body">
+            <div class="script">You are not asking for a favour. You are sharing market information and inviting alignment. 40 LPA is a correction, not an ambition. She needs this conversation as much as you do.</div>
+          </div>
+        </div>
+
+        <div class="playbook-phase">
+          <div class="playbook-header" onclick="togglePlaybook(this)">
+            <div class="playbook-num">1</div>
+            <div><div class="playbook-title">Open — set the tone</div><div class="playbook-sub">30 seconds. Signal intent.</div></div>
+            <span style="color:var(--text3); font-size:0.8rem;">▾</span>
+          </div>
+          <div class="playbook-body">
+            <div class="script">"I wanted to have a conversation I've been meaning to have — about my growth here, where I see myself going, and making sure we're aligned on that. Is this a good time to go a bit deeper?"</div>
+            <div class="note-text">Wait for her to settle in. The pause after this line is intentional.</div>
+          </div>
+        </div>
+
+        <div class="playbook-phase">
+          <div class="playbook-header" onclick="togglePlaybook(this)">
+            <div class="playbook-num">2</div>
+            <div><div class="playbook-title">Contribution anchor</div><div class="playbook-sub">Show the weight, not the list.</div></div>
+            <span style="color:var(--text3); font-size:0.8rem;">▾</span>
+          </div>
+          <div class="playbook-body">
+            <div class="script">"In the past year I've owned my projects end to end — from problem framing through to delivery at the client's end. What isn't always visible is the complexity underneath — the modelling decisions, the pipeline work, the iterations before anything reaches the client. I've been operating independently on that consistently."</div>
+            <div class="note-text">Pick 1–2 specific projects mentally before the meeting. Don't volunteer a list unprompted.</div>
+          </div>
+        </div>
+
+        <div class="playbook-phase">
+          <div class="playbook-header" onclick="togglePlaybook(this)">
+            <div class="playbook-num">3</div>
+            <div><div class="playbook-title">Market reality</div><div class="playbook-sub">Factual. Calm. Not a threat.</div></div>
+            <span style="color:var(--text3); font-size:0.8rem;">▾</span>
+          </div>
+          <div class="playbook-body">
+            <div class="script">"I've been doing some honest homework on where my profile sits in the market — the combination of data science and credit risk domain depth. There's a meaningful gap between my current compensation and what the market is offering. I'm not saying that to create pressure — both of us should be working with the same information."</div>
+            <div class="note-text">Pause after this. Let it land. Don't fill the silence.</div>
+          </div>
+        </div>
+
+        <div class="playbook-phase">
+          <div class="playbook-header" onclick="togglePlaybook(this)">
+            <div class="playbook-num">4</div>
+            <div><div class="playbook-title">The ask</div><div class="playbook-sub">Specific. No range. No softening.</div></div>
+            <span style="color:var(--text3); font-size:0.8rem;">▾</span>
+          </div>
+          <div class="playbook-body">
+            <div class="script">"What I'd like to understand is — what does a path to somewhere around 40 LPA look like here, and over what kind of timeline? I want to plan around that, and I want to make sure my work here continues to justify it."</div>
+            <div class="note-text">Say 40. Not "35 to 40." 40 is the anchor.</div>
+          </div>
+        </div>
+
+        <div class="playbook-phase">
+          <div class="playbook-header" onclick="togglePlaybook(this)">
+            <div class="playbook-num">5</div>
+            <div><div class="playbook-title">What's in it for her</div><div class="playbook-sub">Make her your champion.</div></div>
+            <span style="color:var(--text3); font-size:0.8rem;">▾</span>
+          </div>
+          <div class="playbook-body">
+            <div class="script">"I'm aware you're building your team in a new capacity now, and I'd genuinely like to be someone you can count on as part of that. I think there's a lot we can do together if we get the foundations right. That's part of why I'd rather have this conversation now than let it simmer."</div>
+            <div class="note-text">She's a new AVP. Retention is her problem. Your growth is her narrative upward.</div>
+          </div>
+        </div>
+
+        <div class="playbook-phase">
+          <div class="playbook-header" onclick="togglePlaybook(this)">
+            <div class="playbook-num">6</div>
+            <div><div class="playbook-title">Alliance close</div><div class="playbook-sub">Invite honesty. Settle intent.</div></div>
+            <span style="color:var(--text3); font-size:0.8rem;">▾</span>
+          </div>
+          <div class="playbook-body">
+            <div class="script">"I'd genuinely like to build my career here rather than keep switching. But I also need to feel like the growth is real and there's a clear path forward. I trust you to be straight with me about what's possible."</div>
+          </div>
+        </div>
+
+        <div class="playbook-phase">
+          <div class="playbook-header" onclick="togglePlaybook(this)">
+            <div class="playbook-num">↓</div>
+            <div><div class="playbook-title">Decision tree — her responses</div><div class="playbook-sub">Four branches. Know them before you walk in.</div></div>
+            <span style="color:var(--text3); font-size:0.8rem;">▾</span>
+          </div>
+          <div class="playbook-body">
+            <div class="branch-grid">
+              <div class="branch-card" style="border-top-color:var(--green)">
+                <div class="branch-label" style="color:var(--green)">Branch 1 — Engages warmly</div>
+                <div class="branch-trigger">"I hear you, let me see what I can do."</div>
+                <div class="branch-response">"Can we set a timeline? Even a 6-week checkpoint would help." — Convert goodwill into commitment.</div>
+              </div>
+              <div class="branch-card" style="border-top-color:var(--teal)">
+                <div class="branch-label" style="color:var(--teal)">Branch 2 — Defers to process</div>
+                <div class="branch-trigger">"Compensation goes through the cycle."</div>
+                <div class="branch-response">"I want to align on the goal now — so when the cycle comes we're already on the same page."</div>
+              </div>
+              <div class="branch-card" style="border-top-color:var(--amber)">
+                <div class="branch-label" style="color:var(--amber)">Branch 3 — Pushes back</div>
+                <div class="branch-trigger">"40 is quite a jump."</div>
+                <div class="branch-response">"I expected that. I'm not anchoring at 40 arbitrarily. What's your read on it?" — Hold the number.</div>
+              </div>
+              <div class="branch-card" style="border-top-color:var(--text3)">
+                <div class="branch-label" style="color:var(--text3)">Branch 4 — Goes cold</div>
+                <div class="branch-trigger">"Not much room right now."</div>
+                <div class="branch-response">"I just wanted this on your radar. Can we revisit in 2 months?" — Plant seed, leave gracefully.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Weekly wins</div>
+        <div id="wins-list" style="margin-bottom:0.75rem"></div>
+        <button class="btn btn-ghost" onclick="openModal('modal-win')">+ Log a win</button>
+      </div>
+    </div>
+
+    <!-- MUSIC -->
+    <div class="section" id="sec-music">
+      <div class="section-heading">Music</div>
+      <div class="section-sub">cinematic · progressive · quietly rebellious</div>
+
+      <div class="card">
+        <div class="card-title">This week</div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Sessions</span><strong id="music-prog-label">0 / 3</strong></div>
+          <div class="progress-bar"><div class="progress-fill" id="music-prog-bar" style="background:var(--accent2); width:0%"></div></div>
+        </div>
+        <div style="margin-top:1rem; font-size:0.72rem; color:var(--text3); font-family:var(--mono); letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.5rem;">Session rotation</div>
+        <div style="font-size:0.82rem; color:var(--text2); line-height:1.7;">
+          Session 1 — 20min vocals + harmonium · 40min keys technique · 30min free play<br>
+          Session 2 — 20min vocals + harmonium · 40min composition sketch (GarageBand) · 30min free play<br>
+          Session 3 — 20min vocals + harmonium · 40min guitar / integration · 30min free play
+        </div>
+        <div class="btn-row" style="margin-top:1rem">
+          <button class="btn btn-primary" onclick="logMusicSession()">+ Log session</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Milestones</div>
+        <ul class="milestone-list" id="music-milestones"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Setup & equipment</div>
+        <div id="equipment-list"></div>
+        <div style="margin-top:0.875rem; padding:0.75rem; background:var(--bg3); border-radius:var(--radius-sm); font-size:0.8rem; color:var(--text2); line-height:1.6;">
+          <strong style="color:var(--accent); font-weight:500;">This week:</strong> Clear table surface · Pull harmonium out of storage · Create GarageBand sketch template
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">12-month arc</div>
+        <div style="font-size:0.82rem; color:var(--text2); line-height:1.8;">
+          <span style="color:var(--accent); font-family:var(--mono); font-size:0.72rem;">M1–3</span> Physical foundations — voice, instruments out, first sketches<br>
+          <span style="color:var(--accent); font-family:var(--mono); font-size:0.72rem;">M4–6</span> First complete 90-second composition sketch recorded<br>
+          <span style="color:var(--accent); font-family:var(--mono); font-size:0.72rem;">M7–9</span> First social media presence — process, not just output<br>
+          <span style="color:var(--accent); font-family:var(--mono); font-size:0.72rem;">M10–12</span> First original piece released on YouTube + Instagram
+        </div>
+        <div style="margin-top:1rem; padding:0.75rem; background:rgba(139,92,246,0.08); border-radius:var(--radius-sm); border:1px solid rgba(139,92,246,0.2);">
+          <div style="font-size:0.72rem; font-family:var(--mono); color:var(--accent); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.4rem;">Targets (3–5 year)</div>
+          <div style="font-size:0.82rem; color:var(--text2);">YouTube 50K · Instagram 200K · 1 gig / month · Pure originals</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Session log</div>
+        <div id="music-log" style="font-size:0.82rem; color:var(--text2);"></div>
+      </div>
+    </div>
+
+    <!-- UPSKILLING -->
+    <div class="section" id="sec-skill">
+      <div class="section-heading">Upskilling</div>
+      <div class="section-sub">GenAI × credit risk · building first</div>
+
+      <div class="card">
+        <div class="card-title">Current project</div>
+        <div style="font-size:1rem; font-weight:500; color:var(--text); margin-bottom:0.5rem;" id="current-project"></div>
+        <div style="font-size:0.8rem; color:var(--text2); line-height:1.6;">Stack: Python · Claude / OpenAI API · SQL · Your existing ML skills<br>Goal: Bank statement in → categories + risk signal out → hosted API</div>
+        <div class="progress-wrap" style="margin-top:1rem">
+          <div class="progress-label"><span>Sessions this week</span><strong id="skill-prog-label">0 / 2</strong></div>
+          <div class="progress-bar"><div class="progress-fill" id="skill-prog-bar" style="background:var(--teal); width:0%"></div></div>
+        </div>
+        <div class="btn-row" style="margin-top:1rem">
+          <button class="btn btn-primary" onclick="logSkillSession()">+ Log session</button>
+          <button class="btn btn-ghost" onclick="openModal('modal-reading')">+ Add reading</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Milestones</div>
+        <ul class="milestone-list" id="skill-milestones"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Weekly rhythm</div>
+        <div style="font-size:0.82rem; color:var(--text2); line-height:1.8;">
+          <span style="color:var(--teal); font-family:var(--mono); font-size:0.72rem;">WEEKDAY</span> 1hr building session — hands on keyboard only, no videos<br>
+          <span style="color:var(--teal); font-family:var(--mono); font-size:0.72rem;">SUNDAY</span> 1hr reading + thinking — one paper/article → 15min notes
+        </div>
+        <div style="margin-top:0.875rem; padding:0.75rem; background:rgba(78,205,196,0.08); border-radius:var(--radius-sm); border:1px solid rgba(78,205,196,0.2); font-size:0.8rem; color:var(--text2);">
+          <strong style="color:var(--teal); font-weight:500;">First action this week:</strong> Open Python notebook · Get API key · Write 10 lines that send a fake transaction and print a category back. Break the blank page.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Build log</div>
+        <div id="skill-log" style="font-size:0.82rem; color:var(--text2);"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Reading log</div>
+        <div id="reading-log" style="font-size:0.82rem; color:var(--text2);"></div>
+      </div>
+    </div>
+
+    <!-- HEALTH -->
+    <div class="section" id="sec-health">
+      <div class="section-heading">Health</div>
+      <div class="section-sub">weight · diet · sleep · energy</div>
+
+      <div class="card">
+        <div class="card-title">Today's log</div>
+        <div class="log-form">
+          <div class="health-grid">
+            <div>
+              <label class="field-label">Weight (kg)</label>
+              <input class="field-input" id="h-weight" type="number" step="0.1" placeholder="105.0">
+            </div>
+            <div>
+              <label class="field-label">Sleep (hrs)</label>
+              <input class="field-input" id="h-sleep" type="number" step="0.5" placeholder="7.0">
+            </div>
+          </div>
+          <div>
+            <label class="field-label">Protein estimate (g)</label>
+            <input class="field-input" id="h-protein" type="number" placeholder="170">
+          </div>
+          <div>
+            <label class="field-label">Energy level</label>
+            <div class="rating-row" id="energy-rating">
+              <div class="rating-dot" onclick="setRating('energy',1,this)">1</div>
+              <div class="rating-dot" onclick="setRating('energy',2,this)">2</div>
+              <div class="rating-dot" onclick="setRating('energy',3,this)">3</div>
+              <div class="rating-dot" onclick="setRating('energy',4,this)">4</div>
+              <div class="rating-dot" onclick="setRating('energy',5,this)">5</div>
+            </div>
+          </div>
+          <div>
+            <label class="field-label">Diet accuracy today</label>
+            <div class="rating-row" id="diet-rating">
+              <div class="rating-dot" onclick="setRating('diet',1,this)">1</div>
+              <div class="rating-dot" onclick="setRating('diet',2,this)">2</div>
+              <div class="rating-dot" onclick="setRating('diet',3,this)">3</div>
+              <div class="rating-dot" onclick="setRating('diet',4,this)">4</div>
+              <div class="rating-dot" onclick="setRating('diet',5,this)">5</div>
+            </div>
+          </div>
+          <div>
+            <label class="field-label">Notes (meals, slip-ups, anything)</label>
+            <textarea class="field-textarea" id="h-notes" placeholder="What did you eat today? Any slip-ups?"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="logHealth()">Save today's log</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" style="margin-bottom:0">Weight trend</div>
+          <div>
+            <div class="fire-label">Target</div>
+            <div style="font-family:var(--mono); font-size:1rem; color:var(--green);">88 kg</div>
+          </div>
+        </div>
+        <div class="chart-area">
+          <canvas id="weight-chart"></canvas>
+        </div>
+        <div id="weight-stats" style="margin-top:0.75rem; display:flex; gap:1rem; flex-wrap:wrap;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Weekly diet plan</div>
+        <div id="diet-plan-display"></div>
+        <button class="btn btn-ghost" style="margin-top:0.75rem; width:100%" onclick="openModal('modal-diet')">Edit diet plan</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Supplements</div>
+        <div id="supplements-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Medical reports</div>
+        <div id="reports-list" style="margin-bottom:0.75rem; font-size:0.82rem; color:var(--text3);"></div>
+        <input type="file" id="report-upload" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadReport(this)">
+        <button class="btn btn-ghost" onclick="document.getElementById('report-upload').click()">+ Upload report</button>
+      </div>
+    </div>
+
+    <!-- FINANCE -->
+    <div class="section" id="sec-finance">
+      <div class="section-heading">Finance</div>
+      <div class="section-sub">invest · track · retire early</div>
+
+      <div class="card">
+        <div class="card-title">Household income</div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-val" style="font-size:1rem;">₹1.77L</div>
+            <div class="stat-label">Your monthly</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="font-size:1rem;">₹95K</div>
+            <div class="stat-label">Wife monthly</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="font-size:1rem; color:var(--gold);">₹2.72L</div>
+            <div class="stat-label">Combined</div>
+          </div>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text3); font-family:var(--mono); margin-top:0.5rem;">Next incentive: Wife's July salary +₹50K</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">FIRE progress</div>
+        <div style="display:flex; align-items:center; gap:1.25rem; margin-bottom:1rem;">
+          <div>
+            <div class="fire-label">Corpus target</div>
+            <div class="fire-number">₹3.5Cr</div>
+          </div>
+          <div style="flex:1">
+            <div class="progress-wrap" style="margin:0">
+              <div class="progress-label"><span>Current portfolio</span><strong id="fire-pct">—</strong></div>
+              <div class="progress-bar" style="height:10px"><div class="progress-fill" id="fire-bar" style="background:var(--gold); width:0%"></div></div>
+            </div>
+            <div style="font-size:0.72rem; color:var(--text3); margin-top:0.4rem;" id="fire-total">Loading portfolio...</div>
+          </div>
+        </div>
+        <div style="font-size:0.78rem; color:var(--text2); line-height:1.6;">At ₹1.39L/month invested · 12% avg return · <span style="color:var(--gold);">~12–14 years</span> to FIRE target (age 43–45)</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Investment portfolio</div>
+        <div id="investments-list"></div>
+        <div style="margin-top:1rem; padding-top:0.75rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-size:0.78rem; color:var(--text3);">Total invested monthly</div>
+          <div style="font-family:var(--mono); font-size:0.95rem; color:var(--gold);">₹1,39,200</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Emergency fund</div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>RD balance</span><strong id="ef-label">₹0 / ₹5.5L</strong></div>
+          <div class="progress-bar" style="height:8px"><div class="progress-fill" id="ef-bar" style="background:var(--green); width:0%"></div></div>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text3); margin-top:0.5rem;">₹25,000/month RD · Target: 6 months expenses · ~22 months to fill</div>
+        <button class="btn btn-ghost" style="margin-top:0.875rem" onclick="openModal('modal-ef')">Update balance</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Tax & obligations calendar</div>
+        <div id="tax-calendar"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Subscriptions & NACH</div>
+        <div style="font-size:0.75rem; color:var(--amber); font-family:var(--mono); margin-bottom:0.75rem;">Target: All deductions on 2nd–3rd of month</div>
+        <div id="subs-list"></div>
+        <button class="btn btn-ghost" style="margin-top:0.75rem" onclick="openModal('modal-sub')">+ Add subscription</button>
+      </div>
+
+      <!-- VAULT -->
+      <div class="card" style="border-color:rgba(245,200,66,0.2)">
+        <div class="card-title" style="color:var(--gold)">Financial vault</div>
+        <div id="vault-area">
+          <div class="vault-locked" id="vault-locked">
+            <div class="vault-icon">🔐</div>
+            <div style="font-size:0.875rem; color:var(--text2); margin-bottom:1rem;">Nominee-ready financial document store.<br>Enter PIN to access.</div>
+            <div class="pin-input-row">
+              <input class="pin-digit" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,0)">
+              <input class="pin-digit" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,1)">
+              <input class="pin-digit" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,2)">
+              <input class="pin-digit" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,3)">
+            </div>
+            <button class="btn btn-primary" onclick="unlockVault()" style="margin-top:0.5rem">Unlock</button>
+          </div>
+          <div id="vault-content" style="display:none">
+            <div style="font-size:0.82rem; color:var(--text2); margin-bottom:1rem;">Accessible to nominees in an emergency. Keep updated.</div>
+            <div class="btn-row">
+              <button class="btn btn-ghost" onclick="openModal('modal-vault-bank')">+ Bank account</button>
+              <button class="btn btn-ghost" onclick="openModal('modal-vault-ins')">+ Insurance policy</button>
+            </div>
+            <div id="vault-bank-list" style="margin-top:1rem"></div>
+            <div id="vault-ins-list" style="margin-top:0.75rem"></div>
+            <button class="btn btn-danger" style="margin-top:1rem; width:100%" onclick="lockVault()">Lock vault</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIFE OPS -->
+    <div class="section" id="sec-ops">
+      <div class="section-heading">Life Ops</div>
+      <div class="section-sub">tasks · docs · home · vehicle</div>
+
+      <div class="card">
+        <div class="card-title">Pending tasks</div>
+        <div id="tasks-list"></div>
+        <button class="btn btn-ghost" style="margin-top:0.875rem" onclick="openModal('modal-task')">+ Add task</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Wife name updation — sequence</div>
+        <ul class="milestone-list">
+          <li class="milestone-item" id="name-1" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text"><strong style="color:var(--text); font-weight:500;">Gazette notification</strong> — Dept of Publication website · ₹600–800 · 2–4 weeks</div></li>
+          <li class="milestone-item" id="name-2" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text"><strong style="color:var(--text); font-weight:500;">Aadhaar</strong> — UIDAI portal / Seva Kendra · Marriage cert + affidavit · 30–90 days</div></li>
+          <li class="milestone-item" id="name-3" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text"><strong style="color:var(--text); font-weight:500;">PAN card</strong> — NSDL / UTIITSL portal · Can run parallel to Aadhaar · 15–30 days</div></li>
+          <li class="milestone-item" id="name-4" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text"><strong style="color:var(--text); font-weight:500;">Passport</strong> — passportindia.gov.in · Book now, slots fill fast · 4–8 weeks</div></li>
+          <li class="milestone-item" id="name-5" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text"><strong style="color:var(--text); font-weight:500;">Bank accounts</strong> — Branch visit · Needs updated Aadhaar + PAN</div></li>
+          <li class="milestone-item" id="name-6" onclick="toggleMilestone(this)"><div class="milestone-check"></div><div class="milestone-text"><strong style="color:var(--text); font-weight:500;">Driving licence, Voter ID, Insurance</strong> — After passport done</div></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Document vault</div>
+        <div id="docs-list" style="font-size:0.82rem; color:var(--text3); margin-bottom:0.75rem;">No documents uploaded yet.</div>
+        <input type="file" id="doc-upload" style="display:none" onchange="uploadDoc(this)">
+        <button class="btn btn-ghost" onclick="document.getElementById('doc-upload').click()">+ Upload document</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Home maintenance calendar</div>
+        <div id="maintenance-list" style="font-size:0.82rem; color:var(--text3); margin-bottom:0.75rem;">No items yet.</div>
+        <button class="btn btn-ghost" onclick="openModal('modal-maintenance')">+ Add maintenance item</button>
+      </div>
+    </div>
+
+    <!-- REVIEW -->
+    <div class="section" id="sec-review">
+      <div class="section-heading">Weekly Review</div>
+      <div class="section-sub">every sunday · 5:00 pm · 30 minutes</div>
+
+      <div class="card">
+        <div class="card-title">Week of <span id="review-week"></span></div>
+        <div class="review-section">
+          <div class="review-q">How many music sessions did you complete?</div>
+          <div class="score-row">
+            <button class="score-btn" onclick="setScore('music-sessions',0,this)">0</button>
+            <button class="score-btn" onclick="setScore('music-sessions',1,this)">1</button>
+            <button class="score-btn" onclick="setScore('music-sessions',2,this)">2</button>
+            <button class="score-btn" onclick="setScore('music-sessions',3,this)">3</button>
+          </div>
+        </div>
+        <div class="review-section">
+          <div class="review-q">How many upskilling sessions?</div>
+          <div class="score-row">
+            <button class="score-btn" onclick="setScore('skill-sessions',0,this)">0</button>
+            <button class="score-btn" onclick="setScore('skill-sessions',1,this)">1</button>
+            <button class="score-btn" onclick="setScore('skill-sessions',2,this)">2</button>
+          </div>
+        </div>
+        <div class="review-section">
+          <div class="review-q">Gym days this week?</div>
+          <div class="score-row">
+            <button class="score-btn" onclick="setScore('gym-days',0,this)">0</button>
+            <button class="score-btn" onclick="setScore('gym-days',1,this)">1</button>
+            <button class="score-btn" onclick="setScore('gym-days',2,this)">2</button>
+            <button class="score-btn" onclick="setScore('gym-days',3,this)">3</button>
+            <button class="score-btn" onclick="setScore('gym-days',4,this)">4</button>
+          </div>
+        </div>
+        <div class="review-section">
+          <div class="review-q">Overall diet accuracy this week (1–5)?</div>
+          <div class="score-row">
+            <button class="score-btn" onclick="setScore('diet-acc',1,this)">1</button>
+            <button class="score-btn" onclick="setScore('diet-acc',2,this)">2</button>
+            <button class="score-btn" onclick="setScore('diet-acc',3,this)">3</button>
+            <button class="score-btn" onclick="setScore('diet-acc',4,this)">4</button>
+            <button class="score-btn" onclick="setScore('diet-acc',5,this)">5</button>
+          </div>
+        </div>
+        <div class="review-section">
+          <div class="review-q">What worked well this week?</div>
+          <textarea class="field-textarea" id="review-good" placeholder="What actually happened that you're proud of?"></textarea>
+        </div>
+        <div class="review-section">
+          <div class="review-q">What slipped and why?</div>
+          <textarea class="field-textarea" id="review-slip" placeholder="Honest — what didn't happen and what got in the way?"></textarea>
+        </div>
+        <div class="review-section">
+          <div class="review-q">One adjustment for next week</div>
+          <textarea class="field-textarea" id="review-adjust" placeholder="One specific, small change to make next week slightly better."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="saveReview()" style="width:100%; margin-top:0.5rem">Save this week's review</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Past reviews</div>
+        <div id="past-reviews" style="font-size:0.82rem; color:var(--text3);"></div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-item active" onclick="showSection('home',this)">
+      <span class="nav-icon">⌂</span>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" onclick="showSection('work',this)">
+      <span class="nav-icon">◈</span>
+      <span class="nav-label">Work</span>
+    </div>
+    <div class="nav-item" onclick="showSection('music',this)">
+      <span class="nav-icon">♩</span>
+      <span class="nav-label">Music</span>
+    </div>
+    <div class="nav-item" onclick="showSection('skill',this)">
+      <span class="nav-icon">⟨/⟩</span>
+      <span class="nav-label">Build</span>
+    </div>
+    <div class="nav-item" onclick="showSection('health',this)">
+      <span class="nav-icon">◎</span>
+      <span class="nav-label">Health</span>
+    </div>
+    <div class="nav-item" onclick="showSection('finance',this)">
+      <span class="nav-icon">₹</span>
+      <span class="nav-label">Money</span>
+    </div>
+    <div class="nav-item" onclick="showSection('ops',this)">
+      <span class="nav-icon">✓</span>
+      <span class="nav-label">Ops</span>
+    </div>
+    <div class="nav-item" onclick="showSection('review',this)">
+      <span class="nav-icon">↻</span>
+      <span class="nav-label">Review</span>
+    </div>
+  </nav>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-win">
+  <div class="modal">
+    <div class="modal-title">Log a work win</div>
+    <div class="log-form">
+      <div><label class="field-label">Win</label><input class="field-input" id="win-text" placeholder="What did you deliver or accomplish?"></div>
+      <div><label class="field-label">Impact</label><input class="field-input" id="win-impact" placeholder="What did it mean for the client or team?"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveWin()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-win')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-reading">
+  <div class="modal">
+    <div class="modal-title">Add reading / resource</div>
+    <div class="log-form">
+      <div><label class="field-label">Title / topic</label><input class="field-input" id="read-title" placeholder="Paper or article title"></div>
+      <div><label class="field-label">Key takeaway</label><textarea class="field-textarea" id="read-note" placeholder="What did you learn? How does it connect to your build?"></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveReading()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-reading')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-sub">
+  <div class="modal">
+    <div class="modal-title">Add subscription / NACH</div>
+    <div class="log-form">
+      <div><label class="field-label">Name</label><input class="field-input" id="sub-name" placeholder="Netflix, SIP — HDFC, etc."></div>
+      <div class="health-grid">
+        <div><label class="field-label">Amount (₹)</label><input class="field-input" id="sub-amount" type="number" placeholder="499"></div>
+        <div><label class="field-label">Deduction date</label><input class="field-input" id="sub-date" type="number" min="1" max="31" placeholder="2"></div>
+      </div>
+      <div><label class="field-label">Type</label>
+        <select class="field-select" id="sub-type">
+          <option value="monthly">Monthly</option>
+          <option value="annual">Annual</option>
+          <option value="sip">SIP / Investment</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveSub()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-sub')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <div class="modal-title">Add task</div>
+    <div class="log-form">
+      <div><label class="field-label">Task</label><input class="field-input" id="task-text" placeholder="What needs to be done?"></div>
+      <div><label class="field-label">Next action</label><input class="field-input" id="task-next" placeholder="Immediate next step"></div>
+      <div class="health-grid">
+        <div><label class="field-label">Owner</label><input class="field-input" id="task-owner" placeholder="Aabhas / Wife"></div>
+        <div><label class="field-label">Due date</label><input class="field-input" id="task-due" type="date"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveTask()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-task')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ef">
+  <div class="modal">
+    <div class="modal-title">Update emergency fund balance</div>
+    <div class="log-form">
+      <div><label class="field-label">Current RD balance (₹)</label><input class="field-input" id="ef-input" type="number" placeholder="25000"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveEF()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-ef')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-diet">
+  <div class="modal">
+    <div class="modal-title">Edit weekly diet plan</div>
+    <div id="diet-edit-form"></div>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="saveDietPlan()">Save plan</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-diet')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-vault-bank">
+  <div class="modal">
+    <div class="modal-title">Add bank account</div>
+    <div class="log-form">
+      <div><label class="field-label">Bank name</label><input class="field-input" id="vb-bank" placeholder="HDFC Bank"></div>
+      <div><label class="field-label">Account number</label><input class="field-input" id="vb-acc" placeholder="XXXX XXXX XXXX"></div>
+      <div><label class="field-label">Account type</label><input class="field-input" id="vb-type" placeholder="Savings / Current"></div>
+      <div><label class="field-label">Nominee</label><input class="field-input" id="vb-nom" placeholder="Wife's name"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveVaultBank()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-vault-bank')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-vault-ins">
+  <div class="modal">
+    <div class="modal-title">Add insurance policy</div>
+    <div class="log-form">
+      <div><label class="field-label">Provider</label><input class="field-input" id="vi-provider" placeholder="Star Health / LIC"></div>
+      <div><label class="field-label">Policy number</label><input class="field-input" id="vi-policy" placeholder="Policy number"></div>
+      <div class="health-grid">
+        <div><label class="field-label">Sum insured</label><input class="field-input" id="vi-sum" placeholder="₹10L"></div>
+        <div><label class="field-label">Renewal date</label><input class="field-input" id="vi-renewal" type="date"></div>
+      </div>
+      <div><label class="field-label">Nominee</label><input class="field-input" id="vi-nom" placeholder="Nominee name"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveVaultIns()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-vault-ins')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-maintenance">
+  <div class="modal">
+    <div class="modal-title">Add maintenance item</div>
+    <div class="log-form">
+      <div><label class="field-label">Item</label><input class="field-input" id="maint-item" placeholder="AC service, society maintenance, etc."></div>
+      <div><label class="field-label">Next due date</label><input class="field-input" id="maint-due" type="date"></div>
+      <div><label class="field-label">Frequency</label><input class="field-input" id="maint-freq" placeholder="Annual, Quarterly, Monthly"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveMaintenance()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-maintenance')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+let CFG = {};
+let DATA = {};
+let currentRatings = { energy: 0, diet: 0 };
+let reviewScores = {};
+let vaultUnlocked = false;
+let weightChart = null;
+
+function saveConfig() {
+  const u = document.getElementById('cfg-user').value.trim();
+  const r = document.getElementById('cfg-repo').value.trim();
+  const t = document.getElementById('cfg-token').value.trim();
+  if (!u || !r || !t) { showToast('Fill all fields'); return; }
+  CFG = { user: u, repo: r, token: t };
+  localStorage.setItem('lifeos_cfg', JSON.stringify(CFG));
+  loadData();
+}
+
+function loadConfig() {
+  const stored = localStorage.getItem('lifeos_cfg');
+  if (stored) { CFG = JSON.parse(stored); return true; }
+  return false;
+}
+
+// ─── GITHUB API ───────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${CFG.user}/${CFG.repo}/contents/data.json`, {
+      headers: { Authorization: `token ${CFG.token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) throw new Error('Not found');
+    const json = await res.json();
+    DATA = JSON.parse(atob(json.content));
+    DATA._sha = json.sha;
+    initApp();
+  } catch(e) {
+    DATA = getDefaultData();
+    initApp();
+    showToast('Using local data — check GitHub config');
+  }
+}
+
+async function saveData() {
+  const btn = document.getElementById('sync-btn');
+  btn.textContent = '⟳ saving'; btn.className = 'sync-btn saving';
+  try {
+    const sha = DATA._sha;
+    const payload = { ...DATA };
+    delete payload._sha;
+    payload.meta.lastUpdated = new Date().toISOString();
+    const body = { message: `update ${new Date().toLocaleDateString()}`, content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))) };
+    if (sha) body.sha = sha;
+    const res = await fetch(`https://api.github.com/repos/${CFG.user}/${CFG.repo}/contents/data.json`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${CFG.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error();
+    const json = await res.json();
+    DATA._sha = json.content.sha;
+    btn.textContent = '✓ saved'; btn.className = 'sync-btn saved';
+    setTimeout(() => { btn.textContent = '↑ sync'; btn.className = 'sync-btn'; }, 2000);
+  } catch(e) {
+    btn.textContent = '↑ sync'; btn.className = 'sync-btn';
+    showToast('Sync failed — check connection');
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function initApp() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  setGreeting();
+  renderHome();
+  renderWork();
+  renderMusic();
+  renderSkill();
+  renderHealth();
+  renderFinance();
+  renderOps();
+  renderReview();
+  setDayType('music', document.querySelector('.day-type-btn'));
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+}
+
+function getDefaultData() {
+  return {
+    meta: { lastUpdated: '', version: '1.0' },
+    work: { raiseTarget: 4000000, currentCTC: 3090000, conversationDone: false, conversationDate: '', weeklyWins: [], weeklyGymDays: 0 },
+    music: { sessionsThisWeek: 0, weeklyTarget: 3, totalSessionsAllTime: 0, log: [], milestones: [
+      { label: 'Space activated & instruments out', done: false },
+      { label: 'GarageBand sketch template created', done: false },
+      { label: 'First 30-day vocal streak', done: false },
+      { label: 'First composition sketch (90 sec)', done: false },
+      { label: 'First complete piece recorded', done: false },
+      { label: 'First social media post', done: false },
+      { label: 'First gig', done: false }
+    ], equipment: [
+      { item: 'MIDI keyboard (61-key Arturia)', status: 'ready' },
+      { item: 'Boom arm microphone', status: 'ready' },
+      { item: 'Harmonium', status: 'in-storage' },
+      { item: 'Electric guitar + amp', status: 'in-storage' },
+      { item: 'GarageBand', status: 'installed' },
+      { item: 'Ableton 12 Lite', status: 'installed' }
+    ]},
+    upskilling: { sessionsThisWeek: 0, weeklyTarget: 2, currentProject: 'GenAI + Credit Risk — Transaction Categorisation Tool', log: [], milestones: [
+      { label: 'First API call — transaction categorised', done: false },
+      { label: 'Working prototype locally', done: false },
+      { label: 'Hosted online via Render/Railway', done: false },
+      { label: 'GitHub repo with README', done: false },
+      { label: 'First LinkedIn post published', done: false },
+      { label: 'First market conversation', done: false }
+    ], readingLog: [] },
+    health: { targetWeight: 88, dailyProteinTarget: 170, weeklyDietPlan: { monday:{breakfast:'Muesli + yogurt + 1 scoop whey',midMorning:'Boiled bean salad + 2 eggs',lunch:'Masala oats (50g) + 4 boiled eggs',eveningSnack:'20 almonds (pre-portioned)',dinner:'150–200g chicken + salad + vegetables'}, tuesday:{breakfast:'Muesli + yogurt + 1 scoop whey',midMorning:'Boiled bean salad + 2 eggs',lunch:'Masala oats (50g) + 4 boiled eggs',eveningSnack:'Greek yogurt + 1 tsp honey',dinner:'150–200g chicken + salad + vegetables'}, wednesday:{breakfast:'Muesli + yogurt + 1 scoop whey',midMorning:'Boiled bean salad + 2 eggs',lunch:'Masala oats (50g) + 4 boiled eggs',eveningSnack:'1 apple + 1 tbsp peanut butter',dinner:'150–200g chicken + salad + vegetables'}, thursday:{breakfast:'Muesli + yogurt + 1 scoop whey',midMorning:'Boiled bean salad + 2 eggs',lunch:'Masala oats (50g) + 4 boiled eggs',eveningSnack:'20 almonds (pre-portioned)',dinner:'150–200g chicken + salad + vegetables'}, friday:{breakfast:'Muesli + yogurt + 1 scoop whey',midMorning:'Boiled bean salad + 2 eggs',lunch:'Masala oats (50g) + 4 boiled eggs',eveningSnack:'Greek yogurt + 1 tsp honey',dinner:'150–200g chicken + salad + vegetables'}, saturday:{breakfast:'Muesli + yogurt + 1 scoop whey',midMorning:'Boiled bean salad',lunch:'Masala oats + 4 eggs',eveningSnack:'2 boiled eggs',dinner:'Chicken meal — home / out'}, sunday:{breakfast:'Big breakfast — eggs + oats + fruit',midMorning:'—',lunch:'Home food — 2 rotis + dal + sabzi (portion aware)',eveningSnack:'Greek yogurt',dinner:'Grilled chicken or home food'} }, dailyLog: [], medicalReports: [], supplements: [
+      { name: 'Whey Protein', dose: '1 scoop', frequency: 'Daily', notes: 'Mix into morning yogurt — every day, not just gym days' },
+      { name: 'Creatine', dose: '5g', frequency: 'Daily', notes: 'Every day — works through saturation not acute dosing' }
+    ]},
+    finance: { yourIncome: 177000, wifeIncome: 95000, investments: [
+      { name: 'Indian Mutual Funds (Your SIP)', type: 'mf', value: 1650000, monthly: 75000 },
+      { name: 'Indian Stocks', type: 'stock', value: 70000, monthly: 5000 },
+      { name: 'US Stocks (VOO/QQQ)', type: 'us-stock', value: 100000, monthly: 5000 },
+      { name: 'NPS', type: 'nps', value: 0, monthly: 4200 },
+      { name: 'PPF', type: 'ppf', value: 160000, monthly: 500 },
+      { name: "Wife's SIP", type: 'mf', value: 0, monthly: 25000 },
+      { name: 'Emergency RD', type: 'rd', value: 0, monthly: 25000, target: 550000 }
+    ], subscriptions: [], taxCalendar: [
+      { label: 'Crypto tax — ETH profit ₹70K @ 30%', amount: 21000, due: '2026-07-31', paid: false },
+      { label: 'Health insurance renewal (port window)', amount: 70000, due: '2026-07-31', paid: false },
+      { label: 'ITR filing deadline', amount: 0, due: '2026-07-31', paid: false }
+    ], fireTarget: 35000000, vault: { pin: '', bankAccounts: [], insurancePolicies: [] } },
+    lifeops: { tasks: [
+      { id: 1, task: 'Gazette notification — wife name change', status: 'pending', nextAction: 'Apply on Department of Publication website · ₹600–800', owner: 'Aabhas', dueDate: '' },
+      { id: 2, task: 'Aadhaar name change for wife', status: 'pending', nextAction: 'UIDAI portal / Seva Kendra with marriage cert + affidavit', owner: 'Aabhas', dueDate: '' },
+      { id: 3, task: 'PAN card name change for wife', status: 'pending', nextAction: 'NSDL / UTIITSL portal — can run parallel to Aadhaar', owner: 'Aabhas', dueDate: '' },
+      { id: 4, task: 'Passport name change for wife', status: 'pending', nextAction: 'Book appointment now at passportindia.gov.in', owner: 'Aabhas', dueDate: '' },
+      { id: 5, task: 'Align all NACH deductions to 2nd–3rd of month', status: 'pending', nextAction: 'List all SIPs and subscriptions, contact each provider', owner: 'Aabhas', dueDate: '' },
+      { id: 6, task: 'Open Emergency Fund RD (₹25K/month)', status: 'pending', nextAction: 'Visit bank or open via net banking', owner: 'Aabhas', dueDate: '' },
+      { id: 7, task: 'Set aside crypto tax ₹21,000', status: 'pending', nextAction: 'Transfer to dedicated savings account, label it', owner: 'Aabhas', dueDate: '' }
+    ], maintenanceCalendar: [], documents: [] },
+    relationships: { wishlist: [] },
+    weeklyReview: []
+  };
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  el.classList.add('active');
+  document.querySelector('.content').scrollTop = 0;
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────────────────
+function setGreeting() {
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = `${g}, Aabhas`;
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const now = new Date();
+  document.getElementById('today-date').textContent = `${days[now.getDay()]} · ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('review-week').textContent = `${now.getDate()} ${months[now.getMonth()]}`;
+}
+
+const protocols = {
+  music: [
+    { label: 'Morning', val: '90 min music session', sub: 'Vocals 20min → main dimension 40min → free play 30min', color: 'var(--accent2)' },
+    { label: 'Work', val: 'Start after music', sub: 'Work runs through the day', color: 'var(--teal)' },
+    { label: 'Evening', val: 'Dinner + wind-down', sub: '10min lamp · 10min harmonium · 10min podcast → sleep by 11:30', color: 'var(--text3)' }
+  ],
+  gym: [
+    { label: '7–9 AM', val: 'Gym + travel', sub: 'Protect this slot regardless of work', color: 'var(--green)' },
+    { label: 'Work', val: 'Start at 10 AM', sub: 'Full work day', color: 'var(--teal)' },
+    { label: 'Music', val: '5-min minimum', sub: 'Harmonium + one phrase after dinner', color: 'var(--accent2)' }
+  ],
+  work: [
+    { label: 'All day', val: 'Urgent deliverable mode', sub: 'Work owns the day — no guilt', color: 'var(--coral)' },
+    { label: 'Meals', val: 'Fixed times', sub: 'Breakfast · Lunch 1 PM · Dinner by 8 PM', color: 'var(--green)' },
+    { label: 'Music', val: '5-min floor only', sub: 'Harmonium + one phrase after dinner', color: 'var(--accent2)' }
+  ]
+};
+
+function setDayType(type, el) {
+  document.querySelectorAll('.day-type-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const p = protocols[type];
+  document.getElementById('protocol-content').innerHTML = p.map(item => `
+    <div style="display:flex; gap:0.75rem; align-items:flex-start; padding:0.5rem 0; border-bottom:1px solid var(--border);">
+      <div style="min-width:60px; font-size:0.68rem; font-family:var(--mono); color:${item.color}; padding-top:2px; letter-spacing:0.04em;">${item.label}</div>
+      <div><div style="font-size:0.875rem; font-weight:500; color:var(--text);">${item.val}</div><div style="font-size:0.72rem; color:var(--text3); margin-top:2px;">${item.sub}</div></div>
+    </div>`).join('');
+}
+
+function renderHome() {
+  if (!DATA.music) return;
+  const ms = DATA.music.sessionsThisWeek || 0;
+  const ss = DATA.upskilling ? (DATA.upskilling.sessionsThisWeek || 0) : 0;
+  const gd = DATA.work ? (DATA.work.weeklyGymDays || 0) : 0;
+  document.getElementById('home-music-prog').textContent = `${ms} / 3`;
+  document.getElementById('home-music-bar').style.width = Math.min(100, (ms/3)*100) + '%';
+  document.getElementById('home-skill-prog').textContent = `${ss} / 2`;
+  document.getElementById('home-skill-bar').style.width = Math.min(100, (ss/2)*100) + '%';
+  document.getElementById('home-gym-prog').textContent = `${gd} / 4`;
+  document.getElementById('home-gym-bar').style.width = Math.min(100, (gd/4)*100) + '%';
+  if (DATA.work && DATA.work.conversationDone) {
+    document.getElementById('raise-status').textContent = 'Done ✓';
+    document.getElementById('raise-status').style.color = 'var(--green)';
+  }
+}
+
+// ─── WORK ─────────────────────────────────────────────────────────────────────
+function renderWork() {
+  if (!DATA.work) return;
+  const done = DATA.work.conversationDone;
+  document.getElementById('conv-status-label').textContent = done ? 'Done ✓' : 'Pending';
+  document.getElementById('conv-bar').style.width = done ? '100%' : '10%';
+  document.getElementById('conv-bar').style.background = done ? 'var(--green)' : 'var(--amber)';
+  const wins = DATA.work.weeklyWins || [];
+  document.getElementById('wins-list').innerHTML = wins.length ? wins.slice(-5).reverse().map(w =>
+    `<div style="padding:0.6rem 0; border-bottom:1px solid var(--border);">
+      <div style="font-size:0.875rem; color:var(--text);">${w.text}</div>
+      <div style="font-size:0.72rem; color:var(--text3); margin-top:2px;">${w.impact} · ${w.date}</div>
+    </div>`).join('') : '<div style="font-size:0.82rem; color:var(--text3);">No wins logged yet — add your first one.</div>';
+}
+
+function markConversationDone() {
+  DATA.work.conversationDone = true;
+  DATA.work.conversationDate = new Date().toLocaleDateString();
+  renderWork(); renderHome(); showToast('Conversation marked done ✓');
+}
+
+function toggleMilestone(el) {
+  el.classList.toggle('done');
+}
+
+function togglePlaybook(el) {
+  const body = el.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+function saveWin() {
+  const text = document.getElementById('win-text').value.trim();
+  const impact = document.getElementById('win-impact').value.trim();
+  if (!text) return;
+  if (!DATA.work.weeklyWins) DATA.work.weeklyWins = [];
+  DATA.work.weeklyWins.push({ text, impact, date: new Date().toLocaleDateString() });
+  document.getElementById('win-text').value = ''; document.getElementById('win-impact').value = '';
+  closeModal('modal-win'); renderWork(); showToast('Win logged');
+}
+
+// ─── MUSIC ────────────────────────────────────────────────────────────────────
+function renderMusic() {
+  if (!DATA.music) return;
+  const s = DATA.music.sessionsThisWeek || 0;
+  document.getElementById('music-prog-label').textContent = `${s} / 3`;
+  document.getElementById('music-prog-bar').style.width = Math.min(100,(s/3)*100) + '%';
+  const ml = document.getElementById('music-milestones');
+  ml.innerHTML = (DATA.music.milestones || []).map((m, i) =>
+    `<li class="milestone-item ${m.done?'done':''}" onclick="toggleMusMilestone(${i})">
+      <div class="milestone-check"></div><div class="milestone-text">${m.label}</div>
+    </li>`).join('');
+  const el = document.getElementById('equipment-list');
+  el.innerHTML = (DATA.music.equipment || []).map(e =>
+    `<div class="equip-item"><span class="equip-name">${e.item}</span>
+    <span class="equip-badge ${e.status==='ready'?'equip-ready':e.status==='installed'?'equip-installed':'equip-storage'}">${e.status}</span></div>`).join('');
+  const log = document.getElementById('music-log');
+  const logs = DATA.music.log || [];
+  log.innerHTML = logs.length ? logs.slice(-8).reverse().map(l =>
+    `<div style="padding:0.5rem 0; border-bottom:1px solid var(--border);">
+      <div style="color:var(--text);">${l.note}</div>
+      <div style="font-size:0.7rem; color:var(--text3); margin-top:2px; font-family:var(--mono);">${l.date} · ${l.dimension}</div>
+    </div>`).join('') : '<div style="color:var(--text3);">No sessions logged yet.</div>';
+}
+
+function toggleMusMilestone(i) {
+  DATA.music.milestones[i].done = !DATA.music.milestones[i].done;
+  renderMusic();
+}
+
+function logMusicSession() {
+  const dim = ['Vocals + keys','Vocals + composition','Vocals + guitar / integration'];
+  const s = DATA.music.sessionsThisWeek || 0;
+  const next = dim[s % 3];
+  DATA.music.sessionsThisWeek = s + 1;
+  DATA.music.totalSessionsAllTime = (DATA.music.totalSessionsAllTime || 0) + 1;
+  if (!DATA.music.log) DATA.music.log = [];
+  DATA.music.log.push({ date: new Date().toLocaleDateString(), dimension: next, note: `Session ${DATA.music.totalSessionsAllTime} — ${next}` });
+  renderMusic(); renderHome(); showToast('Session logged ✓');
+}
+
+// ─── UPSKILLING ───────────────────────────────────────────────────────────────
+function renderSkill() {
+  if (!DATA.upskilling) return;
+  document.getElementById('current-project').textContent = DATA.upskilling.currentProject || '';
+  const s = DATA.upskilling.sessionsThisWeek || 0;
+  document.getElementById('skill-prog-label').textContent = `${s} / 2`;
+  document.getElementById('skill-prog-bar').style.width = Math.min(100,(s/2)*100) + '%';
+  const sm = document.getElementById('skill-milestones');
+  sm.innerHTML = (DATA.upskilling.milestones || []).map((m, i) =>
+    `<li class="milestone-item ${m.done?'done':''}" onclick="toggleSkillMilestone(${i})">
+      <div class="milestone-check"></div><div class="milestone-text">${m.label}</div>
+    </li>`).join('');
+  const sl = document.getElementById('skill-log');
+  const logs = DATA.upskilling.log || [];
+  sl.innerHTML = logs.length ? logs.slice(-6).reverse().map(l =>
+    `<div style="padding:0.5rem 0; border-bottom:1px solid var(--border);">
+      <div style="color:var(--text);">${l.note}</div>
+      <div style="font-size:0.7rem; color:var(--text3); margin-top:2px; font-family:var(--mono);">${l.date}</div>
+    </div>`).join('') : '<div style="color:var(--text3);">No sessions logged yet — make your first API call this week.</div>';
+  const rl = document.getElementById('reading-log');
+  const reads = DATA.upskilling.readingLog || [];
+  rl.innerHTML = reads.length ? reads.slice(-6).reverse().map(r =>
+    `<div style="padding:0.5rem 0; border-bottom:1px solid var(--border);">
+      <div style="color:var(--text); font-weight:500;">${r.title}</div>
+      <div style="color:var(--text2); margin-top:2px; line-height:1.5;">${r.note}</div>
+      <div style="font-size:0.7rem; color:var(--text3); margin-top:2px; font-family:var(--mono);">${r.date}</div>
+    </div>`).join('') : '<div style="color:var(--text3);">No readings logged yet.</div>';
+}
+
+function toggleSkillMilestone(i) {
+  DATA.upskilling.milestones[i].done = !DATA.upskilling.milestones[i].done;
+  renderSkill();
+}
+
+function logSkillSession() {
+  const note = prompt('What did you build today? (brief note)');
+  if (!note) return;
+  DATA.upskilling.sessionsThisWeek = (DATA.upskilling.sessionsThisWeek || 0) + 1;
+  if (!DATA.upskilling.log) DATA.upskilling.log = [];
+  DATA.upskilling.log.push({ date: new Date().toLocaleDateString(), note });
+  renderSkill(); renderHome(); showToast('Build session logged ✓');
+}
+
+function saveReading() {
+  const title = document.getElementById('read-title').value.trim();
+  const note = document.getElementById('read-note').value.trim();
+  if (!title) return;
+  if (!DATA.upskilling.readingLog) DATA.upskilling.readingLog = [];
+  DATA.upskilling.readingLog.push({ title, note, date: new Date().toLocaleDateString() });
+  document.getElementById('read-title').value = ''; document.getElementById('read-note').value = '';
+  closeModal('modal-reading'); renderSkill(); showToast('Reading logged');
+}
+
+// ─── HEALTH ───────────────────────────────────────────────────────────────────
+function setRating(type, val, el) {
+  currentRatings[type] = val;
+  const row = document.getElementById(type + '-rating');
+  row.querySelectorAll('.rating-dot').forEach((d, i) => {
+    d.classList.toggle('selected', i < val);
+  });
+}
+
+function logHealth() {
+  const w = parseFloat(document.getElementById('h-weight').value);
+  const sl = parseFloat(document.getElementById('h-sleep').value);
+  const pr = parseInt(document.getElementById('h-protein').value);
+  const notes = document.getElementById('h-notes').value.trim();
+  if (!DATA.health.dailyLog) DATA.health.dailyLog = [];
+  DATA.health.dailyLog.push({
+    date: new Date().toLocaleDateString(),
+    weight: w || null, sleep: sl || null, protein: pr || null,
+    energy: currentRatings.energy, diet: currentRatings.diet, notes
+  });
+  document.getElementById('h-weight').value = '';
+  document.getElementById('h-sleep').value = '';
+  document.getElementById('h-protein').value = '';
+  document.getElementById('h-notes').value = '';
+  currentRatings = { energy: 0, diet: 0 };
+  document.querySelectorAll('.rating-dot').forEach(d => d.classList.remove('selected'));
+  renderHealthChart(); showToast('Health logged ✓');
+}
+
+function renderHealth() {
+  renderHealthChart();
+  renderDietPlan();
+  renderSupplements();
+  const reports = DATA.health.medicalReports || [];
+  document.getElementById('reports-list').innerHTML = reports.length ?
+    reports.map(r => `<div style="padding:0.4rem 0; border-bottom:1px solid var(--border); color:var(--text2);">${r.name} · <span style="color:var(--text3);">${r.date}</span></div>`).join('') :
+    'No reports uploaded yet.';
+}
+
+function renderHealthChart() {
+  const logs = (DATA.health.dailyLog || []).filter(l => l.weight).slice(-30);
+  const labels = logs.map(l => l.date);
+  const weights = logs.map(l => l.weight);
+  const ctx = document.getElementById('weight-chart').getContext('2d');
+  if (weightChart) weightChart.destroy();
+  weightChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{
+      data: weights, borderColor: '#c8b8ff', backgroundColor: 'rgba(200,184,255,0.08)',
+      borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#c8b8ff', tension: 0.4, fill: true
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { display: false },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#5a5870', font: { family: 'DM Mono', size: 10 } } }
+      },
+      animation: { duration: 600 }
+    }
+  });
+  if (weights.length > 0) {
+    const curr = weights[weights.length-1];
+    const target = DATA.health.targetWeight || 88;
+    const lost = weights[0] - curr;
+    document.getElementById('weight-stats').innerHTML = `
+      <div class="stat-box" style="flex:1; text-align:left; padding:0.6rem 0.75rem;">
+        <div class="stat-val" style="font-size:1rem; color:var(--accent);">${curr.toFixed(1)} kg</div>
+        <div class="stat-label">Current</div>
+      </div>
+      <div class="stat-box" style="flex:1; text-align:left; padding:0.6rem 0.75rem;">
+        <div class="stat-val" style="font-size:1rem; color:var(--green);">${target} kg</div>
+        <div class="stat-label">Target</div>
+      </div>
+      <div class="stat-box" style="flex:1; text-align:left; padding:0.6rem 0.75rem;">
+        <div class="stat-val" style="font-size:1rem; color:${lost>0?'var(--green)':'var(--text3)'};">${lost>0?'-':''}${Math.abs(lost).toFixed(1)} kg</div>
+        <div class="stat-label">Lost</div>
+      </div>`;
+  }
+}
+
+function renderDietPlan() {
+  const plan = DATA.health.weeklyDietPlan || {};
+  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  const dayLabels = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const meals = ['breakfast','midMorning','lunch','eveningSnack','dinner'];
+  const mealLabels = ['Breakfast','Mid-morning','Lunch','Eve snack','Dinner'];
+  document.getElementById('diet-plan-display').innerHTML = days.map((d, di) => {
+    const dp = plan[d] || {};
+    const hasMeals = meals.some(m => dp[m]);
+    return `<div class="diet-day">
+      <div class="diet-day-header" onclick="toggleDietDay('dd-${d}')">
+        <span>${dayLabels[di]}</span><span>▾</span>
+      </div>
+      <div class="diet-meals" id="dd-${d}" ${di > 0 ? 'style="display:none"' : ''}>
+        ${meals.map((m, mi) => `<div class="diet-meal-row">
+          <div class="diet-meal-label">${mealLabels[mi]}</div>
+          <div class="diet-meal-val">${dp[m] || '—'}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  renderDietEditForm();
+}
+
+function toggleDietDay(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function renderDietEditForm() {
+  const plan = DATA.health.weeklyDietPlan || {};
+  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  const dayLabels = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const meals = ['breakfast','midMorning','lunch','eveningSnack','dinner'];
+  const mealLabels = ['Breakfast','Mid-morning','Lunch','Evening snack','Dinner'];
+  document.getElementById('diet-edit-form').innerHTML = days.map((d, di) =>
+    `<div style="margin-bottom:1.25rem;">
+      <div style="font-size:0.72rem; font-family:var(--mono); color:var(--accent); letter-spacing:0.07em; text-transform:uppercase; margin-bottom:0.6rem;">${dayLabels[di]}</div>
+      ${meals.map((m, mi) => `<div style="margin-bottom:0.5rem;">
+        <label class="field-label">${mealLabels[mi]}</label>
+        <input class="field-input" id="de-${d}-${m}" value="${(plan[d]||{})[m]||''}" placeholder="${mealLabels[mi]}">
+      </div>`).join('')}
+    </div>`).join('');
+}
+
+function saveDietPlan() {
+  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  const meals = ['breakfast','midMorning','lunch','eveningSnack','dinner'];
+  if (!DATA.health.weeklyDietPlan) DATA.health.weeklyDietPlan = {};
+  days.forEach(d => {
+    DATA.health.weeklyDietPlan[d] = {};
+    meals.forEach(m => {
+      DATA.health.weeklyDietPlan[d][m] = document.getElementById(`de-${d}-${m}`).value.trim();
+    });
+  });
+  closeModal('modal-diet'); renderDietPlan(); showToast('Diet plan saved');
+}
+
+function renderSupplements() {
+  const sups = DATA.health.supplements || [];
+  document.getElementById('supplements-list').innerHTML = sups.map(s =>
+    `<div class="finance-row">
+      <div><div class="finance-name">${s.name}</div><div class="finance-sub">${s.notes}</div></div>
+      <div style="text-align:right"><div class="finance-val" style="font-size:0.82rem;">${s.dose}</div><div class="finance-monthly">${s.frequency}</div></div>
+    </div>`).join('');
+}
+
+function uploadReport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!DATA.health.medicalReports) DATA.health.medicalReports = [];
+  DATA.health.medicalReports.push({ name: file.name, date: new Date().toLocaleDateString() });
+  renderHealth(); showToast('Report logged (name saved — store file separately)');
+}
+
+function uploadDoc(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!DATA.lifeops.documents) DATA.lifeops.documents = [];
+  DATA.lifeops.documents.push({ name: file.name, date: new Date().toLocaleDateString() });
+  renderOps(); showToast('Document logged');
+}
+
+// ─── FINANCE ─────────────────────────────────────────────────────────────────
+function renderFinance() {
+  if (!DATA.finance) return;
+  const inv = DATA.finance.investments || [];
+  const total = inv.reduce((s, i) => s + (i.value || 0), 0);
+  const target = DATA.finance.fireTarget || 35000000;
+  const pct = Math.min(100, (total / target) * 100);
+  document.getElementById('fire-pct').textContent = pct.toFixed(1) + '%';
+  document.getElementById('fire-bar').style.width = pct + '%';
+  document.getElementById('fire-total').textContent = `Portfolio ₹${(total/100000).toFixed(1)}L of ₹${(target/10000000).toFixed(1)}Cr target`;
+
+  const badges = { mf:'badge-mf', stock:'badge-stock', 'us-stock':'badge-stock', nps:'badge-debt', ppf:'badge-debt', rd:'badge-rd' };
+  const typeLabels = { mf:'MF', stock:'Stocks', 'us-stock':'US', nps:'NPS', ppf:'PPF', rd:'RD' };
+  document.getElementById('investments-list').innerHTML = inv.map(i =>
+    `<div class="finance-row">
+      <div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div class="finance-name">${i.name}</div>
+          <span class="badge ${badges[i.type]||'badge-mf'}">${typeLabels[i.type]||i.type}</span>
+        </div>
+        <div class="finance-sub">₹${(i.monthly||0).toLocaleString('en-IN')}/month</div>
+      </div>
+      <div>
+        <div class="finance-val">₹${((i.value||0)/100000).toFixed(2)}L</div>
+        ${i.target ? `<div class="finance-monthly">Target: ₹${(i.target/100000).toFixed(1)}L</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  const rdInv = inv.find(i => i.type === 'rd');
+  if (rdInv) {
+    const efVal = rdInv.value || 0;
+    const efTarget = rdInv.target || 550000;
+    document.getElementById('ef-label').textContent = `₹${(efVal/100000).toFixed(2)}L / ₹${(efTarget/100000).toFixed(1)}L`;
+    document.getElementById('ef-bar').style.width = Math.min(100,(efVal/efTarget)*100) + '%';
+  }
+
+  const tax = DATA.finance.taxCalendar || [];
+  document.getElementById('tax-calendar').innerHTML = tax.map((t, i) => {
+    const due = new Date(t.due);
+    const days = Math.round((due - new Date()) / 86400000);
+    const urgency = days < 30 ? 'var(--coral)' : days < 60 ? 'var(--amber)' : 'var(--text2)';
+    return `<div class="finance-row">
+      <div>
+        <div class="finance-name ${t.paid?'':''}">
+          ${t.paid ? '<span style="color:var(--green)">✓ </span>' : ''}${t.label}
+        </div>
+        ${t.amount ? `<div class="finance-sub">₹${t.amount.toLocaleString('en-IN')}</div>` : ''}
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--mono); font-size:0.8rem; color:${urgency};">${due.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
+        ${!t.paid ? `<button onclick="markTaxPaid(${i})" style="font-size:0.65rem; font-family:var(--mono); background:none; border:1px solid var(--border2); color:var(--text3); padding:2px 6px; border-radius:4px; cursor:pointer; margin-top:2px;">Mark paid</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const subs = DATA.finance.subscriptions || [];
+  document.getElementById('subs-list').innerHTML = subs.length ? subs.map(s => {
+    const aligned = s.date >= 2 && s.date <= 3;
+    return `<div class="sub-item">
+      <div><div class="finance-name">${s.name}</div><div class="finance-sub">${s.type} · Date: ${s.date || '?'}</div></div>
+      <div style="text-align:right">
+        <div class="finance-val">₹${(s.amount||0).toLocaleString('en-IN')}</div>
+        <div class="sub-due ${aligned?'ok':'soon'}">${aligned?'aligned':'misaligned'}</div>
+      </div>
+    </div>`;
+  }).join('') : '<div style="font-size:0.82rem; color:var(--text3);">No subscriptions added yet.</div>';
+}
+
+function markTaxPaid(i) {
+  DATA.finance.taxCalendar[i].paid = true;
+  renderFinance(); showToast('Marked as paid ✓');
+}
+
+function saveEF() {
+  const val = parseFloat(document.getElementById('ef-input').value);
+  if (!val) return;
+  const rd = DATA.finance.investments.find(i => i.type === 'rd');
+  if (rd) { rd.value = val; }
+  closeModal('modal-ef'); renderFinance(); showToast('Emergency fund updated');
+}
+
+function saveSub() {
+  const name = document.getElementById('sub-name').value.trim();
+  const amount = parseFloat(document.getElementById('sub-amount').value);
+  const date = parseInt(document.getElementById('sub-date').value);
+  const type = document.getElementById('sub-type').value;
+  if (!name) return;
+  if (!DATA.finance.subscriptions) DATA.finance.subscriptions = [];
+  DATA.finance.subscriptions.push({ name, amount, date, type });
+  document.getElementById('sub-name').value = ''; document.getElementById('sub-amount').value = ''; document.getElementById('sub-date').value = '';
+  closeModal('modal-sub'); renderFinance(); showToast('Subscription added');
+}
+
+// VAULT
+function pinNext(el, idx) {
+  if (el.value.length === 1) {
+    const pins = document.querySelectorAll('.pin-digit');
+    if (idx < 3) pins[idx + 1].focus();
+  }
+}
+
+function unlockVault() {
+  const pins = document.querySelectorAll('.pin-digit');
+  const entered = Array.from(pins).map(p => p.value).join('');
+  const stored = DATA.finance.vault ? DATA.finance.vault.pin : '';
+  if (!stored) {
+    DATA.finance.vault.pin = entered;
+    showVaultContent();
+    showToast('PIN set ✓');
+    return;
+  }
+  if (entered === stored) { showVaultContent(); }
+  else { showToast('Wrong PIN'); pins.forEach(p => p.value = ''); pins[0].focus(); }
+}
+
+function showVaultContent() {
+  vaultUnlocked = true;
+  document.getElementById('vault-locked').style.display = 'none';
+  document.getElementById('vault-content').style.display = 'block';
+  renderVault();
+}
+
+function lockVault() {
+  vaultUnlocked = false;
+  document.getElementById('vault-locked').style.display = 'block';
+  document.getElementById('vault-content').style.display = 'none';
+  document.querySelectorAll('.pin-digit').forEach(p => p.value = '');
+}
+
+function renderVault() {
+  const vault = DATA.finance.vault || {};
+  const banks = vault.bankAccounts || [];
+  document.getElementById('vault-bank-list').innerHTML = banks.length ? banks.map(b =>
+    `<div class="finance-row"><div><div class="finance-name">${b.bank}</div><div class="finance-sub">${b.type} · Nominee: ${b.nominee}</div></div><div class="finance-val" style="font-family:var(--mono); font-size:0.75rem;">${b.account}</div></div>`
+  ).join('') : '';
+  const ins = vault.insurancePolicies || [];
+  document.getElementById('vault-ins-list').innerHTML = ins.length ? ins.map(i =>
+    `<div class="finance-row"><div><div class="finance-name">${i.provider}</div><div class="finance-sub">Policy: ${i.policy} · ${i.sumInsured} · Nominee: ${i.nominee}</div></div><div class="finance-val" style="font-size:0.75rem; color:var(--amber);">${i.renewal}</div></div>`
+  ).join('') : '';
+}
+
+function saveVaultBank() {
+  const b = { bank: document.getElementById('vb-bank').value.trim(), account: document.getElementById('vb-acc').value.trim(), type: document.getElementById('vb-type').value.trim(), nominee: document.getElementById('vb-nom').value.trim() };
+  if (!b.bank) return;
+  if (!DATA.finance.vault.bankAccounts) DATA.finance.vault.bankAccounts = [];
+  DATA.finance.vault.bankAccounts.push(b);
+  closeModal('modal-vault-bank'); renderVault(); showToast('Bank account saved');
+}
+
+function saveVaultIns() {
+  const i = { provider: document.getElementById('vi-provider').value.trim(), policy: document.getElementById('vi-policy').value.trim(), sumInsured: document.getElementById('vi-sum').value.trim(), renewal: document.getElementById('vi-renewal').value, nominee: document.getElementById('vi-nom').value.trim() };
+  if (!i.provider) return;
+  if (!DATA.finance.vault.insurancePolicies) DATA.finance.vault.insurancePolicies = [];
+  DATA.finance.vault.insurancePolicies.push(i);
+  closeModal('modal-vault-ins'); renderVault(); showToast('Insurance policy saved');
+}
+
+// ─── LIFE OPS ─────────────────────────────────────────────────────────────────
+function renderOps() {
+  if (!DATA.lifeops) return;
+  const tasks = DATA.lifeops.tasks || [];
+  document.getElementById('tasks-list').innerHTML = tasks.map((t, i) =>
+    `<div class="task-item">
+      <div class="task-status-dot status-${t.status}"></div>
+      <div style="flex:1">
+        <div class="task-text">${t.task}</div>
+        <div class="task-next">${t.nextAction}</div>
+        <div style="display:flex; gap:0.5rem; align-items:center; margin-top:4px;">
+          <div class="task-owner">${t.owner}</div>
+          ${t.dueDate ? `<div style="font-size:0.65rem; color:var(--text3); font-family:var(--mono);">${t.dueDate}</div>` : ''}
+          <select onchange="updateTaskStatus(${i},this.value)" style="font-size:0.65rem; font-family:var(--mono); background:var(--bg3); border:1px solid var(--border2); color:var(--text3); padding:1px 4px; border-radius:4px; cursor:pointer;">
+            <option value="pending" ${t.status==='pending'?'selected':''}>pending</option>
+            <option value="inprogress" ${t.status==='inprogress'?'selected':''}>in progress</option>
+            <option value="done" ${t.status==='done'?'selected':''}>done</option>
+          </select>
+        </div>
+      </div>
+    </div>`).join('');
+
+  const docs = DATA.lifeops.documents || [];
+  document.getElementById('docs-list').innerHTML = docs.length ?
+    docs.map(d => `<div style="padding:0.4rem 0; border-bottom:1px solid var(--border); color:var(--text2); font-size:0.82rem;">${d.name} · <span style="color:var(--text3);">${d.date}</span></div>`).join('') :
+    'No documents uploaded yet.';
+
+  const maint = DATA.lifeops.maintenanceCalendar || [];
+  document.getElementById('maintenance-list').innerHTML = maint.length ?
+    maint.map(m => `<div class="finance-row"><div><div class="finance-name">${m.item}</div><div class="finance-sub">${m.freq}</div></div><div class="finance-val" style="font-size:0.8rem; color:var(--amber);">${m.due}</div></div>`).join('') :
+    '<div style="font-size:0.82rem; color:var(--text3);">No items yet.</div>';
+}
+
+function updateTaskStatus(i, status) {
+  DATA.lifeops.tasks[i].status = status;
+  renderOps();
+}
+
+function saveTask() {
+  const text = document.getElementById('task-text').value.trim();
+  const next = document.getElementById('task-next').value.trim();
+  const owner = document.getElementById('task-owner').value.trim() || 'Aabhas';
+  const due = document.getElementById('task-due').value;
+  if (!text) return;
+  if (!DATA.lifeops.tasks) DATA.lifeops.tasks = [];
+  DATA.lifeops.tasks.push({ id: Date.now(), task: text, nextAction: next, status: 'pending', owner, dueDate: due });
+  document.getElementById('task-text').value = ''; document.getElementById('task-next').value = ''; document.getElementById('task-due').value = '';
+  closeModal('modal-task'); renderOps(); showToast('Task added');
+}
+
+function saveMaintenance() {
+  const item = document.getElementById('maint-item').value.trim();
+  const due = document.getElementById('maint-due').value;
+  const freq = document.getElementById('maint-freq').value.trim();
+  if (!item) return;
+  if (!DATA.lifeops.maintenanceCalendar) DATA.lifeops.maintenanceCalendar = [];
+  DATA.lifeops.maintenanceCalendar.push({ item, due, freq });
+  document.getElementById('maint-item').value = ''; document.getElementById('maint-due').value = ''; document.getElementById('maint-freq').value = '';
+  closeModal('modal-maintenance'); renderOps(); showToast('Maintenance item added');
+}
+
+// ─── WEEKLY REVIEW ────────────────────────────────────────────────────────────
+function setScore(key, val, el) {
+  reviewScores[key] = val;
+  el.closest('.score-row').querySelectorAll('.score-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveReview() {
+  const entry = {
+    date: new Date().toLocaleDateString(),
+    scores: { ...reviewScores },
+    good: document.getElementById('review-good').value.trim(),
+    slip: document.getElementById('review-slip').value.trim(),
+    adjust: document.getElementById('review-adjust').value.trim()
+  };
+  if (!DATA.weeklyReview) DATA.weeklyReview = [];
+  DATA.weeklyReview.push(entry);
+  if (entry.scores['music-sessions']) DATA.music.sessionsThisWeek = 0;
+  if (entry.scores['skill-sessions']) DATA.upskilling.sessionsThisWeek = 0;
+  if (entry.scores['gym-days']) DATA.work.weeklyGymDays = 0;
+  document.getElementById('review-good').value = '';
+  document.getElementById('review-slip').value = '';
+  document.getElementById('review-adjust').value = '';
+  reviewScores = {};
+  document.querySelectorAll('.score-btn').forEach(b => b.classList.remove('selected'));
+  renderReview(); renderHome(); showToast('Week reviewed ✓ — counters reset');
+}
+
+function renderReview() {
+  const reviews = (DATA.weeklyReview || []).slice(-5).reverse();
+  document.getElementById('past-reviews').innerHTML = reviews.length ? reviews.map(r =>
+    `<div style="padding:0.75rem 0; border-bottom:1px solid var(--border);">
+      <div style="font-family:var(--mono); font-size:0.7rem; color:var(--accent); margin-bottom:0.4rem;">${r.date}</div>
+      <div style="font-size:0.78rem; color:var(--text2); line-height:1.6;">
+        Music: ${r.scores['music-sessions']||0}/3 · Skill: ${r.scores['skill-sessions']||0}/2 · Gym: ${r.scores['gym-days']||0}/4 · Diet: ${r.scores['diet-acc']||0}/5
+      </div>
+      ${r.good ? `<div style="font-size:0.78rem; color:var(--text2); margin-top:0.3rem;">✓ ${r.good}</div>` : ''}
+      ${r.adjust ? `<div style="font-size:0.78rem; color:var(--text3); margin-top:0.2rem;">→ ${r.adjust}</div>` : ''}
+    </div>`).join('') : 'No reviews yet — your first Sunday review will appear here.';
+}
+
+// ─── MODALS ───────────────────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (loadConfig()) { loadData(); }
+});
+</script>
+</body>
+</html>
