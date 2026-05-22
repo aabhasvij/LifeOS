@@ -760,6 +760,49 @@ html, body {
   .health-grid { grid-template-columns: 1fr; }
   .today-targets { grid-template-columns: 1fr; }
 }
+
+/* PORTFOLIO ENHANCEMENTS */
+.port-hero{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;padding:1.25rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);}
+.port-hero-label{font-size:0.68rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;}
+.port-hero-val{font-family:var(--serif);font-size:2.1rem;color:var(--text);line-height:1.1;margin:0.2rem 0;}
+.port-hero-sub{font-size:0.78rem;font-family:var(--mono);}
+.live-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:0.72rem;padding:0.4rem 0.875rem;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;letter-spacing:0.04em;}
+.live-btn:hover{border-color:var(--teal);color:var(--teal);}
+.live-btn.loading{border-color:var(--gold);color:var(--gold);}
+.port-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem;}
+.port-metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.875rem 0.75rem;}
+.pm-label{font-size:0.62rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:0.3rem;}
+.pm-val{font-size:0.9rem;font-weight:500;color:var(--text);font-family:var(--mono);}
+.alloc-wrap{display:flex;align-items:center;gap:1.25rem;}
+.alloc-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.alloc-legend{flex:1;display:flex;flex-direction:column;gap:0.5rem;}
+.alloc-legend-item{display:flex;align-items:center;gap:0.6rem;font-size:0.78rem;}
+.alloc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.hold-tabs{display:flex;gap:0.4rem;margin-bottom:0;overflow-x:auto;padding-bottom:0.25rem;scrollbar-width:none;}
+.hold-tabs::-webkit-scrollbar{display:none;}
+.hold-tab{padding:0.35rem 0.875rem;border-radius:20px;border:1px solid var(--border2);background:none;color:var(--text3);font-family:var(--mono);font-size:0.68rem;letter-spacing:0.05em;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.hold-tab.active{background:var(--bg3);color:var(--text);border-color:var(--border2);}
+.hold-row{display:flex;align-items:flex-start;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--border);}
+.hold-row:last-child{border-bottom:none;}
+.hold-ticker{font-family:var(--mono);font-size:0.7rem;color:var(--accent);min-width:64px;padding-top:1px;}
+.hold-name{font-size:0.8rem;color:var(--text);flex:1;line-height:1.35;}
+.hold-qty{font-size:0.68rem;color:var(--text3);font-family:var(--mono);margin-top:2px;}
+.hold-ltp{font-family:var(--mono);font-size:0.85rem;color:var(--text);}
+.hold-pnl{font-family:var(--mono);font-size:0.68rem;margin-top:1px;}
+.hold-val{font-family:var(--mono);font-size:0.75rem;color:var(--text2);margin-top:1px;}
+.pnl-pos{color:var(--green);}
+.pnl-neg{color:var(--coral);}
+.retiral-section{padding:0.75rem 0;border-bottom:1px solid var(--border);}
+.retiral-section:last-child{border-bottom:none;}
+.retiral-hdr{display:flex;align-items:center;justify-content:space-between;}
+.retiral-val{font-family:var(--mono);font-size:1rem;color:var(--gold);}
+.proj-toggles{display:flex;gap:0.35rem;}
+.proj-btn{padding:0.2rem 0.6rem;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text3);font-family:var(--mono);font-size:0.7rem;cursor:pointer;transition:all 0.15s;}
+.proj-btn.active{background:var(--accent2);border-color:var(--accent2);color:white;}
+.proj-stats{display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.75rem;}
+.proj-stat{background:var(--bg3);border-radius:var(--radius-sm);padding:0.6rem 0.875rem;flex:1;min-width:90px;}
+.proj-stat-val{font-family:var(--mono);font-size:0.9rem;color:var(--gold);font-weight:500;}
+.proj-stat-label{font-size:0.6rem;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;font-family:var(--mono);margin-top:2px;}
 </style>
 </head>
 <body>
@@ -1203,84 +1246,155 @@ html, body {
 
     <!-- FINANCE -->
     <div class="section" id="sec-finance">
-      <div class="section-heading">Finance</div>
-      <div class="section-sub">invest · track · retire early</div>
+
+      <div class="port-hero">
+        <div>
+          <div class="port-hero-label">Total portfolio</div>
+          <div class="port-hero-val" id="port-total-val">calculating...</div>
+          <div class="port-hero-sub" id="port-day-change" style="color:var(--text3);">Tap Live prices to refresh</div>
+        </div>
+        <div style="text-align:right">
+          <button class="live-btn" id="live-btn" onclick="refreshPrices()">↻ Live prices</button>
+          <div class="port-hero-label" id="port-refreshed" style="margin-top:0.5rem;">—</div>
+        </div>
+      </div>
+
+      <div class="port-metrics">
+        <div class="port-metric"><div class="pm-label">Invested</div><div class="pm-val" id="pm-invested">—</div></div>
+        <div class="port-metric"><div class="pm-label">Returns</div><div class="pm-val" id="pm-returns">—</div></div>
+        <div class="port-metric"><div class="pm-label">Today P&L</div><div class="pm-val" id="pm-today">—</div></div>
+      </div>
 
       <div class="card">
-        <div class="card-title">Household income</div>
-        <div class="stats-row">
-          <div class="stat-box">
-            <div class="stat-val" style="font-size:1rem;">₹1.77L</div>
-            <div class="stat-label">Your monthly</div>
+        <div class="card-title">Allocation</div>
+        <div class="alloc-wrap">
+          <div style="position:relative;width:140px;height:140px;flex-shrink:0;">
+            <canvas id="alloc-chart" width="140" height="140"></canvas>
+            <div class="alloc-center" id="alloc-center"></div>
           </div>
-          <div class="stat-box">
-            <div class="stat-val" style="font-size:1rem;">₹95K</div>
-            <div class="stat-label">Wife monthly</div>
+          <div id="alloc-legend" class="alloc-legend"></div>
+        </div>
+      </div>
+
+      <div class="hold-tabs">
+        <button class="hold-tab active" onclick="switchHoldTab('in-stocks',this)">IN Stocks</button>
+        <button class="hold-tab" onclick="switchHoldTab('mf',this)">Mutual Funds</button>
+        <button class="hold-tab" onclick="switchHoldTab('us-stocks',this)">US Stocks</button>
+        <button class="hold-tab" onclick="switchHoldTab('retirals',this)">Retirals</button>
+        <button class="hold-tab" onclick="switchHoldTab('sip-plan',this)">SIP Plan</button>
+      </div>
+
+      <div id="hold-in-stocks" class="hold-panel">
+        <div class="card" style="margin-top:0.75rem">
+          <div id="in-stocks-list"></div>
+        </div>
+      </div>
+
+      <div id="hold-mf" class="hold-panel" style="display:none">
+        <div style="font-size:0.7rem;color:var(--text3);font-family:var(--mono);margin:0.75rem 0 0.5rem;line-height:1.6;">Live NAVs via mfapi.in · Units auto-calculated on first ↻ sync · <a href="https://api.mfapi.in/mf/search?q=franklin" style="color:var(--accent);" target="_blank">Find scheme codes ↗</a></div>
+        <div class="card"><div id="mf-list"></div></div>
+      </div>
+
+      <div id="hold-us-stocks" class="hold-panel" style="display:none">
+        <div style="font-size:0.7rem;color:var(--text3);font-family:var(--mono);margin:0.75rem 0 0.5rem;">USD/INR: <span id="usd-inr-rate" style="color:var(--text2);">₹84.00</span> · Live via Yahoo Finance</div>
+        <div class="card"><div id="us-stocks-list"></div></div>
+      </div>
+
+      <div id="hold-retirals" class="hold-panel" style="display:none">
+        <div class="card" style="margin-top:0.75rem">
+          <div class="card-title">Retirals — update monthly</div>
+          <div class="retiral-section">
+            <div class="retiral-hdr">
+              <div><div style="font-size:0.875rem;font-weight:500;color:var(--text);">EPF</div><div style="font-size:0.7rem;color:var(--text3);">Employee Provident Fund</div></div>
+              <div style="text-align:right"><div class="retiral-val" id="epf-val">₹0</div><button onclick="openModal('modal-retiral-epf')" style="font-size:0.65rem;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--mono);">update</button></div>
+            </div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-top:0.4rem;" id="epf-sub">Not yet updated</div>
           </div>
-          <div class="stat-box">
-            <div class="stat-val" style="font-size:1rem; color:var(--gold);">₹2.72L</div>
-            <div class="stat-label">Combined</div>
+          <div class="retiral-section">
+            <div class="retiral-hdr">
+              <div><div style="font-size:0.875rem;font-weight:500;color:var(--text);">PPF</div><div style="font-size:0.7rem;color:var(--text3);">7.1% p.a. tax-free · Min ₹500/yr</div></div>
+              <div style="text-align:right"><div class="retiral-val" id="ppf-val">₹1.60L</div><button onclick="openModal('modal-retiral-ppf')" style="font-size:0.65rem;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--mono);">update</button></div>
+            </div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-top:0.4rem;">₹500/month · Keep alive</div>
+          </div>
+          <div class="retiral-section">
+            <div class="retiral-hdr">
+              <div><div style="font-size:0.875rem;font-weight:500;color:var(--text);">NPS</div><div style="font-size:0.7rem;color:var(--text3);">₹50K/yr tax benefit · 80CCD(1B)</div></div>
+              <div style="text-align:right"><div class="retiral-val" id="nps-val">₹0</div><button onclick="openModal('modal-retiral-nps')" style="font-size:0.65rem;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--mono);">update</button></div>
+            </div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-top:0.4rem;">₹4,200/month</div>
           </div>
         </div>
-        <div style="font-size:0.75rem; color:var(--text3); font-family:var(--mono); margin-top:0.5rem;">Next incentive: Wife's July salary +₹50K</div>
+      </div>
+
+      <div id="hold-sip-plan" class="hold-panel" style="display:none">
+        <div class="card" style="margin-top:0.75rem">
+          <div class="card-title">Monthly deployment plan</div>
+          <div id="sip-schedule"></div>
+          <div style="margin-top:1rem;padding-top:0.875rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:0.78rem;color:var(--text3);">Total committed monthly</div>
+            <div style="font-family:var(--mono);font-size:0.95rem;color:var(--gold);">₹1,57,200</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <div class="card-header">
+          <div class="card-title" style="margin-bottom:0">Growth projector</div>
+          <div class="proj-toggles">
+            <button class="proj-btn active" onclick="renderProjection(5,this)">5Y</button>
+            <button class="proj-btn" onclick="renderProjection(10,this)">10Y</button>
+            <button class="proj-btn" onclick="renderProjection(20,this)">20Y</button>
+          </div>
+        </div>
+        <div id="proj-stats" class="proj-stats"></div>
+        <div style="position:relative;height:180px;margin-top:0.75rem"><canvas id="proj-chart"></canvas></div>
+        <div style="font-size:0.68rem;color:var(--text3);margin-top:0.5rem;font-family:var(--mono);">₹1.39L/month SIP · 12% annual return · existing portfolio as base</div>
       </div>
 
       <div class="card">
         <div class="card-title">FIRE progress</div>
-        <div style="display:flex; align-items:center; gap:1.25rem; margin-bottom:1rem;">
-          <div>
-            <div class="fire-label">Corpus target</div>
-            <div class="fire-number">₹3.5Cr</div>
-          </div>
+        <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem;">
+          <div><div class="fire-label">Target corpus</div><div class="fire-number">₹3.5Cr</div></div>
           <div style="flex:1">
             <div class="progress-wrap" style="margin:0">
-              <div class="progress-label"><span>Current portfolio</span><strong id="fire-pct">—</strong></div>
-              <div class="progress-bar" style="height:10px"><div class="progress-fill" id="fire-bar" style="background:var(--gold); width:0%"></div></div>
+              <div class="progress-label"><span>Current</span><strong id="fire-pct">—</strong></div>
+              <div class="progress-bar" style="height:10px"><div class="progress-fill" id="fire-bar" style="background:var(--gold);width:0%"></div></div>
             </div>
-            <div style="font-size:0.72rem; color:var(--text3); margin-top:0.4rem;" id="fire-total">Loading portfolio...</div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-top:0.4rem;" id="fire-total">—</div>
           </div>
         </div>
-        <div style="font-size:0.78rem; color:var(--text2); line-height:1.6;">At ₹1.39L/month invested · 12% avg return · <span style="color:var(--gold);">~12–14 years</span> to FIRE target (age 43–45)</div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Investment portfolio</div>
-        <div id="investments-list"></div>
-        <div style="margin-top:1rem; padding-top:0.75rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-          <div style="font-size:0.78rem; color:var(--text3);">Total invested monthly</div>
-          <div style="font-family:var(--mono); font-size:0.95rem; color:var(--gold);">₹1,39,200</div>
-        </div>
+        <div style="font-size:0.78rem;color:var(--text2);line-height:1.6;">₹1.39L/month · 12% avg return · <span style="color:var(--gold);">~12–14 years</span> · Age 43–45</div>
       </div>
 
       <div class="card">
         <div class="card-title">Emergency fund</div>
         <div class="progress-wrap">
           <div class="progress-label"><span>RD balance</span><strong id="ef-label">₹0 / ₹5.5L</strong></div>
-          <div class="progress-bar" style="height:8px"><div class="progress-fill" id="ef-bar" style="background:var(--green); width:0%"></div></div>
+          <div class="progress-bar" style="height:8px"><div class="progress-fill" id="ef-bar" style="background:var(--green);width:0%"></div></div>
         </div>
-        <div style="font-size:0.75rem; color:var(--text3); margin-top:0.5rem;">₹25,000/month RD · Target: 6 months expenses · ~22 months to fill</div>
+        <div style="font-size:0.75rem;color:var(--text3);margin-top:0.5rem;">₹25,000/month RD · Target: 6 months expenses · ~22 months</div>
         <button class="btn btn-ghost" style="margin-top:0.875rem" onclick="openModal('modal-ef')">Update balance</button>
       </div>
 
       <div class="card">
-        <div class="card-title">Tax & obligations calendar</div>
+        <div class="card-title">Tax & obligations</div>
         <div id="tax-calendar"></div>
       </div>
 
       <div class="card">
         <div class="card-title">Subscriptions & NACH</div>
-        <div style="font-size:0.75rem; color:var(--amber); font-family:var(--mono); margin-bottom:0.75rem;">Target: All deductions on 2nd–3rd of month</div>
+        <div style="font-size:0.75rem;color:var(--amber);font-family:var(--mono);margin-bottom:0.75rem;">Target: all deductions on 2nd–3rd of month</div>
         <div id="subs-list"></div>
         <button class="btn btn-ghost" style="margin-top:0.75rem" onclick="openModal('modal-sub')">+ Add subscription</button>
       </div>
 
-      <!-- VAULT -->
       <div class="card" style="border-color:rgba(245,200,66,0.2)">
         <div class="card-title" style="color:var(--gold)">Financial vault</div>
         <div id="vault-area">
           <div class="vault-locked" id="vault-locked">
             <div class="vault-icon">🔐</div>
-            <div style="font-size:0.875rem; color:var(--text2); margin-bottom:1rem;">Nominee-ready financial document store.<br>Enter PIN to access.</div>
+            <div style="font-size:0.875rem;color:var(--text2);margin-bottom:1rem;">Nominee-ready document store.<br>Enter PIN to access.</div>
             <div class="pin-input-row">
               <input class="pin-digit" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,0)">
               <input class="pin-digit" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,1)">
@@ -1290,14 +1404,14 @@ html, body {
             <button class="btn btn-primary" onclick="unlockVault()" style="margin-top:0.5rem">Unlock</button>
           </div>
           <div id="vault-content" style="display:none">
-            <div style="font-size:0.82rem; color:var(--text2); margin-bottom:1rem;">Accessible to nominees in an emergency. Keep updated.</div>
+            <div style="font-size:0.82rem;color:var(--text2);margin-bottom:1rem;">Keep updated for nominees.</div>
             <div class="btn-row">
               <button class="btn btn-ghost" onclick="openModal('modal-vault-bank')">+ Bank account</button>
               <button class="btn btn-ghost" onclick="openModal('modal-vault-ins')">+ Insurance policy</button>
             </div>
             <div id="vault-bank-list" style="margin-top:1rem"></div>
             <div id="vault-ins-list" style="margin-top:0.75rem"></div>
-            <button class="btn btn-danger" style="margin-top:1rem; width:100%" onclick="lockVault()">Lock vault</button>
+            <button class="btn btn-danger" style="margin-top:1rem;width:100%" onclick="lockVault()">Lock vault</button>
           </div>
         </div>
       </div>
@@ -2103,161 +2217,374 @@ function uploadDoc(input) {
 }
 
 // ─── FINANCE ─────────────────────────────────────────────────────────────────
-function renderFinance() {
-  if (!DATA.finance) return;
-  const inv = DATA.finance.investments || [];
-  const total = inv.reduce((s, i) => s + (i.value || 0), 0);
+const PROXY = 'https://corsproxy.io/?';
+const YAHOO_Q = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=';
+const MFAPI = 'https://api.mfapi.in/mf/';
+let allocChart = null;
+let projChart = null;
+
+function getDefaultPortfolio() {
+  return {
+    usdToInr: 84,
+    lastRefreshed: '',
+    indianStocks: [
+      {name:'Bajaj Housing Finance',ticker:'BAJAJHFL.NS',qty:428,avgPrice:70.00,livePrice:83.15,dayChange:0.52},
+      {name:'Adani Ports',ticker:'ADANIPORTS.NS',qty:10,avgPrice:1285.20,livePrice:1786.50,dayChange:-0.38},
+      {name:'ICICI Prud Gold ETF',ticker:'ICICIGOLD.NS',qty:111,avgPrice:133.00,livePrice:135.14,dayChange:-0.21},
+      {name:'Tata Gold ETF',ticker:'TATAGOLD.NS',qty:14,avgPrice:14.42,livePrice:15.31,dayChange:-0.20}
+    ],
+    usStocks: [
+      {name:'NVIDIA',ticker:'NVDA',qty:1.4865,avgPrice:177.22,livePrice:219.45,dayChange:-1.79},
+      {name:'Vanguard S&P 500',ticker:'VOO',qty:0.4368,avgPrice:603.03,livePrice:682.76,dayChange:0.17},
+      {name:'Alphabet Inc',ticker:'GOOGL',qty:0.7118,avgPrice:295.79,livePrice:387.67,dayChange:-0.31},
+      {name:'Amazon',ticker:'AMZN',qty:0.754,avgPrice:209.72,livePrice:268.44,dayChange:1.29},
+      {name:'Raytheon',ticker:'RTX',qty:0.8035,avgPrice:196.23,livePrice:176.01,dayChange:0.66}
+    ],
+    mutualFunds: [
+      {name:'Franklin India Aggressive Hybrid',schemeCode:'118778',units:0,snapshotValue:646263,costBasis:619969,isSIP:false,liveValue:0},
+      {name:'Parag Parikh Flexi Cap',schemeCode:'122639',units:0,snapshotValue:276422,costBasis:259987,isSIP:false,liveValue:0},
+      {name:'ICICI Pru Balanced Advantage',schemeCode:'120585',units:0,snapshotValue:149842,costBasis:139993,isSIP:false,liveValue:0},
+      {name:'ICICI Pru Technology',schemeCode:'120483',units:0,snapshotValue:134709,costBasis:104995,isSIP:false,liveValue:0},
+      {name:'HDFC Flexi Cap',schemeCode:'125354',units:0,snapshotValue:97740,costBasis:99994,isSIP:true,liveValue:0},
+      {name:'Axis ELSS Tax Saver',schemeCode:'120503',units:0,snapshotValue:94924,costBasis:67997,isSIP:false,liveValue:0},
+      {name:'Navi Nifty 50 Index',schemeCode:'147946',units:0,snapshotValue:72312,costBasis:74996,isSIP:true,liveValue:0},
+      {name:'Motilal Oswal Nifty Midcap 150',schemeCode:'147622',units:0,snapshotValue:52484,costBasis:49997,isSIP:true,liveValue:0},
+      {name:'Canara Robeco Small Cap',schemeCode:'120828',units:0,snapshotValue:43342,costBasis:34998,isSIP:true,liveValue:0},
+      {name:'Canara Robeco ELSS Tax Saver',schemeCode:'112090',units:0,snapshotValue:35994,costBasis:27010,isSIP:false,liveValue:0},
+      {name:'Aditya Birla SL Dynamic Bond',schemeCode:'100444',units:0,snapshotValue:25562,costBasis:19999,isSIP:false,liveValue:0},
+      {name:'Tata Digital India Fund',schemeCode:'145552',units:0,snapshotValue:23842,costBasis:19999,isSIP:false,liveValue:0}
+    ],
+    retirals: {
+      epf:{balance:0,monthlyEmployee:0,monthlyEmployer:0,lastUpdated:''},
+      ppf:{balance:160000,monthly:500,lastUpdated:''},
+      nps:{balance:0,monthly:4200,lastUpdated:''}
+    }
+  };
+}
+
+function ensurePortfolio() {
+  if (!DATA.finance.portfolio) DATA.finance.portfolio = getDefaultPortfolio();
+}
+
+function getPortfolioTotals() {
+  ensurePortfolio();
+  const p = DATA.finance.portfolio;
+  const usdInr = p.usdToInr || 84;
+  let totalValue = 0, totalCost = 0, dayPnL = 0;
+  p.indianStocks.forEach(s => {
+    const ltp = s.livePrice || s.avgPrice;
+    const val = ltp * s.qty;
+    totalValue += val; totalCost += s.avgPrice * s.qty;
+    if (s.dayChange) dayPnL += val * (s.dayChange / 100);
+  });
+  p.usStocks.forEach(s => {
+    const ltp = s.livePrice || s.avgPrice;
+    const val = ltp * s.qty * usdInr;
+    totalValue += val; totalCost += s.avgPrice * s.qty * usdInr;
+    if (s.dayChange) dayPnL += val * (s.dayChange / 100);
+  });
+  p.mutualFunds.forEach(mf => {
+    const val = (mf.liveValue && mf.liveValue > 0) ? mf.liveValue : mf.snapshotValue;
+    totalValue += val || 0; totalCost += mf.costBasis || 0;
+  });
+  const ret = p.retirals || {};
+  const retiralTotal = (ret.epf?.balance||0) + (ret.ppf?.balance||0) + (ret.nps?.balance||0);
+  totalValue += retiralTotal; totalCost += retiralTotal;
+  const returns = totalValue - totalCost;
+  const returnPct = totalCost > 0 ? (returns / totalCost * 100) : 0;
+  return {totalValue, totalCost, dayPnL, returns, returnPct};
+}
+
+async function refreshPrices() {
+  ensurePortfolio();
+  const btn = document.getElementById('live-btn');
+  btn.textContent = '⟳ fetching...'; btn.classList.add('loading');
+  const p = DATA.finance.portfolio;
+  try {
+    const inTickers = p.indianStocks.map(s => s.ticker).join(',');
+    const usTickers = p.usStocks.map(s => s.ticker).join(',');
+    const all = `${inTickers},${usTickers},USDINR=X`;
+    const res = await fetch(`${PROXY}${encodeURIComponent(YAHOO_Q + all)}`);
+    const d = await res.json();
+    (d.quoteResponse?.result || []).forEach(q => {
+      const inS = p.indianStocks.find(s => s.ticker === q.symbol);
+      if (inS) { inS.livePrice = q.regularMarketPrice; inS.dayChange = q.regularMarketChangePercent; }
+      const usS = p.usStocks.find(s => s.ticker === q.symbol);
+      if (usS) { usS.livePrice = q.regularMarketPrice; usS.dayChange = q.regularMarketChangePercent; }
+      if (q.symbol === 'USDINR=X') p.usdToInr = q.regularMarketPrice;
+    });
+  } catch(e) { showToast('Stock fetch failed — using last known prices'); }
+  try {
+    const mfPromises = p.mutualFunds.map(async mf => {
+      if (!mf.schemeCode) return;
+      try {
+        const r = await fetch(`${MFAPI}${mf.schemeCode}/latest`);
+        const d = await r.json();
+        const nav = parseFloat(d.data[0].nav);
+        mf.latestNav = nav;
+        if (!mf.units || mf.units === 0) mf.units = mf.snapshotValue / nav;
+        mf.liveValue = mf.units * nav;
+      } catch(e) {}
+    });
+    await Promise.all(mfPromises);
+  } catch(e) { showToast('MF NAV fetch failed'); }
+  p.lastRefreshed = new Date().toLocaleTimeString();
+  renderFinance();
+  showToast('Prices updated ✓');
+  btn.textContent = '↻ Live prices'; btn.classList.remove('loading');
+}
+
+function renderPortfolioHero() {
+  const {totalValue, totalCost, dayPnL, returns, returnPct} = getPortfolioTotals();
+  document.getElementById('port-total-val').textContent = `\u20b9${(totalValue/100000).toFixed(2)}L`;
+  const dayEl = document.getElementById('port-day-change');
+  if (dayPnL !== 0) {
+    dayEl.textContent = `${dayPnL>=0?'+':''}\u20b9${Math.round(Math.abs(dayPnL)).toLocaleString('en-IN')} today`;
+    dayEl.style.color = dayPnL>=0?'var(--green)':'var(--coral)';
+  } else { dayEl.textContent='Tap \u2197 Live prices to refresh'; dayEl.style.color='var(--text3)'; }
+  document.getElementById('pm-invested').textContent = `\u20b9${(totalCost/100000).toFixed(1)}L`;
+  const retEl = document.getElementById('pm-returns');
+  retEl.textContent = `${returns>=0?'+':''}${returnPct.toFixed(1)}%`;
+  retEl.style.color = returns>=0?'var(--green)':'var(--coral)';
+  const todayEl = document.getElementById('pm-today');
+  todayEl.textContent = `${dayPnL>=0?'+':''}\u20b9${Math.round(Math.abs(dayPnL)).toLocaleString('en-IN')}`;
+  todayEl.style.color = dayPnL>=0?'var(--green)':'var(--coral)';
+  const ref = DATA.finance.portfolio?.lastRefreshed;
+  document.getElementById('port-refreshed').textContent = ref ? `Last: ${ref}` : 'Not yet refreshed';
   const target = DATA.finance.fireTarget || 35000000;
-  const pct = Math.min(100, (total / target) * 100);
-  document.getElementById('fire-pct').textContent = pct.toFixed(1) + '%';
-  document.getElementById('fire-bar').style.width = pct + '%';
-  document.getElementById('fire-total').textContent = `Portfolio ₹${(total/100000).toFixed(1)}L of ₹${(target/10000000).toFixed(1)}Cr target`;
+  const pct = Math.min(100, (totalValue/target)*100);
+  document.getElementById('fire-pct').textContent = pct.toFixed(1)+'%';
+  document.getElementById('fire-bar').style.width = pct+'%';
+  document.getElementById('fire-total').textContent = `\u20b9${(totalValue/100000).toFixed(1)}L of \u20b9${(target/10000000).toFixed(1)}Cr target`;
+}
 
-  const badges = { mf:'badge-mf', stock:'badge-stock', 'us-stock':'badge-stock', nps:'badge-debt', ppf:'badge-debt', rd:'badge-rd' };
-  const typeLabels = { mf:'MF', stock:'Stocks', 'us-stock':'US', nps:'NPS', ppf:'PPF', rd:'RD' };
-  document.getElementById('investments-list').innerHTML = inv.map(i =>
-    `<div class="finance-row">
-      <div>
-        <div style="display:flex; align-items:center; gap:0.5rem;">
-          <div class="finance-name">${i.name}</div>
-          <span class="badge ${badges[i.type]||'badge-mf'}">${typeLabels[i.type]||i.type}</span>
+function renderAllocationChart() {
+  ensurePortfolio();
+  const p = DATA.finance.portfolio;
+  const usdInr = p.usdToInr || 84;
+  const inStockVal = p.indianStocks.reduce((s,x) => s + (x.livePrice||x.avgPrice)*x.qty, 0);
+  const usStockVal = p.usStocks.reduce((s,x) => s + (x.livePrice||x.avgPrice)*x.qty*usdInr, 0);
+  const mfVal = p.mutualFunds.reduce((s,x) => s + ((x.liveValue&&x.liveValue>0)?x.liveValue:x.snapshotValue||0), 0);
+  const ret = p.retirals||{};
+  const retVal = (ret.epf?.balance||0)+(ret.ppf?.balance||0)+(ret.nps?.balance||0);
+  const total = inStockVal+usStockVal+mfVal+retVal || 1;
+  const colors = ['#8b5cf6','#4ecdc4','#f5c842','#6bcb77'];
+  const labels = ['IN Stocks','Mutual Funds','US Stocks','Retirals'];
+  const vals = [inStockVal, mfVal, usStockVal, retVal];
+  const ctx = document.getElementById('alloc-chart').getContext('2d');
+  if (allocChart) allocChart.destroy();
+  allocChart = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:0,hoverOffset:4}]},
+    options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` ${c.label}: \u20b9${(c.raw/100000).toFixed(1)}L (${(c.raw/total*100).toFixed(0)}%)`}}},animation:{duration:500}}
+  });
+  document.getElementById('alloc-legend').innerHTML = labels.map((l,i) =>
+    `<div class="alloc-legend-item"><div class="alloc-dot" style="background:${colors[i]}"></div><div style="flex:1;color:var(--text2);font-size:0.78rem;">${l}</div><div style="font-family:var(--mono);font-size:0.75rem;color:var(--text);">\u20b9${(vals[i]/100000).toFixed(1)}L</div><div style="font-family:var(--mono);font-size:0.68rem;color:var(--text3);min-width:32px;text-align:right;">${(vals[i]/total*100).toFixed(0)}%</div></div>`
+  ).join('');
+  document.getElementById('alloc-center').innerHTML = `<div style="font-family:var(--mono);font-size:0.85rem;font-weight:500;color:var(--text);">\u20b9${(total/100000).toFixed(1)}L</div><div style="font-size:0.58rem;color:var(--text3);font-family:var(--mono);letter-spacing:0.06em;">TOTAL</div>`;
+}
+
+function renderInStocks() {
+  ensurePortfolio();
+  document.getElementById('in-stocks-list').innerHTML = DATA.finance.portfolio.indianStocks.map(s => {
+    const ltp = s.livePrice || s.avgPrice;
+    const val = ltp * s.qty;
+    const pnlAmt = (ltp - s.avgPrice) * s.qty;
+    const pnlPct = (ltp - s.avgPrice) / s.avgPrice * 100;
+    const dayStr = s.dayChange ? ` ${s.dayChange>=0?'+':''}${s.dayChange.toFixed(2)}% 1D` : '';
+    return `<div class="hold-row">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:3px;">
+          <div class="hold-ticker">${s.ticker.replace('.NS','')}</div>
+          <div class="hold-name">${s.name}</div>
         </div>
-        <div class="finance-sub">₹${(i.monthly||0).toLocaleString('en-IN')}/month</div>
-      </div>
-      <div>
-        <div class="finance-val">₹${((i.value||0)/100000).toFixed(2)}L</div>
-        ${i.target ? `<div class="finance-monthly">Target: ₹${(i.target/100000).toFixed(1)}L</div>` : ''}
-      </div>
-    </div>`).join('');
-
-  const rdInv = inv.find(i => i.type === 'rd');
-  if (rdInv) {
-    const efVal = rdInv.value || 0;
-    const efTarget = rdInv.target || 550000;
-    document.getElementById('ef-label').textContent = `₹${(efVal/100000).toFixed(2)}L / ₹${(efTarget/100000).toFixed(1)}L`;
-    document.getElementById('ef-bar').style.width = Math.min(100,(efVal/efTarget)*100) + '%';
-  }
-
-  const tax = DATA.finance.taxCalendar || [];
-  document.getElementById('tax-calendar').innerHTML = tax.map((t, i) => {
-    const due = new Date(t.due);
-    const days = Math.round((due - new Date()) / 86400000);
-    const urgency = days < 30 ? 'var(--coral)' : days < 60 ? 'var(--amber)' : 'var(--text2)';
-    return `<div class="finance-row">
-      <div>
-        <div class="finance-name ${t.paid?'':''}">
-          ${t.paid ? '<span style="color:var(--green)">✓ </span>' : ''}${t.label}
-        </div>
-        ${t.amount ? `<div class="finance-sub">₹${t.amount.toLocaleString('en-IN')}</div>` : ''}
+        <div class="hold-qty">${s.qty} shares · avg \u20b9${s.avgPrice.toLocaleString('en-IN')}</div>
       </div>
       <div style="text-align:right">
-        <div style="font-family:var(--mono); font-size:0.8rem; color:${urgency};">${due.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
-        ${!t.paid ? `<button onclick="markTaxPaid(${i})" style="font-size:0.65rem; font-family:var(--mono); background:none; border:1px solid var(--border2); color:var(--text3); padding:2px 6px; border-radius:4px; cursor:pointer; margin-top:2px;">Mark paid</button>` : ''}
+        <div class="hold-ltp">\u20b9${ltp.toFixed(2)}<span style="font-size:0.62rem;margin-left:3px;color:${s.dayChange>=0?'var(--green)':'var(--coral)'};">${dayStr}</span></div>
+        <div class="hold-pnl ${pnlAmt>=0?'pnl-pos':'pnl-neg'}">${pnlAmt>=0?'+':''}\u20b9${Math.round(pnlAmt).toLocaleString('en-IN')} (${pnlPct.toFixed(1)}%)</div>
+        <div class="hold-val">\u20b9${(val/100000).toFixed(2)}L</div>
       </div>
     </div>`;
   }).join('');
+}
 
-  const subs = DATA.finance.subscriptions || [];
-  document.getElementById('subs-list').innerHTML = subs.length ? subs.map(s => {
-    const aligned = s.date >= 2 && s.date <= 3;
-    return `<div class="sub-item">
-      <div><div class="finance-name">${s.name}</div><div class="finance-sub">${s.type} · Date: ${s.date || '?'}</div></div>
+function renderMFs() {
+  ensurePortfolio();
+  document.getElementById('mf-list').innerHTML = DATA.finance.portfolio.mutualFunds.map(mf => {
+    const val = (mf.liveValue&&mf.liveValue>0) ? mf.liveValue : mf.snapshotValue || 0;
+    const cost = mf.costBasis || 0;
+    const pnlAmt = val - cost;
+    const pnlPct = cost > 0 ? (pnlAmt/cost*100) : 0;
+    const navStr = mf.latestNav ? `NAV \u20b9${mf.latestNav.toFixed(3)}` : 'tap \u21bb for live NAV';
+    return `<div class="hold-row">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:3px;">
+          <div class="hold-name" style="font-size:0.78rem;">${mf.name}</div>
+          ${mf.isSIP?'<span style="font-size:0.58rem;background:rgba(139,92,246,0.15);color:var(--accent);padding:1px 5px;border-radius:3px;font-family:var(--mono);flex-shrink:0;">SIP</span>':''}
+        </div>
+        <div class="hold-qty">${navStr}</div>
+      </div>
       <div style="text-align:right">
-        <div class="finance-val">₹${(s.amount||0).toLocaleString('en-IN')}</div>
-        <div class="sub-due ${aligned?'ok':'soon'}">${aligned?'aligned':'misaligned'}</div>
+        <div class="hold-pnl ${pnlAmt>=0?'pnl-pos':'pnl-neg'}">${pnlAmt>=0?'+':''}\u20b9${Math.round(Math.abs(pnlAmt)).toLocaleString('en-IN')} (${pnlPct.toFixed(1)}%)</div>
+        <div class="hold-val">\u20b9${(val/100000).toFixed(2)}L</div>
+        <div style="font-size:0.62rem;color:var(--text3);font-family:var(--mono);">cost \u20b9${(cost/100000).toFixed(2)}L</div>
       </div>
     </div>`;
-  }).join('') : '<div style="font-size:0.82rem; color:var(--text3);">No subscriptions added yet.</div>';
+  }).join('');
 }
 
-function markTaxPaid(i) {
-  DATA.finance.taxCalendar[i].paid = true;
-  renderFinance(); showToast('Marked as paid ✓');
+function renderUSStocks() {
+  ensurePortfolio();
+  const p = DATA.finance.portfolio;
+  const usdInr = p.usdToInr || 84;
+  document.getElementById('usd-inr-rate').textContent = `\u20b9${usdInr.toFixed(2)}`;
+  document.getElementById('us-stocks-list').innerHTML = p.usStocks.map(s => {
+    const ltp = s.livePrice || s.avgPrice;
+    const valInr = ltp * s.qty * usdInr;
+    const pnlUsd = (ltp - s.avgPrice) * s.qty;
+    const pnlPct = (ltp - s.avgPrice) / s.avgPrice * 100;
+    const dayStr = s.dayChange ? ` ${s.dayChange>=0?'+':''}${s.dayChange.toFixed(2)}% 1D` : '';
+    return `<div class="hold-row">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:3px;">
+          <div class="hold-ticker">${s.ticker}</div>
+          <div class="hold-name">${s.name}</div>
+        </div>
+        <div class="hold-qty">${s.qty} shares · avg $${s.avgPrice.toFixed(2)}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="hold-ltp">$${ltp.toFixed(2)}<span style="font-size:0.62rem;margin-left:3px;color:${s.dayChange>=0?'var(--green)':'var(--coral)'};">${dayStr}</span></div>
+        <div class="hold-pnl ${pnlUsd>=0?'pnl-pos':'pnl-neg'}">${pnlUsd>=0?'+':''}$${pnlUsd.toFixed(2)} (${pnlPct.toFixed(1)}%)</div>
+        <div class="hold-val">\u20b9${(valInr/100000).toFixed(2)}L</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function saveEF() {
-  const val = parseFloat(document.getElementById('ef-input').value);
-  if (!val) return;
-  const rd = DATA.finance.investments.find(i => i.type === 'rd');
-  if (rd) { rd.value = val; }
-  closeModal('modal-ef'); renderFinance(); showToast('Emergency fund updated');
+function renderRetirals() {
+  ensurePortfolio();
+  const ret = DATA.finance.portfolio.retirals || {};
+  document.getElementById('epf-val').textContent = `\u20b9${((ret.epf?.balance||0)/100000).toFixed(2)}L`;
+  document.getElementById('ppf-val').textContent = `\u20b9${((ret.ppf?.balance||0)/100000).toFixed(2)}L`;
+  document.getElementById('nps-val').textContent = `\u20b9${((ret.nps?.balance||0)/100000).toFixed(2)}L`;
+  if (ret.epf?.lastUpdated) document.getElementById('epf-sub').textContent = `Employee: \u20b9${(ret.epf.monthlyEmployee||0).toLocaleString('en-IN')}/mo · Employer: \u20b9${(ret.epf.monthlyEmployer||0).toLocaleString('en-IN')}/mo · Updated: ${ret.epf.lastUpdated}`;
 }
 
-function saveSub() {
-  const name = document.getElementById('sub-name').value.trim();
-  const amount = parseFloat(document.getElementById('sub-amount').value);
-  const date = parseInt(document.getElementById('sub-date').value);
-  const type = document.getElementById('sub-type').value;
-  if (!name) return;
-  if (!DATA.finance.subscriptions) DATA.finance.subscriptions = [];
-  DATA.finance.subscriptions.push({ name, amount, date, type });
-  document.getElementById('sub-name').value = ''; document.getElementById('sub-amount').value = ''; document.getElementById('sub-date').value = '';
-  closeModal('modal-sub'); renderFinance(); showToast('Subscription added');
+function renderSIPSchedule() {
+  const items = [
+    {name:"Dad support",amount:10000,date:"1st",color:"var(--text3)"},
+    {name:"Mom support",amount:8000,date:"1st",color:"var(--text3)"},
+    {name:"Your SIP — ₹75K target",amount:75000,date:"2nd",color:"var(--teal)"},
+    {name:"Wife's SIP — ₹25K",amount:25000,date:"2nd",color:"var(--teal)"},
+    {name:"NPS auto-debit",amount:4200,date:"2nd",color:"var(--teal)"},
+    {name:"Emergency RD",amount:25000,date:"3rd",color:"var(--teal)"},
+    {name:"PPF minimum",amount:500,date:"5th",color:"var(--text3)"},
+    {name:"HDFC Flexi Cap SIP",amount:0,date:"—",color:"var(--text3)",note:"Add date via broker"},
+    {name:"Navi Nifty 50 SIP",amount:0,date:"—",color:"var(--text3)",note:"Add date via broker"},
+    {name:"Motilal Midcap 150 SIP",amount:0,date:"—",color:"var(--text3)",note:"Add date via broker"},
+    {name:"Canara Robeco Small Cap SIP",amount:0,date:"—",color:"var(--text3)",note:"Add date via broker"}
+  ];
+  document.getElementById('sip-schedule').innerHTML = items.map(s =>
+    `<div class="finance-row">
+      <div><div class="finance-name">${s.name}</div>${s.note?`<div class="finance-sub">${s.note}</div>`:''}</div>
+      <div style="text-align:right">
+        ${s.amount?`<div class="finance-val">\u20b9${s.amount.toLocaleString('en-IN')}</div>`:''}
+        <div style="font-family:var(--mono);font-size:0.7rem;color:${s.color};">${s.date}</div>
+      </div>
+    </div>`
+  ).join('');
 }
 
-// VAULT
-function pinNext(el, idx) {
-  if (el.value.length === 1) {
-    const pins = document.querySelectorAll('.pin-digit');
-    if (idx < 3) pins[idx + 1].focus();
+function switchHoldTab(id, el) {
+  document.querySelectorAll('.hold-panel').forEach(p => p.style.display='none');
+  document.querySelectorAll('.hold-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('hold-'+id).style.display='block';
+  el.classList.add('active');
+}
+
+function renderProjection(years, btn) {
+  if (btn) { document.querySelectorAll('.proj-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+  const {totalValue} = getPortfolioTotals();
+  const monthlyInv = 139200;
+  const r = 0.12/12;
+  const months = years*12;
+  const data=[], labels=[];
+  const step = Math.max(1, Math.floor(months/20));
+  for (let m=0; m<=months; m+=step) {
+    const fv = totalValue*Math.pow(1+r,m) + monthlyInv*(Math.pow(1+r,m)-1)/r;
+    data.push(+(fv/10000000).toFixed(3));
+    labels.push(m===0?'Now':`${Math.round(m/12)}Y`);
   }
+  const finalVal = totalValue*Math.pow(1+r,months) + monthlyInv*(Math.pow(1+r,months)-1)/r;
+  const totalInv = totalValue + monthlyInv*months;
+  const wealthMult = +(finalVal/totalInv).toFixed(1);
+  document.getElementById('proj-stats').innerHTML = `
+    <div class="proj-stat"><div class="proj-stat-val">\u20b9${(finalVal/10000000).toFixed(2)}Cr</div><div class="proj-stat-label">Projected</div></div>
+    <div class="proj-stat"><div class="proj-stat-val" style="color:var(--green);">${((finalVal/totalInv-1)*100).toFixed(0)}%</div><div class="proj-stat-label">Returns</div></div>
+    <div class="proj-stat"><div class="proj-stat-val" style="color:var(--teal);">${wealthMult}x</div><div class="proj-stat-label">Wealth mult</div></div>`;
+  const ctx = document.getElementById('proj-chart').getContext('2d');
+  if (projChart) projChart.destroy();
+  projChart = new Chart(ctx, {
+    type:'line',
+    data:{labels,datasets:[{data,borderColor:'#f5c842',backgroundColor:'rgba(245,200,66,0.07)',borderWidth:2,pointRadius:0,tension:0.4,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` \u20b9${c.raw.toFixed(2)}Cr`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9},callback:v=>`\u20b9${v.toFixed(1)}Cr`}}},animation:{duration:400}}
+  });
 }
 
-function unlockVault() {
-  const pins = document.querySelectorAll('.pin-digit');
-  const entered = Array.from(pins).map(p => p.value).join('');
-  const stored = DATA.finance.vault ? DATA.finance.vault.pin : '';
-  if (!stored) {
-    DATA.finance.vault.pin = entered;
-    showVaultContent();
-    showToast('PIN set ✓');
-    return;
+function saveRetiral(type) {
+  ensurePortfolio();
+  if (!DATA.finance.portfolio.retirals) DATA.finance.portfolio.retirals = {epf:{},ppf:{},nps:{}};
+  const r = DATA.finance.portfolio.retirals;
+  if (type==='epf') {
+    r.epf = {balance:parseFloat(document.getElementById('epf-bal').value)||0,monthlyEmployee:parseFloat(document.getElementById('epf-emp').value)||0,monthlyEmployer:parseFloat(document.getElementById('epf-er').value)||0,lastUpdated:new Date().toLocaleDateString()};
+    closeModal('modal-retiral-epf');
+  } else if (type==='ppf') {
+    r.ppf = {...(r.ppf||{}),balance:parseFloat(document.getElementById('ppf-bal').value)||0,lastUpdated:new Date().toLocaleDateString()};
+    closeModal('modal-retiral-ppf');
+  } else if (type==='nps') {
+    r.nps = {...(r.nps||{}),balance:parseFloat(document.getElementById('nps-bal').value)||0,lastUpdated:new Date().toLocaleDateString()};
+    closeModal('modal-retiral-nps');
   }
-  if (entered === stored) { showVaultContent(); }
-  else { showToast('Wrong PIN'); pins.forEach(p => p.value = ''); pins[0].focus(); }
+  renderRetirals(); renderPortfolioHero(); renderAllocationChart(); showToast(`${type.toUpperCase()} updated`);
 }
 
-function showVaultContent() {
-  vaultUnlocked = true;
-  document.getElementById('vault-locked').style.display = 'none';
-  document.getElementById('vault-content').style.display = 'block';
-  renderVault();
+function renderFinance() {
+  ensurePortfolio();
+  renderPortfolioHero();
+  renderAllocationChart();
+  renderInStocks();
+  renderMFs();
+  renderUSStocks();
+  renderRetirals();
+  renderSIPSchedule();
+  const rdInv = (DATA.finance.investments||[]).find(i=>i.type==='rd');
+  if (rdInv) {
+    const efVal=rdInv.value||0, efTarget=rdInv.target||550000;
+    document.getElementById('ef-label').textContent=`\u20b9${(efVal/100000).toFixed(2)}L / \u20b9${(efTarget/100000).toFixed(1)}L`;
+    document.getElementById('ef-bar').style.width=Math.min(100,(efVal/efTarget)*100)+'%';
+  }
+  const tax = DATA.finance.taxCalendar||[];
+  document.getElementById('tax-calendar').innerHTML = tax.map((t,i)=>{
+    const due=new Date(t.due), days=Math.round((due-new Date())/86400000);
+    const urg=days<30?'var(--coral)':days<60?'var(--amber)':'var(--text2)';
+    return `<div class="finance-row"><div><div class="finance-name">${t.paid?'<span style="color:var(--green)">\u2713 </span>':''}${t.label}</div>${t.amount?`<div class="finance-sub">\u20b9${t.amount.toLocaleString('en-IN')}</div>`:''}</div><div style="text-align:right"><div style="font-family:var(--mono);font-size:0.8rem;color:${urg};">${due.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>${!t.paid?`<button onclick="markTaxPaid(${i})" style="font-size:0.65rem;font-family:var(--mono);background:none;border:1px solid var(--border2);color:var(--text3);padding:2px 6px;border-radius:4px;cursor:pointer;margin-top:2px;">Mark paid</button>`:''}</div></div>`;
+  }).join('');
+  const subs=DATA.finance.subscriptions||[];
+  document.getElementById('subs-list').innerHTML=subs.length?subs.map(s=>{const aligned=s.date>=2&&s.date<=3;return`<div class="sub-item"><div><div class="finance-name">${s.name}</div><div class="finance-sub">${s.type} · Date: ${s.date||'?'}</div></div><div style="text-align:right"><div class="finance-val">\u20b9${(s.amount||0).toLocaleString('en-IN')}</div><div class="sub-due ${aligned?'ok':'soon'}">${aligned?'aligned':'misaligned'}</div></div></div>`;}).join(''):'<div style="font-size:0.82rem;color:var(--text3);">No subscriptions yet.</div>';
+  setTimeout(()=>renderProjection(10,null),100);
 }
 
-function lockVault() {
-  vaultUnlocked = false;
-  document.getElementById('vault-locked').style.display = 'block';
-  document.getElementById('vault-content').style.display = 'none';
-  document.querySelectorAll('.pin-digit').forEach(p => p.value = '');
-}
-
-function renderVault() {
-  const vault = DATA.finance.vault || {};
-  const banks = vault.bankAccounts || [];
-  document.getElementById('vault-bank-list').innerHTML = banks.length ? banks.map(b =>
-    `<div class="finance-row"><div><div class="finance-name">${b.bank}</div><div class="finance-sub">${b.type} · Nominee: ${b.nominee}</div></div><div class="finance-val" style="font-family:var(--mono); font-size:0.75rem;">${b.account}</div></div>`
-  ).join('') : '';
-  const ins = vault.insurancePolicies || [];
-  document.getElementById('vault-ins-list').innerHTML = ins.length ? ins.map(i =>
-    `<div class="finance-row"><div><div class="finance-name">${i.provider}</div><div class="finance-sub">Policy: ${i.policy} · ${i.sumInsured} · Nominee: ${i.nominee}</div></div><div class="finance-val" style="font-size:0.75rem; color:var(--amber);">${i.renewal}</div></div>`
-  ).join('') : '';
-}
-
-function saveVaultBank() {
-  const b = { bank: document.getElementById('vb-bank').value.trim(), account: document.getElementById('vb-acc').value.trim(), type: document.getElementById('vb-type').value.trim(), nominee: document.getElementById('vb-nom').value.trim() };
-  if (!b.bank) return;
-  if (!DATA.finance.vault.bankAccounts) DATA.finance.vault.bankAccounts = [];
-  DATA.finance.vault.bankAccounts.push(b);
-  closeModal('modal-vault-bank'); renderVault(); showToast('Bank account saved');
-}
-
-function saveVaultIns() {
-  const i = { provider: document.getElementById('vi-provider').value.trim(), policy: document.getElementById('vi-policy').value.trim(), sumInsured: document.getElementById('vi-sum').value.trim(), renewal: document.getElementById('vi-renewal').value, nominee: document.getElementById('vi-nom').value.trim() };
-  if (!i.provider) return;
-  if (!DATA.finance.vault.insurancePolicies) DATA.finance.vault.insurancePolicies = [];
-  DATA.finance.vault.insurancePolicies.push(i);
-  closeModal('modal-vault-ins'); renderVault(); showToast('Insurance policy saved');
-}
+function markTaxPaid(i) { DATA.finance.taxCalendar[i].paid=true; renderFinance(); showToast('Marked paid \u2713'); }
+function saveEF() { const val=parseFloat(document.getElementById('ef-input').value); if(!val)return; const rd=(DATA.finance.investments||[]).find(i=>i.type==='rd'); if(rd)rd.value=val; closeModal('modal-ef'); renderFinance(); showToast('Emergency fund updated'); }
+function saveSub() { const name=document.getElementById('sub-name').value.trim(),amount=parseFloat(document.getElementById('sub-amount').value),date=parseInt(document.getElementById('sub-date').value),type=document.getElementById('sub-type').value; if(!name)return; if(!DATA.finance.subscriptions)DATA.finance.subscriptions=[]; DATA.finance.subscriptions.push({name,amount,date,type}); document.getElementById('sub-name').value='';document.getElementById('sub-amount').value='';document.getElementById('sub-date').value=''; closeModal('modal-sub');renderFinance();showToast('Subscription added'); }
+function pinNext(el,idx){if(el.value.length===1){const pins=document.querySelectorAll('.pin-digit');if(idx<3)pins[idx+1].focus();}}
+function unlockVault(){const pins=document.querySelectorAll('.pin-digit');const entered=Array.from(pins).map(p=>p.value).join('');const stored=DATA.finance.vault?DATA.finance.vault.pin:'';if(!stored){DATA.finance.vault.pin=entered;showVaultContent();showToast('PIN set \u2713');return;}if(entered===stored){showVaultContent();}else{showToast('Wrong PIN');pins.forEach(p=>p.value='');pins[0].focus();}}
+function showVaultContent(){vaultUnlocked=true;document.getElementById('vault-locked').style.display='none';document.getElementById('vault-content').style.display='block';renderVault();}
+function lockVault(){vaultUnlocked=false;document.getElementById('vault-locked').style.display='block';document.getElementById('vault-content').style.display='none';document.querySelectorAll('.pin-digit').forEach(p=>p.value='');}
+function renderVault(){const vault=DATA.finance.vault||{};const banks=vault.bankAccounts||[];document.getElementById('vault-bank-list').innerHTML=banks.length?banks.map(b=>`<div class="finance-row"><div><div class="finance-name">${b.bank}</div><div class="finance-sub">${b.type} · Nominee: ${b.nominee}</div></div><div class="finance-val" style="font-family:var(--mono);font-size:0.75rem;">${b.account}</div></div>`).join(''):'';const ins=vault.insurancePolicies||[];document.getElementById('vault-ins-list').innerHTML=ins.length?ins.map(i=>`<div class="finance-row"><div><div class="finance-name">${i.provider}</div><div class="finance-sub">Policy: ${i.policy} · ${i.sumInsured} · Nominee: ${i.nominee}</div></div><div class="finance-val" style="font-size:0.75rem;color:var(--amber);">${i.renewal}</div></div>`).join(''):'';}
+function saveVaultBank(){const b={bank:document.getElementById('vb-bank').value.trim(),account:document.getElementById('vb-acc').value.trim(),type:document.getElementById('vb-type').value.trim(),nominee:document.getElementById('vb-nom').value.trim()};if(!b.bank)return;if(!DATA.finance.vault.bankAccounts)DATA.finance.vault.bankAccounts=[];DATA.finance.vault.bankAccounts.push(b);closeModal('modal-vault-bank');renderVault();showToast('Bank account saved');}
+function saveVaultIns(){const i={provider:document.getElementById('vi-provider').value.trim(),policy:document.getElementById('vi-policy').value.trim(),sumInsured:document.getElementById('vi-sum').value.trim(),renewal:document.getElementById('vi-renewal').value,nominee:document.getElementById('vi-nom').value.trim()};if(!i.provider)return;if(!DATA.finance.vault.insurancePolicies)DATA.finance.vault.insurancePolicies=[];DATA.finance.vault.insurancePolicies.push(i);closeModal('modal-vault-ins');renderVault();showToast('Insurance policy saved');}
 
 // ─── LIFE OPS ─────────────────────────────────────────────────────────────────
 function renderOps() {
@@ -2384,5 +2711,38 @@ window.addEventListener('DOMContentLoaded', () => {
   if (loadConfig()) { loadData(); }
 });
 </script>
+
+<div class="modal-overlay" id="modal-retiral-epf">
+  <div class="modal">
+    <div class="modal-title">Update EPF balance</div>
+    <div class="log-form">
+      <div><label class="field-label">Current EPF balance (₹)</label><input class="field-input" id="epf-bal" type="number" placeholder="0"></div>
+      <div class="health-grid">
+        <div><label class="field-label">Monthly employee (₹)</label><input class="field-input" id="epf-emp" type="number" placeholder="0"></div>
+        <div><label class="field-label">Monthly employer (₹)</label><input class="field-input" id="epf-er" type="number" placeholder="0"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveRetiral('epf')">Save</button><button class="btn btn-ghost" onclick="closeModal('modal-retiral-epf')">Cancel</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-retiral-ppf">
+  <div class="modal">
+    <div class="modal-title">Update PPF balance</div>
+    <div class="log-form">
+      <div><label class="field-label">Current PPF balance (₹)</label><input class="field-input" id="ppf-bal" type="number" placeholder="160000"></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveRetiral('ppf')">Save</button><button class="btn btn-ghost" onclick="closeModal('modal-retiral-ppf')">Cancel</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-retiral-nps">
+  <div class="modal">
+    <div class="modal-title">Update NPS balance</div>
+    <div class="log-form">
+      <div><label class="field-label">Current NPS balance (₹)</label><input class="field-input" id="nps-bal" type="number" placeholder="0"></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveRetiral('nps')">Save</button><button class="btn btn-ghost" onclick="closeModal('modal-retiral-nps')">Cancel</button></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
