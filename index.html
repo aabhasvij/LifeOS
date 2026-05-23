@@ -1339,25 +1339,46 @@ html, body {
           <button class="cf-toggle-btn" id="cf-toggle-btn" onclick="event.stopPropagation();toggleCF()">details ▾</button>
         </div>
         <div class="cf-detail" id="cf-detail" style="display:none">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
-            <div style="font-size:0.78rem;font-weight:500;color:var(--text);">Cash flow breakdown</div>
-            <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.68rem;color:var(--text3);font-family:var(--mono);cursor:pointer;">
-              <input type="checkbox" id="incentive-toggle" onchange="renderCashFlow()" style="width:12px;height:12px;">
-              +incentive
-            </label>
-          </div>
-          <div class="cf-section-label">Income <button class="cf-add-btn" onclick="openEditIncome()">✎ edit</button></div>
-          <div id="cf-income"></div>
-          <div class="cf-section-label">Fixed obligations</div>
-          <div id="cf-fixed"></div>
-          <div class="cf-section-label">Upcoming this month</div>
-          <div id="cf-upcoming"></div>
-          <div class="cf-section-hdr">Fixed expenses
-            <button class="cf-add-btn" onclick="openModal('modal-fixed-exp')">+ add</button>
-          </div>
-          <div id="cf-fixed-exp"></div>
-          <div class="cf-section-hdr">Subscriptions</div>
-          <div id="cf-subs-cf"></div>
+          <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+            <!-- INCOME -->
+            <tr><td colspan="2" style="padding:0.5rem 0 0.2rem;font-size:0.65rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:2px solid var(--accent2);">
+              Income
+              <button class="cf-add-btn" onclick="openEditIncome()" style="margin-left:0.5rem;">✎ edit</button>
+              <label style="float:right;font-size:0.68rem;color:var(--text3);cursor:pointer;">
+                <input type="checkbox" id="incentive-toggle" onchange="renderCashFlow()" style="width:11px;height:11px;"> +incentive
+              </label>
+            </td></tr>
+            <tbody id="cf-income"></tbody>
+            <!-- SIPs / INVESTMENTS -->
+            <tr><td colspan="2" style="padding:0.6rem 0 0.2rem;font-size:0.65rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border2);">
+              SIPs &amp; investments
+              <button class="cf-add-btn" onclick="showSection('skill',document.querySelector('.nav-item:nth-child(4)'));switchHoldTab('sip-plan',document.querySelector('.hold-tab:last-child'))" style="margin-left:0.5rem;">✎ manage</button>
+            </td></tr>
+            <tbody id="cf-fixed"></tbody>
+            <!-- FIXED EXPENSES -->
+            <tr><td colspan="2" style="padding:0.6rem 0 0.2rem;font-size:0.65rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border2);">
+              Monthly expenses
+              <button class="cf-add-btn" onclick="openModal('modal-fixed-exp')" style="margin-left:0.5rem;">+ add</button>
+            </td></tr>
+            <tbody id="cf-fixed-exp"></tbody>
+            <!-- SUBSCRIPTIONS -->
+            <tr><td colspan="2" style="padding:0.6rem 0 0.2rem;font-size:0.65rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border2);">
+              Subscriptions &amp; NACH
+              <button class="cf-add-btn" onclick="openModal('modal-sub')" style="margin-left:0.5rem;">+ add</button>
+            </td></tr>
+            <tbody id="cf-subs-cf"></tbody>
+            <!-- UPCOMING THIS MONTH -->
+            <tr><td colspan="2" style="padding:0.6rem 0 0.2rem;font-size:0.65rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border2);">
+              Upcoming this month
+              <button class="cf-add-btn" onclick="openModal('modal-upcoming')" style="margin-left:0.5rem;">+ add</button>
+            </td></tr>
+            <tbody id="cf-upcoming"></tbody>
+            <!-- TOTAL ROW -->
+            <tr style="border-top:2px solid var(--border2);">
+              <td style="padding:0.5rem 0;font-weight:600;color:var(--text);">Obligations total</td>
+              <td style="text-align:right;font-family:var(--mono);font-weight:600;color:var(--coral);" id="cf-total-out-detail">—</td>
+            </tr>
+          </table>
         </div>
       </div>
 
@@ -2409,7 +2430,7 @@ function getSIPTotal(){ensureSIPs();return DATA.finance.sips.filter(s=>s.active)
 
 function getPortfolioTotals(){ensurePortfolio();const p=DATA.finance.portfolio,usdInr=p.usdToInr||95;let tv=0,tc=0,dp=0;p.indianStocks.forEach(s=>{const ltp=s.livePrice||s.avgPrice,val=ltp*s.qty;tv+=val;tc+=s.avgPrice*s.qty;if(s.dayChange)dp+=val*(s.dayChange/100);});p.usStocks.forEach(s=>{const ltp=s.livePrice||s.avgPrice,val=ltp*s.qty*usdInr;tv+=val;tc+=s.avgPrice*s.qty*usdInr;if(s.dayChange)dp+=val*(s.dayChange/100);});p.mutualFunds.forEach(mf=>{const val=(mf.liveValue&&mf.liveValue>0)?mf.liveValue:mf.snapshotValue||0;tv+=val;tc+=mf.costBasis||0;});const ret=p.retirals||{},rv=(ret.epf?.balance||0)+(ret.ppf?.balance||0)+(ret.nps?.balance||0)+(ret.rd?.balance||0);tv+=rv;tc+=rv;return{totalValue:tv,totalCost:tc,dayPnL:dp,returns:tv-tc,returnPct:tc>0?((tv-tc)/tc*100):0};}
 
-async function refreshPrices(){ensurePortfolio();const btn=document.getElementById('live-btn');btn.textContent='⟳ fetching...';btn.classList.add('loading');const p=DATA.finance.portfolio;try{const all=p.indianStocks.map(s=>s.ticker).concat(p.usStocks.map(s=>s.ticker)).join(',')+ ',USDINR=X';const res=await fetch(PROXY+encodeURIComponent(YAHOO_Q+all));const d=await res.json();(d.quoteResponse?.result||[]).forEach(q=>{const i=p.indianStocks.find(s=>s.ticker===q.symbol);if(i){i.livePrice=q.regularMarketPrice;i.dayChange=q.regularMarketChangePercent;}const u=p.usStocks.find(s=>s.ticker===q.symbol);if(u){u.livePrice=q.regularMarketPrice;u.dayChange=q.regularMarketChangePercent;}if(q.symbol==='USDINR=X'&&q.regularMarketPrice>50)p.usdToInr=q.regularMarketPrice;});}catch(e){showToast('Stock fetch failed');}try{await Promise.all(p.mutualFunds.map(async mf=>{if(!mf.schemeCode)return;try{const r=await fetch(MFAPI+mf.schemeCode+'/latest');const d=await r.json();const nav=parseFloat(d.data[0].nav);mf.latestNav=nav;if(!mf.units||mf.units===0)mf.units=mf.snapshotValue/nav;mf.liveValue=mf.units*nav;}catch(e){};}));}catch(e){}p.lastRefreshed=new Date().toLocaleTimeString();renderFinance();showToast('Prices updated ✓');btn.textContent='↻ Live prices';btn.classList.remove('loading');}
+async function refreshPrices(){ensurePortfolio();const btn=document.getElementById('live-btn');btn.textContent='⟳ fetching...';btn.classList.add('loading');const p=DATA.finance.portfolio;const allTickers=p.indianStocks.map(s=>s.ticker).concat(p.usStocks.map(s=>s.ticker)).concat(['USDINR=X']).join(',');async function tryFetch(url){const r=await fetch(url);if(!r.ok)throw new Error(r.status);return r.json();}try{let d;try{d=await tryFetch(PROXY+encodeURIComponent(YAHOO_Q+allTickers));}catch(e1){d=await tryFetch(YAHOO_Q+allTickers);}(d.quoteResponse?.result||[]).forEach(q=>{const i=p.indianStocks.find(s=>s.ticker===q.symbol);if(i){i.livePrice=q.regularMarketPrice;i.dayChange=q.regularMarketChangePercent;}const u=p.usStocks.find(s=>s.ticker===q.symbol);if(u){u.livePrice=q.regularMarketPrice;u.dayChange=q.regularMarketChangePercent;}if(q.symbol==='USDINR=X'&&q.regularMarketPrice>50){p.usdToInr=q.regularMarketPrice;console.log('USD/INR fetched:',q.regularMarketPrice);}});}catch(e){console.error('Stock fetch failed:',e);showToast('Stock fetch failed — check console');}try{await Promise.all(p.mutualFunds.map(async mf=>{if(!mf.schemeCode)return;try{const r=await fetch(MFAPI+mf.schemeCode+'/latest');const d=await r.json();const nav=parseFloat(d.data[0].nav);mf.latestNav=nav;if(!mf.units||mf.units===0)mf.units=mf.snapshotValue/nav;mf.liveValue=mf.units*nav;}catch(e){};}));}catch(e){}p.lastRefreshed=new Date().toLocaleTimeString();renderFinance();showToast('Prices updated ✓');btn.textContent='↻ Live prices';btn.classList.remove('loading');}
 
 function renderPortfolioHero(){const{totalValue,totalCost,dayPnL,returns,returnPct}=getPortfolioTotals();document.getElementById('port-total-val').textContent=fmt(totalValue);document.getElementById('port-invested-hero').textContent=fmt(totalCost);const dc=document.getElementById('port-day-change');if(dayPnL!==0){dc.textContent=fmtSign(dayPnL)+' today ('+dayPnL.toFixed(2)+'%)';dc.style.color=dayPnL>=0?'var(--green)':'var(--coral)';}else{dc.textContent='tap ↻ for live';dc.style.color='var(--text3)';}const re=document.getElementById('pm-returns');re.textContent=(returns>=0?'+':'')+returnPct.toFixed(1)+'%';re.style.color=returns>=0?'var(--green)':'var(--coral)';const te=document.getElementById('pm-today');te.textContent=fmtSign(dayPnL);te.style.color=dayPnL>=0?'var(--green)':'var(--coral)';document.getElementById('port-refreshed').textContent=DATA.finance.portfolio?.lastRefreshed?'Last: '+DATA.finance.portfolio.lastRefreshed:'Not refreshed';const usdEl=document.getElementById('usd-inr-hero');if(usdEl)usdEl.textContent='₹'+(DATA.finance.portfolio?.usdToInr||95).toFixed(2);renderMarketStatus();const target=DATA.finance.fireTarget||35000000,pct=Math.min(100,(totalValue/target)*100);document.getElementById('fire-pct').textContent=pct.toFixed(1)+'%';document.getElementById('fire-bar').style.width=pct+'%';document.getElementById('fire-total').textContent=fmt(totalValue)+' of '+fmt(target)+' target';}
 
@@ -2467,53 +2488,59 @@ function renderCashFlow(){
   const subs=(DATA.finance.subscriptions||[]).filter(function(s){return (s.amount||0)>0;});
   const subsTotal=subs.reduce(function(t,s){return t+(s.amount||0);},0);
   const cfM=nextMo.getMonth(),cfY=nextMo.getFullYear();
-  const upcomingThisMonth=(DATA.finance.upcomingObligations||[]).filter(function(u){
+  const upcoming=(DATA.finance.upcomingObligations||[]).filter(function(u){
     if(!u.due)return false;
     const d=new Date(u.due);
     return d.getMonth()===cfM&&d.getFullYear()===cfY;
   });
-  const upcomingTotal=upcomingThisMonth.reduce(function(t,u){return t+(u.amount||0);},0);
+  const upcomingTotal=upcoming.reduce(function(t,u){return t+(u.amount||0);},0);
   const totalOut=sipTotal+fixedExpTotal+subsTotal+upcomingTotal;
   const disposable=totalIncome-totalOut;
-  const sumIn=document.getElementById('cf-sum-in');
-  if(sumIn)sumIn.textContent=fmt(totalIncome);
-  const sumOut=document.getElementById('cf-sum-out');
-  if(sumOut)sumOut.textContent='-'+fmt(totalOut);
+  const sumIn=document.getElementById('cf-sum-in');if(sumIn)sumIn.textContent=fmt(totalIncome);
+  const sumOut=document.getElementById('cf-sum-out');if(sumOut)sumOut.textContent='-'+fmt(totalOut);
   const de=document.getElementById('cf-disposable');
   if(de){de.textContent=fmt(disposable);de.style.color=disposable>=0?'var(--green)':'var(--coral)';}
+  function tr(label,val,cls,extra){
+    return '<tr><td style="padding:0.25rem 0.1rem;color:var(--text2);">'+label+(extra||'')+'</td><td style="text-align:right;font-family:var(--mono);padding:0.25rem 0;" class="'+(cls||'')+'">'+val+'</td></tr>';
+  }
+  function trEdit(label,val,editFn,delFn){
+    return '<tr><td style="padding:0.25rem 0.1rem;color:var(--text2);">'+label+'</td><td style="text-align:right;font-family:var(--mono);padding:0.25rem 0;"><span style="color:var(--coral);">-'+fmt(val)+'</span> <button class="sip-btn" onclick="'+editFn+'">✎</button><button class="sip-btn del" onclick="'+delFn+'">×</button></td></tr>';
+  }
   const ci=document.getElementById('cf-income');
   if(ci){
-    let incHtml='<div class="cf-row"><span>Your in-hand</span><span class="cf-pos">+'+fmt(yourIncome)+'</span></div>';
-    incHtml+='<div class="cf-row"><span>Wife&#39;s in-hand</span><span class="cf-pos">+'+fmt(wifeIncome)+'</span></div>';
-    if(isIncentive)incHtml+='<div class="cf-row"><span>Incentive</span><span class="cf-pos">+'+fmt(wifeBonus)+'</span></div>';
-    incHtml+='<div class="cf-row" style="border-top:1px solid var(--border);padding-top:0.3rem;font-weight:500;color:var(--text);"><span>Total income</span><span class="cf-pos">'+fmt(totalIncome)+'</span></div>';
-    ci.innerHTML=incHtml;
+    let h=tr('Your in-hand','+'+fmt(yourIncome),'cf-pos');
+    h+=tr('Wife&#39;s in-hand','+'+fmt(wifeIncome),'cf-pos');
+    if(isIncentive)h+=tr('Incentive','+'+fmt(wifeBonus),'cf-pos');
+    h+='<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:600;color:var(--text);">Total income</td><td style="text-align:right;font-family:var(--mono);font-weight:600;color:var(--green);">+'+fmt(totalIncome)+'</td></tr>';
+    ci.innerHTML=h;
   }
   const cf=document.getElementById('cf-fixed');
   if(cf){
-    let fixHtml=sips.length?sips.map(function(s){return '<div class="cf-row"><span>'+s.name+'</span><span class="cf-neg">-'+fmt(s.amount)+'</span></div>';}).join(''):'<div style="font-size:0.75rem;color:var(--text3);">No active SIPs with amount set</div>';
-    fixHtml+='<div class="cf-row" style="border-top:1px solid var(--border);padding-top:0.3rem;font-weight:500;color:var(--text);"><span>SIPs total</span><span class="cf-neg">-'+fmt(sipTotal)+'</span></div>';
-    cf.innerHTML=fixHtml;
+    let h=sips.length?sips.map(function(s){return tr(s.name,'-'+fmt(s.amount),'cf-neg');}).join(''):'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">No active SIPs — add in SIP Plan tab</td></tr>';
+    h+='<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">SIPs subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(sipTotal)+'</td></tr>';
+    cf.innerHTML=h;
   }
   const cfe=document.getElementById('cf-fixed-exp');
   if(cfe){
     cfe.innerHTML=fixedExp.length?fixedExp.map(function(f){
-      return '<div class="cf-row"><span style="flex:1">'+f.name+'</span><div style="display:flex;align-items:center;gap:0.4rem;"><span class="cf-neg">-'+fmt(f.amount)+'</span><button class="sip-btn" onclick="editFixedExp('+f.id+')" style="padding:0 2px;">✎</button><button class="sip-btn del" onclick="deleteFixedExp('+f.id+')" style="padding:0 2px;">×</button></div></div>';
-    }).join(''):'<div style="font-size:0.75rem;color:var(--text3);">None added</div>';
+      return trEdit(f.name,f.amount,'editFixedExp('+f.id+')','deleteFixedExp('+f.id+')');
+    }).join('')+'<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Expenses subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(fixedExpTotal)+'</td></tr>':'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">None added yet</td></tr>';
   }
   const cfsubs=document.getElementById('cf-subs-cf');
   if(cfsubs){
-    cfsubs.innerHTML=subs.length?subs.map(function(s){return '<div class="cf-row"><span>'+s.name+'</span><span class="cf-neg">-'+fmt(s.amount)+'</span></div>';}).join('')+'<div class="cf-row" style="border-top:1px solid var(--border);padding-top:0.3rem;font-weight:500;color:var(--text);"><span>Subs total</span><span class="cf-neg">-'+fmt(subsTotal)+'</span></div>':'<div style="font-size:0.75rem;color:var(--text3);">No subscriptions added yet</div>';
+    cfsubs.innerHTML=subs.length?subs.map(function(s){return tr(s.name,'-'+fmt(s.amount),'cf-neg');}).join('')+'<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Subs subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(subsTotal)+'</td></tr>':'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">No subscriptions yet</td></tr>';
   }
   const cu=document.getElementById('cf-upcoming');
   if(cu){
-    cu.innerHTML=upcomingThisMonth.length?upcomingThisMonth.map(function(u){return '<div class="cf-row"><span>'+u.desc+'</span><span class="cf-neg">-'+fmt(u.amount||0)+'</span></div>';}).join(''):'<div style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">None this month</div>';
+    cu.innerHTML=upcoming.length?upcoming.map(function(u){return tr(u.desc,'-'+fmt(u.amount||0),'cf-neg');}).join(''):'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">None this month</td></tr>';
   }
+  const tot=document.getElementById('cf-total-out-detail');
+  if(tot)tot.textContent='-'+fmt(totalOut);
 }
 
 function switchHoldTab(id,el){document.querySelectorAll('.hold-panel').forEach(p=>p.style.display='none');document.querySelectorAll('.hold-tab').forEach(t=>t.classList.remove('active'));document.getElementById('hold-'+id).style.display='block';el.classList.add('active');}
 
-function renderProjection(years,btn){currentProjYears=years||currentProjYears;if(btn){document.querySelectorAll('.proj-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}ensurePortfolio();ensureSIPs();const p=DATA.finance.portfolio,usdInr=p.usdToInr||95,months=currentProjYears*12,step=Math.max(1,Math.floor(months/24));const projRates=DATA.finance.projRates||{mf:12,in:14,us:12,ret:8.5};const r=0.12/12;const inV=p.indianStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty,0);const usV=p.usStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty*usdInr,0);const mfV=p.mutualFunds.reduce((s,x)=>s+((x.liveValue&&x.liveValue>0)?x.liveValue:x.snapshotValue||0),0);const ret=p.retirals||{},rv=(ret.epf?.balance||0)+(ret.ppf?.balance||0)+(ret.nps?.balance||0)+(ret.rd?.balance||0);const sips=DATA.finance.sips||[];const mfMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='mf').reduce((t,s)=>t+s.amount,0);const inMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='in-stock').reduce((t,s)=>t+s.amount,0);const usMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='us-stock').reduce((t,s)=>t+s.amount,0);const retMo=(ret.epf?.monthlyEmployee||0)+(ret.epf?.monthlyEmployer||0)+(ret.ppf?.monthly||500)+(ret.nps?.monthly||4200)+(ret.rd?.monthly||0);const totalMo=mfMo+inMo+usMo+retMo+sips.filter(s=>s.active&&s.amount>0&&!['mf','in-stock','us-stock'].includes(s.category)).reduce((t,s)=>t+s.amount,0);const totalBase=inV+usV+mfV+rv;const allCats=[{id:'total',label:'All',color:'#f5c842',dash:[],base:totalBase,mo:totalMo,w:2,r:(projRates.mf*mfV+projRates.in*inV+projRates.us*usV+projRates.ret*rv)/(totalBase||1)/12/100},{id:'mf',label:'Mutual Funds',color:'#8b5cf6',dash:[4,2],base:mfV,mo:mfMo,w:1.5,r:projRates.mf/12/100},{id:'in',label:'IN Stocks',color:'#4ecdc4',dash:[4,2],base:inV,mo:inMo,w:1.5,r:projRates.in/12/100},{id:'us',label:'US Stocks',color:'#6bcb77',dash:[4,2],base:usV,mo:usMo,w:1.5,r:projRates.us/12/100},{id:'ret',label:'Retirals',color:'#ffa62b',dash:[4,2],base:rv,mo:retMo,w:1.5,r:projRates.ret/12/100}];if(!window.projVisible)window.projVisible=new Set(['total','mf','in','us','ret']);const toggleEl=document.getElementById('proj-cat-toggles');if(toggleEl){toggleEl.innerHTML=allCats.map(cat=>`<label style="display:flex;align-items:center;gap:0.3rem;font-size:0.68rem;color:${cat.color};cursor:pointer;font-family:var(--mono);"><input type="checkbox" ${window.projVisible.has(cat.id)?'checked':''} onchange="toggleProjCat('${cat.id}',this.checked)" style="accent-color:${cat.color};width:12px;height:12px;">${cat.label}${cat.id!=='total'?` <span style='font-size:0.58rem;color:var(--text3);'>${(DATA.finance.projRates||{mf:12,in:14,us:12,ret:8.5})[cat.id]||12}%</span>`:''}</label>`).join('');}const visibleCats=allCats.filter(c=>window.projVisible.has(c.id));const labels=[];visibleCats.forEach(cat=>cat.data=[]);for(let m=0;m<=months;m+=step){labels.push(m===0?'Now':`${Math.round(m/12)}Y`);visibleCats.forEach(cat=>{const cr=cat.r||r;const fv=cat.base*Math.pow(1+cr,m)+(cat.mo||0)*(Math.pow(1+cr,m)-1)/cr;cat.data.push(+(fv/10000000).toFixed(3));});}const totalCat=allCats[0];const cr0=totalCat.r||r;const finalVal=totalCat.base*Math.pow(1+cr0,months)+(totalMo||0)*(Math.pow(1+cr0,months)-1)/cr0;const totalInv=totalBase+totalMo*months;document.getElementById('proj-stats').innerHTML=`<div class="proj-stat"><div class="proj-stat-val">₹${(finalVal/10000000).toFixed(2)}Cr</div><div class="proj-stat-label">Projected total</div></div><div class="proj-stat"><div class="proj-stat-val" style="color:var(--green);">${((finalVal/totalInv-1)*100).toFixed(0)}%</div><div class="proj-stat-label">Returns</div></div><div class="proj-stat"><div class="proj-stat-val" style="color:var(--teal);">${(finalVal/totalInv).toFixed(1)}x</div><div class="proj-stat-label">Wealth mult</div></div>`;const ctx=document.getElementById('proj-chart').getContext('2d');if(projChart)projChart.destroy();projChart=new Chart(ctx,{type:'line',data:{labels,datasets:visibleCats.map(cat=>({label:cat.label,data:cat.data,borderColor:cat.color,backgroundColor:'transparent',borderWidth:cat.w,pointRadius:0,tension:0.4,borderDash:cat.dash}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` ${c.dataset.label}: ₹${c.raw.toFixed(2)}Cr`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9},callback:v=>`₹${v.toFixed(1)}Cr`}}},animation:{duration:400}}});}
+function renderProjection(years,btn){currentProjYears=years||currentProjYears;if(btn){document.querySelectorAll('.proj-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}ensurePortfolio();ensureSIPs();const p=DATA.finance.portfolio,usdInr=p.usdToInr||95,months=currentProjYears*12,step=Math.max(1,Math.floor(months/24));const projRates=DATA.finance.projRates||{mf:12,in:14,us:12,ret:8.5};const r=0.12/12;const inV=p.indianStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty,0);const usV=p.usStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty*usdInr,0);const mfV=p.mutualFunds.reduce((s,x)=>s+((x.liveValue&&x.liveValue>0)?x.liveValue:x.snapshotValue||0),0);const ret=p.retirals||{},rv=(ret.epf?.balance||0)+(ret.ppf?.balance||0)+(ret.nps?.balance||0)+(ret.rd?.balance||0);const sips=DATA.finance.sips||[];const mfMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='mf').reduce((t,s)=>t+s.amount,0);const inMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='in-stock').reduce((t,s)=>t+s.amount,0);const usMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='us-stock').reduce((t,s)=>t+s.amount,0);const retMo=(ret.epf?.monthlyEmployee||0)+(ret.epf?.monthlyEmployer||0)+(ret.ppf?.monthly||500)+(ret.nps?.monthly||4200)+(ret.rd?.monthly||0);const totalMo=mfMo+inMo+usMo+retMo+sips.filter(s=>s.active&&s.amount>0&&!['mf','in-stock','us-stock'].includes(s.category)).reduce((t,s)=>t+s.amount,0);const totalBase=inV+usV+mfV+rv;const allCats=[{id:'total',label:'All',color:'#f5c842',dash:[],base:totalBase,mo:totalMo,w:2,r:(projRates.mf*mfV+projRates.in*inV+projRates.us*usV+projRates.ret*rv)/(totalBase||1)/12/100},{id:'mf',label:'Mutual Funds',color:'#8b5cf6',dash:[4,2],base:mfV,mo:mfMo,w:1.5,r:projRates.mf/12/100},{id:'in',label:'IN Stocks',color:'#4ecdc4',dash:[4,2],base:inV,mo:inMo,w:1.5,r:projRates.in/12/100},{id:'us',label:'US Stocks',color:'#6bcb77',dash:[4,2],base:usV,mo:usMo,w:1.5,r:(projRates.us+(projRates.inrDep||3))/12/100},{id:'ret',label:'Retirals',color:'#ffa62b',dash:[4,2],base:rv,mo:retMo,w:1.5,r:projRates.ret/12/100}];if(!window.projVisible)window.projVisible=new Set(['mf','in','us','ret']);const toggleEl=document.getElementById('proj-cat-toggles');if(toggleEl){toggleEl.innerHTML=allCats.map(cat=>`<label style="display:flex;align-items:center;gap:0.3rem;font-size:0.68rem;color:${cat.color};cursor:pointer;font-family:var(--mono);"><input type="checkbox" ${window.projVisible.has(cat.id)?'checked':''} onchange="toggleProjCat('${cat.id}',this.checked)" style="accent-color:${cat.color};width:12px;height:12px;">${cat.label}${cat.id!=='total'?` <span style='font-size:0.58rem;color:var(--text3);'>${(DATA.finance.projRates||{mf:12,in:14,us:12,ret:8.5})[cat.id]||12}%</span>`:''}</label>`).join('');}const visibleCats=allCats.filter(c=>window.projVisible.has(c.id));const labels=[];visibleCats.forEach(cat=>cat.data=[]);for(let m=0;m<=months;m+=step){labels.push(m===0?'Now':`${Math.round(m/12)}Y`);visibleCats.forEach(cat=>{const cr=cat.r||r;const fv=cat.base*Math.pow(1+cr,m)+(cat.mo||0)*(Math.pow(1+cr,m)-1)/cr;cat.data.push(+(fv/10000000).toFixed(3));});}const totalCat=allCats[0];const cr0=totalCat.r||r;const finalVal=totalCat.base*Math.pow(1+cr0,months)+(totalMo||0)*(Math.pow(1+cr0,months)-1)/cr0;const totalInv=totalBase+totalMo*months;document.getElementById('proj-stats').innerHTML=`<div class="proj-stat"><div class="proj-stat-val">₹${(finalVal/10000000).toFixed(2)}Cr</div><div class="proj-stat-label">Projected total</div></div><div class="proj-stat"><div class="proj-stat-val" style="color:var(--green);">${((finalVal/totalInv-1)*100).toFixed(0)}%</div><div class="proj-stat-label">Returns</div></div><div class="proj-stat"><div class="proj-stat-val" style="color:var(--teal);">${(finalVal/totalInv).toFixed(1)}x</div><div class="proj-stat-label">Wealth mult</div></div>`;const ctx=document.getElementById('proj-chart').getContext('2d');if(projChart)projChart.destroy();projChart=new Chart(ctx,{type:'line',data:{labels,datasets:visibleCats.map(cat=>({label:cat.label,data:cat.data,borderColor:cat.color,backgroundColor:'transparent',borderWidth:cat.w,pointRadius:0,tension:0.4,borderDash:cat.dash}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` ${c.dataset.label}: ₹${c.raw.toFixed(2)}Cr`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9},callback:v=>`₹${v.toFixed(1)}Cr`}}},animation:{duration:400}}});}
 function toggleProjCat(id,on){
   if(!window.projVisible)window.projVisible=new Set(['total']);
   if(id==='total'){
@@ -2535,6 +2562,7 @@ function openProjRates(){
   document.getElementById('rate-in').value=rates.in||14;
   document.getElementById('rate-us').value=rates.us||12;
   document.getElementById('rate-ret').value=rates.ret||8.5;
+  document.getElementById('rate-inr-dep').value=rates.inrDep||3;
   openModal('modal-proj-rates');
 }
 function saveProjRates(){
@@ -2542,7 +2570,8 @@ function saveProjRates(){
     mf:parseFloat(document.getElementById('rate-mf').value)||12,
     in:parseFloat(document.getElementById('rate-in').value)||14,
     us:parseFloat(document.getElementById('rate-us').value)||12,
-    ret:parseFloat(document.getElementById('rate-ret').value)||8.5
+    ret:parseFloat(document.getElementById('rate-ret').value)||8.5,
+    inrDep:parseFloat(document.getElementById('rate-inr-dep').value)||3
   };
   closeModal('modal-proj-rates');
   renderProjection();
@@ -2944,7 +2973,8 @@ window.addEventListener('DOMContentLoaded', () => {
         <div><label class="field-label">US Stocks</label><input class="field-input" id="rate-us" type="number" step="0.5" placeholder="12"></div>
         <div><label class="field-label">Retirals (EPF/PPF/NPS)</label><input class="field-input" id="rate-ret" type="number" step="0.5" placeholder="8.5"></div>
       </div>
-      <div style="font-size:0.72rem;color:var(--text3);font-family:var(--mono);">Rates are applied per category. All = weighted average.</div>
+      <div><label class="field-label">INR depreciation vs USD (% per year)</label><input class="field-input" id="rate-inr-dep" type="number" step="0.5" placeholder="3"></div>
+      <div style="font-size:0.72rem;color:var(--text3);font-family:var(--mono);">US stock returns adjusted for INR depreciation (adds to INR value of US holdings).</div>
       <div class="btn-row">
         <button class="btn btn-primary" onclick="saveProjRates()">Apply</button>
         <button class="btn btn-ghost" onclick="closeModal('modal-proj-rates')">Cancel</button>
