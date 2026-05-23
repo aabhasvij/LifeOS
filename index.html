@@ -2548,8 +2548,8 @@ function renderCashFlow(){
     '<button class="sip-btn" onclick="openEditSIP('+s.id+')" title="Edit">✎</button>'+
     '<button class="sip-btn del" onclick="deleteSIP('+s.id+')" title="Delete">×</button>'+
     '</td></tr>';
-  }).join(''):'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">No active SIPs — click "+ add SIP" above</td></tr>';
-    h+='<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Obligations subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(sipTotal)+'</td></tr>';
+  }).join(''):'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">No active SIPs — click "+ Add Obligation" above</td></tr>';
+    h+='<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Obligations Subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(sipTotal)+'</td></tr>';
     cf.innerHTML=h;
   }
   const cfe=document.getElementById('cf-fixed-exp');
