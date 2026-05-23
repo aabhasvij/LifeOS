@@ -907,6 +907,7 @@ html, body {
       <div class="setup-hint">Settings → Developer settings → Personal access tokens → Fine-grained. Give Contents: Read & Write on your repo.</div>
     </div>
     <button class="setup-btn" onclick="saveConfig()">Connect & Launch →</button>
+<div id="setup-error" style="margin-top:1rem;font-size:0.78rem;color:var(--coral);font-family:var(--mono);display:none;line-height:1.6;word-break:break-all;"></div>
   </div>
 </div>
 
@@ -1883,19 +1884,28 @@ function loadConfig() {
 
 // ─── GITHUB API ───────────────────────────────────────────────────────────────
 async function loadData() {
+  const errEl = document.getElementById('setup-error');
+  if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
   try {
     const res = await fetch(`https://api.github.com/repos/${CFG.user}/${CFG.repo}/contents/data.json`, {
       headers: { Authorization: `token ${CFG.token}`, Accept: 'application/vnd.github.v3+json' }
     });
-    if (!res.ok) throw new Error('Not found');
+    if (res.status === 401) throw new Error('Token invalid or expired. Generate a new fine-grained token with Contents: Read & Write on your lifeos-data repo.');
+    if (res.status === 404) throw new Error('Repo or file not found. Check your GitHub username and repo name. Make sure data.json exists in the repo root.');
+    if (!res.ok) throw new Error('GitHub API error ' + res.status + '. Check your token permissions.');
     const json = await res.json();
-    DATA = JSON.parse(atob(json.content));
+    DATA = JSON.parse(atob(json.content.replace(/\n/g, '')));
     DATA._sha = json.sha;
-    initApp();
+    safeInitApp();
   } catch(e) {
+    console.error('loadData error:', e);
+    if (errEl) {
+      errEl.textContent = '\u26a0 ' + (e.message || 'Unknown error');
+      errEl.style.display = 'block';
+    }
+    // Still launch with default data so UI works
     DATA = getDefaultData();
-    initApp();
-    showToast('Using local data — check GitHub config');
+    safeInitApp();
   }
 }
 
@@ -1926,21 +1936,31 @@ async function saveData() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-function initApp() {
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('app').classList.add('visible');
-  setGreeting();
-  renderHome();renderMarketStatus();
-  renderWork();
-  renderMusic();
-  renderSkill();
-  renderHealth();
-  renderFinance();
-  renderOps();
-  renderReview();
-  setDayType('music', document.querySelector('.day-type-btn'));
+function safeInitApp() {
+  try {
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+  } catch(e) { console.error('setup hide failed', e); return; }
+  const fns = [
+    ['setGreeting', setGreeting],
+    ['renderHome', renderHome],
+    ['renderMarketStatus', renderMarketStatus],
+    ['renderWork', renderWork],
+    ['renderMusic', renderMusic],
+    ['renderSkill', renderSkill],
+    ['renderHealth', renderHealth],
+    ['renderFinance', renderFinance],
+    ['renderOps', renderOps],
+    ['renderReview', renderReview],
+    ['setDayType', () => setDayType('music', document.querySelector('.day-type-btn'))],
+  ];
+  fns.forEach(([name, fn]) => {
+    try { fn(); }
+    catch(e) { console.error(name + ' crashed:', e.message, e.stack); }
+  });
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 }
+function initApp() { safeInitApp(); }
 
 function getDefaultData() {
   return {
