@@ -1352,7 +1352,7 @@ html, body {
             <!-- SIPs / INVESTMENTS -->
             <tr><td colspan="2" style="padding:0.6rem 0 0.2rem;font-size:0.65rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border2);">
               SIPs &amp; obligations
-              <button class="cf-add-btn" onclick="navToSIPPlan()" style="margin-left:0.5rem;">✎ manage</button>
+              <button class="cf-add-btn" onclick="openAddSIP()" style="margin-left:0.5rem;">+ add SIP</button>
             </td></tr>
             <tbody id="cf-fixed"></tbody>
             <!-- FIXED EXPENSES -->
@@ -2423,7 +2423,15 @@ function getDefaultSIPs(){return[{id:1,name:'HDFC Flexi Cap SIP',amount:0,date:5
 function getDefaultUpcoming(){return[{id:1,desc:'Crypto tax — ETH profit ₹70K @30%',amount:21000,due:'2026-07-31',cat:'tax',recurring:'none'},{id:2,desc:'Health insurance renewal (port window)',amount:70000,due:'2026-07-31',cat:'insurance',recurring:'annual'},{id:3,desc:'ITR filing deadline',amount:0,due:'2026-07-31',cat:'tax',recurring:'annual'}];}
 
 function ensurePortfolio(){if(!DATA.finance.portfolio)DATA.finance.portfolio=getDefaultPortfolio();if(!DATA.finance.portfolio.retirals.rd)DATA.finance.portfolio.retirals.rd={balance:0,monthly:25000,rate:7.5,maturity:'',lastUpdated:''};}
-function ensureSIPs(){if(!DATA.finance.sips)DATA.finance.sips=getDefaultSIPs();}
+function ensureSIPs(){
+  if(!DATA.finance.sips)DATA.finance.sips=getDefaultSIPs();
+  // Migrate old garbled names from stored data
+  DATA.finance.sips.forEach(function(s){
+    if(s.name&&(s.name.indexOf('New MF SIP')>=0||s.name.indexOf('â')>=0||s.name.indexOf('₹')>=0&&s.name.indexOf('target')>=0)){
+      s.name='Mutual Fund SIP';
+    }
+  });
+}
 function ensureUpcoming(){if(!DATA.finance.upcomingObligations||!DATA.finance.upcomingObligations.length)DATA.finance.upcomingObligations=getDefaultUpcoming();}
 
 function getSIPTotal(){ensureSIPs();return DATA.finance.sips.filter(s=>s.active).reduce((t,s)=>t+s.amount,0);}
@@ -2431,21 +2439,22 @@ function getSIPTotal(){ensureSIPs();return DATA.finance.sips.filter(s=>s.active)
 function getPortfolioTotals(){ensurePortfolio();const p=DATA.finance.portfolio,usdInr=p.usdToInr||95;let tv=0,tc=0,dp=0;p.indianStocks.forEach(s=>{const ltp=s.livePrice||s.avgPrice,val=ltp*s.qty;tv+=val;tc+=s.avgPrice*s.qty;if(s.dayChange)dp+=val*(s.dayChange/100);});p.usStocks.forEach(s=>{const ltp=s.livePrice||s.avgPrice,val=ltp*s.qty*usdInr;tv+=val;tc+=s.avgPrice*s.qty*usdInr;if(s.dayChange)dp+=val*(s.dayChange/100);});p.mutualFunds.forEach(mf=>{const val=(mf.liveValue&&mf.liveValue>0)?mf.liveValue:mf.snapshotValue||0;tv+=val;tc+=mf.costBasis||0;});const ret=p.retirals||{},rv=(ret.epf?.balance||0)+(ret.ppf?.balance||0)+(ret.nps?.balance||0)+(ret.rd?.balance||0);tv+=rv;tc+=rv;return{totalValue:tv,totalCost:tc,dayPnL:dp,returns:tv-tc,returnPct:tc>0?((tv-tc)/tc*100):0};}
 
 async function refreshPrices(){ensurePortfolio();const btn=document.getElementById('live-btn');btn.textContent='⟳ fetching...';btn.classList.add('loading');const p=DATA.finance.portfolio;const allTickers=p.indianStocks.map(s=>s.ticker).concat(p.usStocks.map(s=>s.ticker)).concat(['USDINR=X']).join(',');async function tryFetch(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(r.status);const t=await r.text();return JSON.parse(t);}const proxies=[PROXY+encodeURIComponent(YAHOO_Q+allTickers),'https://corsproxy.io/?'+encodeURIComponent(YAHOO_Q+allTickers),YAHOO_Q+allTickers];let fetched=false;for(const url of proxies){try{const d=await tryFetch(url);(d.quoteResponse?.result||[]).forEach(q=>{const i=p.indianStocks.find(s=>s.ticker===q.symbol);if(i){i.livePrice=q.regularMarketPrice;i.dayChange=q.regularMarketChangePercent;}const u=p.usStocks.find(s=>s.ticker===q.symbol);if(u){u.livePrice=q.regularMarketPrice;u.dayChange=q.regularMarketChangePercent;}if(q.symbol==='USDINR=X'&&q.regularMarketPrice>50){p.usdToInr=q.regularMarketPrice;console.log('USD/INR:',q.regularMarketPrice);}});fetched=true;break;}catch(e){console.warn('Proxy failed:',url.substring(0,50),e.message);}}if(!fetched){console.error('All proxies failed');showToast('Stock fetch failed — try again');}try{
-  const fxUrls=[
-    'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
-    'https://latest.currency-api.pages.dev/v1/currencies/usd.json'
-  ];
-  for(const fxUrl of fxUrls){
-    try{
-      const fxRes=await fetch(fxUrl,{cache:'no-store'});
-      if(fxRes.ok){
-        const fxData=await fxRes.json();
-        const inr=fxData.usd&&fxData.usd.inr;
-        if(inr&&inr>50){p.usdToInr=inr;console.log('USD/INR:',inr);break;}
-      }
-    }catch(e){console.warn('FX url failed:',fxUrl);}
+  // Frankfurter: ECB-backed, free, reliable, CORS-enabled
+  const fxRes=await fetch('https://api.frankfurter.app/latest?from=USD&to=INR',{cache:'no-store'});
+  if(fxRes.ok){
+    const fxData=await fxRes.json();
+    if(fxData.rates&&fxData.rates.INR>50){
+      p.usdToInr=fxData.rates.INR;
+      console.log('USD/INR (Frankfurter):',p.usdToInr);
+    }
   }
-}catch(fxErr){console.warn('FX fetch error',fxErr);}
+}catch(fxErr){
+  console.warn('Frankfurter failed, trying backup:',fxErr);
+  try{
+    const r2=await fetch('https://api.exchangerate-api.com/v4/latest/USD',{cache:'no-store'});
+    if(r2.ok){const d2=await r2.json();if(d2.rates&&d2.rates.INR>50){p.usdToInr=d2.rates.INR;}}
+  }catch(e2){console.warn('Both FX sources failed');}
+}
 try{await Promise.all(p.mutualFunds.map(async mf=>{if(!mf.schemeCode)return;try{const r=await fetch(MFAPI+mf.schemeCode+'/latest');const d=await r.json();const nav=parseFloat(d.data[0].nav);mf.latestNav=nav;if(!mf.units||mf.units===0)mf.units=mf.snapshotValue/nav;mf.liveValue=mf.units*nav;}catch(e){};}));}catch(e){}p.lastRefreshed=new Date().toLocaleTimeString();renderFinance();showToast('Prices updated ✓');btn.textContent='↻ Live prices';btn.classList.remove('loading');}
 
 function renderPortfolioHero(){const{totalValue,totalCost,dayPnL,returns,returnPct}=getPortfolioTotals();document.getElementById('port-total-val').textContent=fmt(totalValue);document.getElementById('port-invested-hero').textContent=fmt(totalCost);const dc=document.getElementById('port-day-change');if(dayPnL!==0){dc.textContent=fmtSign(dayPnL)+' today ('+dayPnL.toFixed(2)+'%)';dc.style.color=dayPnL>=0?'var(--green)':'var(--coral)';}else{dc.textContent='tap ↻ for live';dc.style.color='var(--text3)';}const re=document.getElementById('pm-returns');re.textContent=(returns>=0?'+':'')+returnPct.toFixed(1)+'%';re.style.color=returns>=0?'var(--green)':'var(--coral)';const te=document.getElementById('pm-today');te.textContent=fmtSign(dayPnL);te.style.color=dayPnL>=0?'var(--green)':'var(--coral)';document.getElementById('port-refreshed').textContent=DATA.finance.portfolio?.lastRefreshed?'Last: '+DATA.finance.portfolio.lastRefreshed:'Not refreshed';const usdEl=document.getElementById('usd-inr-hero');if(usdEl)usdEl.textContent='₹'+(DATA.finance.portfolio?.usdToInr||95).toFixed(2);renderMarketStatus();const target=DATA.finance.fireTarget||35000000,pct=Math.min(100,(totalValue/target)*100);document.getElementById('fire-pct').textContent=pct.toFixed(1)+'%';document.getElementById('fire-bar').style.width=pct+'%';document.getElementById('fire-total').textContent=fmt(totalValue)+' of '+fmt(target)+' target';}
@@ -2532,7 +2541,14 @@ function renderCashFlow(){
   }
   const cf=document.getElementById('cf-fixed');
   if(cf){
-    let h=sips.length?sips.map(function(s){return tr(s.name,'-'+fmt(s.amount),'cf-neg');}).join(''):'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">No active SIPs — add in SIP Plan tab</td></tr>';
+    let h=sips.length?sips.map(function(s){
+    return '<tr><td style="padding:0.25rem 0.1rem;color:var(--text2);">'+s.name+'</td>'+
+    '<td style="text-align:right;font-family:var(--mono);padding:0.25rem 0;">'+
+    '<span style="color:var(--coral);">-'+fmt(s.amount)+'</span> '+
+    '<button class="sip-btn" onclick="openEditSIP('+s.id+')" title="Edit">✎</button>'+
+    '<button class="sip-btn del" onclick="deleteSIP('+s.id+')" title="Delete">×</button>'+
+    '</td></tr>';
+  }).join(''):'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">No active SIPs — click "+ add SIP" above</td></tr>';
     h+='<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Obligations subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(sipTotal)+'</td></tr>';
     cf.innerHTML=h;
   }
@@ -2713,6 +2729,15 @@ function renderMarketStatus(){
 }
 
 
+function openAddSIP(){
+  document.getElementById('sip-edit-id').value='';
+  document.getElementById('sip-modal-title').textContent='Add SIP / obligation';
+  document.getElementById('sip-name-input').value='';
+  document.getElementById('sip-amount-input').value='';
+  document.getElementById('sip-date-input').value='';
+  document.getElementById('sip-cat-input').value='mf';
+  openModal('modal-add-sip');
+}
 function navToSIPPlan(){
   var navItems=document.querySelectorAll('.nav-item');
   var financeItem=null;
