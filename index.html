@@ -1375,7 +1375,7 @@ html, body {
             <tbody id="cf-upcoming"></tbody>
             <!-- TOTAL ROW -->
             <tr style="border-top:2px solid var(--border2);">
-              <td style="padding:0.5rem 0;font-weight:700;color:var(--text);font-size:0.9rem;">Obligations total</td>
+              <td style="padding:0.5rem 0;font-weight:700;color:var(--text);font-size:0.9rem;">Monthly Obligations Total</td>
               <td style="text-align:right;font-family:var(--mono);font-weight:600;color:var(--coral);" id="cf-total-out-detail">—</td>
             </tr>
           </table>
@@ -2556,7 +2556,7 @@ function renderCashFlow(){
   if(cfe){
     cfe.innerHTML=fixedExp.length?fixedExp.map(function(f){
       return trEdit(f.name,f.amount,'editFixedExp('+f.id+')','deleteFixedExp('+f.id+')');
-    }).join('')+'<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Expenses subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(fixedExpTotal)+'</td></tr>':'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">None added yet</td></tr>';
+    }).join('')+'<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Monthly expenses subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(fixedExpTotal)+'</td></tr>':'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">None added yet</td></tr>';
   }
   const cfsubs=document.getElementById('cf-subs-cf');
   if(cfsubs){
