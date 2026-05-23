@@ -1342,7 +1342,7 @@ html, body {
               +incentive
             </label>
           </div>
-          <div class="cf-section-label">Income</div>
+          <div class="cf-section-label">Income <button class="cf-add-btn" onclick="openEditIncome()">✎ edit</button></div>
           <div id="cf-income"></div>
           <div class="cf-section-label">Fixed obligations</div>
           <div id="cf-fixed"></div>
@@ -1368,7 +1368,8 @@ html, body {
         </div>
         <div style="text-align:right">
           <button class="live-btn" id="live-btn" onclick="refreshPrices()">↻ Live prices</button>
-          <div class="port-hero-label" id="port-refreshed" style="margin-top:0.5rem;">—</div>
+          <div class="port-hero-label" id="port-refreshed" style="margin-top:0.4rem;">—</div>
+          <div style="font-family:var(--mono);font-size:0.68rem;color:var(--teal);margin-top:0.25rem;">1 USD = <span id="usd-inr-hero">₹84.00</span></div>
         </div>
       </div>
 
@@ -1463,10 +1464,13 @@ html, body {
       <div class="card" style="margin-top:1rem">
         <div class="card-header">
           <div class="card-title" style="margin-bottom:0">Growth projector</div>
-          <div class="proj-toggles">
-            <button class="proj-btn active" onclick="renderProjection(5,this)">5Y</button>
-            <button class="proj-btn" onclick="renderProjection(10,this)">10Y</button>
-            <button class="proj-btn" onclick="renderProjection(20,this)">20Y</button>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <div class="proj-toggles">
+              <button class="proj-btn active" onclick="renderProjection(5,this)">5Y</button>
+              <button class="proj-btn" onclick="renderProjection(10,this)">10Y</button>
+              <button class="proj-btn" onclick="renderProjection(20,this)">20Y</button>
+            </div>
+            <button class="sip-btn" style="font-size:0.68rem;color:var(--teal);border:1px solid rgba(78,205,196,0.3);padding:2px 8px;border-radius:6px;" onclick="openProjRates()">% rates</button>
           </div>
         </div>
         <div id="proj-stats" class="proj-stats"></div>
@@ -1729,8 +1733,9 @@ html, body {
 
 <div class="modal-overlay" id="modal-sub">
   <div class="modal">
-    <div class="modal-title">Add subscription / NACH</div>
+    <div class="modal-title" id="sub-modal-title">Add subscription / NACH</div>
     <div class="log-form">
+      <input type="hidden" id="sub-edit-id">
       <div><label class="field-label">Name</label><input class="field-input" id="sub-name" placeholder="Netflix, SIP — HDFC, etc."></div>
       <div class="health-grid">
         <div><label class="field-label">Amount (₹)</label><input class="field-input" id="sub-amount" type="number" placeholder="499"></div>
@@ -2381,7 +2386,7 @@ function getPortfolioTotals(){ensurePortfolio();const p=DATA.finance.portfolio,u
 
 async function refreshPrices(){ensurePortfolio();const btn=document.getElementById('live-btn');btn.textContent='⟳ fetching...';btn.classList.add('loading');const p=DATA.finance.portfolio;try{const all=p.indianStocks.map(s=>s.ticker).concat(p.usStocks.map(s=>s.ticker)).join(',')+ ',USDINR=X';const res=await fetch(PROXY+encodeURIComponent(YAHOO_Q+all));const d=await res.json();(d.quoteResponse?.result||[]).forEach(q=>{const i=p.indianStocks.find(s=>s.ticker===q.symbol);if(i){i.livePrice=q.regularMarketPrice;i.dayChange=q.regularMarketChangePercent;}const u=p.usStocks.find(s=>s.ticker===q.symbol);if(u){u.livePrice=q.regularMarketPrice;u.dayChange=q.regularMarketChangePercent;}if(q.symbol==='USDINR=X')p.usdToInr=q.regularMarketPrice;});}catch(e){showToast('Stock fetch failed');}try{await Promise.all(p.mutualFunds.map(async mf=>{if(!mf.schemeCode)return;try{const r=await fetch(MFAPI+mf.schemeCode+'/latest');const d=await r.json();const nav=parseFloat(d.data[0].nav);mf.latestNav=nav;if(!mf.units||mf.units===0)mf.units=mf.snapshotValue/nav;mf.liveValue=mf.units*nav;}catch(e){};}));}catch(e){}p.lastRefreshed=new Date().toLocaleTimeString();renderFinance();showToast('Prices updated ✓');btn.textContent='↻ Live prices';btn.classList.remove('loading');}
 
-function renderPortfolioHero(){const{totalValue,totalCost,dayPnL,returns,returnPct}=getPortfolioTotals();document.getElementById('port-total-val').textContent=fmt(totalValue);document.getElementById('port-invested-hero').textContent=fmt(totalCost);const dc=document.getElementById('port-day-change');if(dayPnL!==0){dc.textContent=fmtSign(dayPnL)+' today ('+dayPnL.toFixed(2)+'%)';dc.style.color=dayPnL>=0?'var(--green)':'var(--coral)';}else{dc.textContent='tap ↻ for live';dc.style.color='var(--text3)';}const re=document.getElementById('pm-returns');re.textContent=(returns>=0?'+':'')+returnPct.toFixed(1)+'%';re.style.color=returns>=0?'var(--green)':'var(--coral)';const te=document.getElementById('pm-today');te.textContent=fmtSign(dayPnL);te.style.color=dayPnL>=0?'var(--green)':'var(--coral)';document.getElementById('port-refreshed').textContent=DATA.finance.portfolio?.lastRefreshed?'Last: '+DATA.finance.portfolio.lastRefreshed:'Not refreshed';const target=DATA.finance.fireTarget||35000000,pct=Math.min(100,(totalValue/target)*100);document.getElementById('fire-pct').textContent=pct.toFixed(1)+'%';document.getElementById('fire-bar').style.width=pct+'%';document.getElementById('fire-total').textContent=fmt(totalValue)+' of '+fmt(target)+' target';}
+function renderPortfolioHero(){const{totalValue,totalCost,dayPnL,returns,returnPct}=getPortfolioTotals();document.getElementById('port-total-val').textContent=fmt(totalValue);document.getElementById('port-invested-hero').textContent=fmt(totalCost);const dc=document.getElementById('port-day-change');if(dayPnL!==0){dc.textContent=fmtSign(dayPnL)+' today ('+dayPnL.toFixed(2)+'%)';dc.style.color=dayPnL>=0?'var(--green)':'var(--coral)';}else{dc.textContent='tap ↻ for live';dc.style.color='var(--text3)';}const re=document.getElementById('pm-returns');re.textContent=(returns>=0?'+':'')+returnPct.toFixed(1)+'%';re.style.color=returns>=0?'var(--green)':'var(--coral)';const te=document.getElementById('pm-today');te.textContent=fmtSign(dayPnL);te.style.color=dayPnL>=0?'var(--green)':'var(--coral)';document.getElementById('port-refreshed').textContent=DATA.finance.portfolio?.lastRefreshed?'Last: '+DATA.finance.portfolio.lastRefreshed:'Not refreshed';const usdEl=document.getElementById('usd-inr-hero');if(usdEl)usdEl.textContent='₹'+(DATA.finance.portfolio?.usdToInr||84).toFixed(2);const target=DATA.finance.fireTarget||35000000,pct=Math.min(100,(totalValue/target)*100);document.getElementById('fire-pct').textContent=pct.toFixed(1)+'%';document.getElementById('fire-bar').style.width=pct+'%';document.getElementById('fire-total').textContent=fmt(totalValue)+' of '+fmt(target)+' target';}
 
 function renderAllocationChart(){ensurePortfolio();const p=DATA.finance.portfolio,usdInr=p.usdToInr||84;const inV=p.indianStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty,0);const usV=p.usStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty*usdInr,0);const mfV=p.mutualFunds.reduce((s,x)=>s+((x.liveValue&&x.liveValue>0)?x.liveValue:x.snapshotValue||0),0);const ret=p.retirals||{},rv=(ret.epf?.balance||0)+(ret.ppf?.balance||0)+(ret.nps?.balance||0)+(ret.rd?.balance||0);const total=inV+usV+mfV+rv||1;const cols=['#8b5cf6','#4ecdc4','#f5c842','#6bcb77'],labs=['IN Stocks','Mutual Funds','US Stocks','Retirals'],vals=[inV,mfV,usV,rv];const ctx=document.getElementById('alloc-chart').getContext('2d');if(allocChart)allocChart.destroy();allocChart=new Chart(ctx,{type:'doughnut',data:{labels:labs,datasets:[{data:vals,backgroundColor:cols,borderWidth:0,hoverOffset:4}]},options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` ${c.label}: ${fmt(c.raw)} (${(c.raw/total*100).toFixed(0)}%)`}}},animation:{duration:500}}});document.getElementById('alloc-legend').innerHTML=labs.map((l,i)=>`<div class="alloc-legend-item"><div class="alloc-dot" style="background:${cols[i]}"></div><div style="flex:1;color:var(--text2);font-size:0.78rem;">${l}</div><div style="font-family:var(--mono);font-size:0.75rem;color:var(--text);">${fmt(vals[i])}</div><div style="font-family:var(--mono);font-size:0.68rem;color:var(--text3);min-width:32px;text-align:right;">${(vals[i]/total*100).toFixed(0)}%</div></div>`).join('');document.getElementById('alloc-center').innerHTML=`<div style="font-family:var(--mono);font-size:0.85rem;font-weight:500;color:var(--text);">${fmt(total)}</div><div style="font-size:0.58rem;color:var(--text3);font-family:var(--mono);letter-spacing:0.06em;">TOTAL</div>`;}
 
@@ -2413,8 +2418,7 @@ function deleteUpcoming(id){ensureUpcoming();DATA.finance.upcomingObligations=DA
 
 function filterUpcoming(f,btn){renderUpcomingCalendar();upcomingFilter=f;document.querySelectorAll('.upcoming-filter .proj-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderUpcomingList();}
 
-function renderUpcomingCalendar(){const el=document.getElementById('upcoming-calendar');if(!el)return;ensureUpcoming();const items=DATA.finance.upcomingObligations.filter(u=>u.due&&u.amount>0);const threshold=parseInt(document.getElementById('big-threshold')?.value)||20000;const dayMap={};items.forEach(u=>{const d=new Date(u.due);const key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;if(!dayMap[key])dayMap[key]=[];dayMap[key].push(u);});const now=new Date();let html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">';for(let mo=0;mo<2;mo++){const d=new Date(now.getFullYear(),now.getMonth()+mo,1);const year=d.getFullYear(),month=d.getMonth();const dim=new Date(year,month+1,0).getDate();const fd=new Date(year,month,1).getDay();const mLabel=d.toLocaleDateString('en-IN',{month:'short',year:'numeric'});html+=`<div><div class="cal-mo">${mLabel}</div><div class="cal-g">`;'SMTWTFS'.split('').forEach(day=>html+=`<div class="cal-dh">${day}</div>`);for(let i=0;i<fd;i++)html+='<div></div>';for(let day=1;day<=dim;day++){const key=`${year}-${month}-${day}`;const di=dayMap[key]||[];const isT=year===now.getFullYear()&&month===now.getMonth()&&day===now.getDate();const hasBig=di.some(u=>(u.amount||0)>=threshold);const hasAny=di.length>0;const title=hasAny?di.map(u=>u.desc+' '+fmt(u.amount)).join(', '):'';html+=`<div class="cal-dc${isT?' today':''} ${hasAny?'has-exp':''}" ${hasAny?`title="${title}"`:''}>`;html+=`<div class="cal-num" style="color:${isT?'var(--accent)':hasAny?'var(--text)':'var(--text3)'}">${day}</div>`;if(hasAny)html+=`<div class="cal-dot" style="background:${hasBig?'var(--coral)':'var(--amber)'}"></div>`;html+='</div>';}html+='</div></div>';}html+='</div>';el.innerHTML=html;}
-
+function renderUpcomingCalendar(){const el=document.getElementById('upcoming-calendar');if(!el)return;ensureUpcoming();const allItems=DATA.finance.upcomingObligations.filter(u=>u.due&&u.amount>0);const threshold=parseInt(document.getElementById('big-threshold')?.value)||20000;const dayMap={};allItems.forEach(u=>{const d=new Date(u.due);const key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;if(!dayMap[key])dayMap[key]=[];dayMap[key].push(u);});const now=new Date();const days=['S','M','T','W','T','F','S'];let html='<div style="display:flex;flex-direction:column;gap:1rem;">';for(let mo=0;mo<2;mo++){const d=new Date(now.getFullYear(),now.getMonth()+mo,1);const year=d.getFullYear(),month=d.getMonth();const dim=new Date(year,month+1,0).getDate();const fd=new Date(year,month,1).getDay();const mLabel=d.toLocaleDateString('en-IN',{month:'long',year:'numeric'});html+=`<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;"><div style="background:var(--bg3);padding:0.4rem 0.75rem;font-family:var(--mono);font-size:0.7rem;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;">${mLabel}</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);padding:0;"><div style="background:var(--bg2);"></div>`;days.forEach(day=>html+=`<div style="background:var(--bg2);text-align:center;padding:4px 0;font-family:var(--mono);font-size:0.58rem;color:var(--text3);">${day}</div>`);html+='<div style="background:var(--bg2);"></div>';for(let i=0;i<fd;i++)html+=`<div style="background:var(--bg2);padding:4px 0;"></div>`;for(let day=1;day<=dim;day++){const key=`${year}-${month}-${day}`;const di=dayMap[key]||[];const isT=year===now.getFullYear()&&month===now.getMonth()&&day===now.getDate();const hasBig=di.some(u=>(u.amount||0)>=threshold);const hasAny=di.length>0;const bgCol=hasAny?(hasBig?'rgba(255,107,107,0.18)':'rgba(255,166,43,0.15)'):(isT?'var(--bg3)':'var(--bg2)');const textCol=isT?'var(--accent)':hasAny?'var(--text)':'var(--text3)';const title=hasAny?di.map(u=>u.desc+': '+fmt(u.amount)).join(', '):'';html+=`<div style="background:${bgCol};text-align:center;padding:5px 2px;cursor:${hasAny?'pointer':'default'};" ${hasAny?`title="${title}"`:''}><div style="font-family:var(--mono);font-size:0.65rem;font-weight:${hasAny?'600':'400'};color:${textCol};">${day}</div>${hasAny?`<div style="font-size:0.48rem;color:${hasBig?'var(--coral)':'var(--amber)'};margin-top:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 2px;">${di[0].desc.substring(0,8)}</div>`:''}  </div>`;}html+='</div></div>';}html+='</div>';el.innerHTML=html;}
 function renderUpcomingList(){ensureUpcoming();renderUpcomingCalendar();const threshold=parseInt(document.getElementById('big-threshold')?.value)||20000;const now=new Date();const thisMonth=now.getMonth(),thisYear=now.getFullYear();const nextD=new Date(thisYear,thisMonth+1,1);const nextMonth=nextD.getMonth(),nextYear=nextD.getFullYear();let items=DATA.finance.upcomingObligations.filter(u=>u.amount>0||u.desc);if(upcomingFilter==='month')items=items.filter(u=>{if(!u.due)return false;const d=new Date(u.due);return d.getMonth()===thisMonth&&d.getFullYear()===thisYear;});else if(upcomingFilter==='next')items=items.filter(u=>{if(!u.due)return false;const d=new Date(u.due);return d.getMonth()===nextMonth&&d.getFullYear()===nextYear;});items.sort((a,b)=>(a.due||'9999')>(b.due||'9999')?1:-1);const bigItems=items.filter(u=>(u.amount||0)>=threshold);const el=document.getElementById('upcoming-list');if(!items.length){el.innerHTML='<div style="font-size:0.78rem;color:var(--text3);padding:0.5rem 0;">No upcoming expenses for this period.</div>';return;}let html='';if(bigItems.length){html+=`<div style="font-size:0.68rem;font-family:var(--mono);color:var(--coral);letter-spacing:0.07em;text-transform:uppercase;padding:0.4rem 0 0.2rem;">⚠ Big expenses (>${fmt(threshold)})</div>`;html+=bigItems.map(u=>{const dStr=u.due?new Date(u.due).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No date';return`<div class="upcoming-item" style="border-left:2px solid var(--coral);padding-left:0.6rem;margin-bottom:3px;"><div style="flex:1"><div style="font-size:0.83rem;color:var(--text);font-weight:500;">${u.desc}<span class="big-exp-badge">BIG</span></div><div style="font-size:0.68rem;color:var(--text3);font-family:var(--mono);">${dStr}${u.cat?' · '+u.cat:''}${u.recurring&&u.recurring!='none'?' · '+u.recurring:''}</div></div><div style="text-align:right;flex-shrink:0;"><div style="font-family:var(--mono);font-size:0.88rem;color:var(--coral);">${fmt(u.amount)}</div><div style="display:flex;gap:0.25rem;justify-content:flex-end;margin-top:2px;"><button class="edit-btn" onclick="editUpcoming(${u.id})">✎</button><button class="edit-btn" style="color:var(--coral)" onclick="deleteUpcoming(${u.id})">×</button></div></div></div>`;}).join('');html+='<div style="height:0.5rem;border-top:1px solid var(--border);margin:0.5rem 0 0.25rem;"></div>';}let currentMonth='';items.forEach(u=>{const d=u.due?new Date(u.due):null;const mStr=d?d.toLocaleDateString('en-IN',{month:'long',year:'numeric'}):'No date';if(mStr!==currentMonth){currentMonth=mStr;html+=`<div class="upcoming-month-hdr">${mStr}</div>`;}html+=`<div class="upcoming-item"><div style="flex:1"><div style="font-size:0.82rem;color:var(--text);">${u.desc}${u.amount>=threshold?'<span class="big-exp-badge">BIG</span>':''}</div><div style="font-size:0.68rem;color:var(--text3);font-family:var(--mono);">${d?d.toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'—'}${u.cat?' · '+u.cat:''}${u.recurring&&u.recurring!='none'?' · '+u.recurring:''}</div></div><div style="text-align:right;flex-shrink:0;"><div style="font-family:var(--mono);font-size:0.82rem;color:var(--text2);">${u.amount?fmt(u.amount):'—'}</div><div style="display:flex;gap:0.25rem;justify-content:flex-end;margin-top:2px;"><button class="edit-btn" onclick="editUpcoming(${u.id})">✎</button><button class="edit-btn" style="color:var(--coral)" onclick="deleteUpcoming(${u.id})">×</button></div></div></div>`;});el.innerHTML=html;}
 
 function toggleCF(){cfExpanded=!cfExpanded;document.getElementById('cf-detail').style.display=cfExpanded?'block':'none';document.getElementById('cf-toggle-btn').textContent=cfExpanded?'collapse ▴':'details ▾';}
@@ -2423,8 +2427,41 @@ function renderCashFlow(){ensureSIPs();ensureUpcoming();ensureFixedExp();const y
 
 function switchHoldTab(id,el){document.querySelectorAll('.hold-panel').forEach(p=>p.style.display='none');document.querySelectorAll('.hold-tab').forEach(t=>t.classList.remove('active'));document.getElementById('hold-'+id).style.display='block';el.classList.add('active');}
 
-function renderProjection(years,btn){currentProjYears=years||currentProjYears;if(btn){document.querySelectorAll('.proj-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}ensurePortfolio();ensureSIPs();const p=DATA.finance.portfolio,usdInr=p.usdToInr||84,r=0.12/12,months=currentProjYears*12,step=Math.max(1,Math.floor(months/24));const inV=p.indianStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty,0);const usV=p.usStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty*usdInr,0);const mfV=p.mutualFunds.reduce((s,x)=>s+((x.liveValue&&x.liveValue>0)?x.liveValue:x.snapshotValue||0),0);const ret=p.retirals||{},rv=(ret.epf?.balance||0)+(ret.ppf?.balance||0)+(ret.nps?.balance||0)+(ret.rd?.balance||0);const sips=DATA.finance.sips||[];const mfMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='mf').reduce((t,s)=>t+s.amount,0);const inMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='in-stock').reduce((t,s)=>t+s.amount,0);const usMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='us-stock').reduce((t,s)=>t+s.amount,0);const retMo=(ret.epf?.monthlyEmployee||0)+(ret.epf?.monthlyEmployer||0)+(ret.ppf?.monthly||500)+(ret.nps?.monthly||4200)+(ret.rd?.monthly||0);const totalMo=mfMo+inMo+usMo+retMo+sips.filter(s=>s.active&&s.amount>0&&!['mf','in-stock','us-stock'].includes(s.category)).reduce((t,s)=>t+s.amount,0);const totalBase=inV+usV+mfV+rv;const allCats=[{id:'total',label:'All',color:'#f5c842',dash:[],base:totalBase,mo:totalMo,w:2},{id:'mf',label:'Mutual Funds',color:'#8b5cf6',dash:[4,2],base:mfV,mo:mfMo,w:1.5},{id:'in',label:'IN Stocks',color:'#4ecdc4',dash:[4,2],base:inV,mo:inMo,w:1.5},{id:'us',label:'US Stocks',color:'#6bcb77',dash:[4,2],base:usV,mo:usMo,w:1.5},{id:'ret',label:'Retirals',color:'#ffa62b',dash:[4,2],base:rv,mo:retMo,w:1.5}];if(!window.projVisible)window.projVisible=new Set(['total','mf','in','us','ret']);const toggleEl=document.getElementById('proj-cat-toggles');if(toggleEl){toggleEl.innerHTML=allCats.map(cat=>`<label style="display:flex;align-items:center;gap:0.3rem;font-size:0.68rem;color:${cat.color};cursor:pointer;font-family:var(--mono);"><input type="checkbox" ${window.projVisible.has(cat.id)?'checked':''} onchange="toggleProjCat('${cat.id}',this.checked);renderProjection()" style="accent-color:${cat.color};width:12px;height:12px;">${cat.label}</label>`).join('');}const visibleCats=allCats.filter(c=>window.projVisible.has(c.id));const labels=[];visibleCats.forEach(cat=>cat.data=[]);for(let m=0;m<=months;m+=step){labels.push(m===0?'Now':`${Math.round(m/12)}Y`);visibleCats.forEach(cat=>{const fv=cat.base*Math.pow(1+r,m)+(cat.mo||0)*(Math.pow(1+r,m)-1)/r;cat.data.push(+(fv/10000000).toFixed(3));});}const totalCat=allCats[0];const finalVal=totalCat.base*Math.pow(1+r,months)+(totalMo||0)*(Math.pow(1+r,months)-1)/r;const totalInv=totalBase+totalMo*months;document.getElementById('proj-stats').innerHTML=`<div class="proj-stat"><div class="proj-stat-val">₹${(finalVal/10000000).toFixed(2)}Cr</div><div class="proj-stat-label">Projected total</div></div><div class="proj-stat"><div class="proj-stat-val" style="color:var(--green);">${((finalVal/totalInv-1)*100).toFixed(0)}%</div><div class="proj-stat-label">Returns</div></div><div class="proj-stat"><div class="proj-stat-val" style="color:var(--teal);">${(finalVal/totalInv).toFixed(1)}x</div><div class="proj-stat-label">Wealth mult</div></div>`;const ctx=document.getElementById('proj-chart').getContext('2d');if(projChart)projChart.destroy();projChart=new Chart(ctx,{type:'line',data:{labels,datasets:visibleCats.map(cat=>({label:cat.label,data:cat.data,borderColor:cat.color,backgroundColor:'transparent',borderWidth:cat.w,pointRadius:0,tension:0.4,borderDash:cat.dash}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` ${c.dataset.label}: ₹${c.raw.toFixed(2)}Cr`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9},callback:v=>`₹${v.toFixed(1)}Cr`}}},animation:{duration:400}}});}
-function toggleProjCat(id,on){if(!window.projVisible)window.projVisible=new Set(['total','mf','in','us','ret']);if(on)window.projVisible.add(id);else window.projVisible.delete(id);}
+function renderProjection(years,btn){currentProjYears=years||currentProjYears;if(btn){document.querySelectorAll('.proj-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}ensurePortfolio();ensureSIPs();const p=DATA.finance.portfolio,usdInr=p.usdToInr||84,months=currentProjYears*12,step=Math.max(1,Math.floor(months/24));const projRates=DATA.finance.projRates||{mf:12,in:14,us:12,ret:8.5};const r=0.12/12;const inV=p.indianStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty,0);const usV=p.usStocks.reduce((s,x)=>s+(x.livePrice||x.avgPrice)*x.qty*usdInr,0);const mfV=p.mutualFunds.reduce((s,x)=>s+((x.liveValue&&x.liveValue>0)?x.liveValue:x.snapshotValue||0),0);const ret=p.retirals||{},rv=(ret.epf?.balance||0)+(ret.ppf?.balance||0)+(ret.nps?.balance||0)+(ret.rd?.balance||0);const sips=DATA.finance.sips||[];const mfMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='mf').reduce((t,s)=>t+s.amount,0);const inMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='in-stock').reduce((t,s)=>t+s.amount,0);const usMo=sips.filter(s=>s.active&&s.amount>0&&s.category==='us-stock').reduce((t,s)=>t+s.amount,0);const retMo=(ret.epf?.monthlyEmployee||0)+(ret.epf?.monthlyEmployer||0)+(ret.ppf?.monthly||500)+(ret.nps?.monthly||4200)+(ret.rd?.monthly||0);const totalMo=mfMo+inMo+usMo+retMo+sips.filter(s=>s.active&&s.amount>0&&!['mf','in-stock','us-stock'].includes(s.category)).reduce((t,s)=>t+s.amount,0);const totalBase=inV+usV+mfV+rv;const allCats=[{id:'total',label:'All',color:'#f5c842',dash:[],base:totalBase,mo:totalMo,w:2,r:(projRates.mf*mfV+projRates.in*inV+projRates.us*usV+projRates.ret*rv)/(totalBase||1)/12/100},{id:'mf',label:'Mutual Funds',color:'#8b5cf6',dash:[4,2],base:mfV,mo:mfMo,w:1.5,r:projRates.mf/12/100},{id:'in',label:'IN Stocks',color:'#4ecdc4',dash:[4,2],base:inV,mo:inMo,w:1.5,r:projRates.in/12/100},{id:'us',label:'US Stocks',color:'#6bcb77',dash:[4,2],base:usV,mo:usMo,w:1.5,r:projRates.us/12/100},{id:'ret',label:'Retirals',color:'#ffa62b',dash:[4,2],base:rv,mo:retMo,w:1.5,r:projRates.ret/12/100}];if(!window.projVisible)window.projVisible=new Set(['total','mf','in','us','ret']);const toggleEl=document.getElementById('proj-cat-toggles');if(toggleEl){toggleEl.innerHTML=allCats.map(cat=>`<label style="display:flex;align-items:center;gap:0.3rem;font-size:0.68rem;color:${cat.color};cursor:pointer;font-family:var(--mono);"><input type="checkbox" ${window.projVisible.has(cat.id)?'checked':''} onchange="toggleProjCat('${cat.id}',this.checked)" style="accent-color:${cat.color};width:12px;height:12px;">${cat.label}${cat.id!=='total'?` <span style='font-size:0.58rem;color:var(--text3);'>${(DATA.finance.projRates||{mf:12,in:14,us:12,ret:8.5})[cat.id]||12}%</span>`:''}</label>`).join('');}const visibleCats=allCats.filter(c=>window.projVisible.has(c.id));const labels=[];visibleCats.forEach(cat=>cat.data=[]);for(let m=0;m<=months;m+=step){labels.push(m===0?'Now':`${Math.round(m/12)}Y`);visibleCats.forEach(cat=>{const cr=cat.r||r;const fv=cat.base*Math.pow(1+cr,m)+(cat.mo||0)*(Math.pow(1+cr,m)-1)/cr;cat.data.push(+(fv/10000000).toFixed(3));});}const totalCat=allCats[0];const cr0=totalCat.r||r;const finalVal=totalCat.base*Math.pow(1+cr0,months)+(totalMo||0)*(Math.pow(1+cr0,months)-1)/cr0;const totalInv=totalBase+totalMo*months;document.getElementById('proj-stats').innerHTML=`<div class="proj-stat"><div class="proj-stat-val">₹${(finalVal/10000000).toFixed(2)}Cr</div><div class="proj-stat-label">Projected total</div></div><div class="proj-stat"><div class="proj-stat-val" style="color:var(--green);">${((finalVal/totalInv-1)*100).toFixed(0)}%</div><div class="proj-stat-label">Returns</div></div><div class="proj-stat"><div class="proj-stat-val" style="color:var(--teal);">${(finalVal/totalInv).toFixed(1)}x</div><div class="proj-stat-label">Wealth mult</div></div>`;const ctx=document.getElementById('proj-chart').getContext('2d');if(projChart)projChart.destroy();projChart=new Chart(ctx,{type:'line',data:{labels,datasets:visibleCats.map(cat=>({label:cat.label,data:cat.data,borderColor:cat.color,backgroundColor:'transparent',borderWidth:cat.w,pointRadius:0,tension:0.4,borderDash:cat.dash}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` ${c.dataset.label}: ₹${c.raw.toFixed(2)}Cr`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a5870',font:{family:'DM Mono',size:9},callback:v=>`₹${v.toFixed(1)}Cr`}}},animation:{duration:400}}});}
+function toggleProjCat(id,on){
+  if(!window.projVisible)window.projVisible=new Set(['total']);
+  if(id==='total'){
+    // All selected: deselect all others
+    if(on){window.projVisible=new Set(['total']);}
+    else{window.projVisible.delete('total');}
+  } else {
+    // Individual selected: deselect All
+    window.projVisible.delete('total');
+    if(on)window.projVisible.add(id);else window.projVisible.delete(id);
+    // If nothing selected, re-select All
+    if(window.projVisible.size===0)window.projVisible=new Set(['total']);
+  }
+  renderProjection();
+}
+function openProjRates(){
+  const rates=DATA.finance.projRates||{mf:12,in:14,us:12,ret:8.5};
+  document.getElementById('rate-mf').value=rates.mf||12;
+  document.getElementById('rate-in').value=rates.in||14;
+  document.getElementById('rate-us').value=rates.us||12;
+  document.getElementById('rate-ret').value=rates.ret||8.5;
+  openModal('modal-proj-rates');
+}
+function saveProjRates(){
+  DATA.finance.projRates={
+    mf:parseFloat(document.getElementById('rate-mf').value)||12,
+    in:parseFloat(document.getElementById('rate-in').value)||14,
+    us:parseFloat(document.getElementById('rate-us').value)||12,
+    ret:parseFloat(document.getElementById('rate-ret').value)||8.5
+  };
+  closeModal('modal-proj-rates');
+  renderProjection();
+  showToast('Rates updated ✓');
+}
 
 
 // ─── FIXED EXPENSES ───────────────────────────────────────────────────────────
@@ -2442,11 +2479,30 @@ function editThreshold(){const inp=document.getElementById('big-threshold'),disp
 function saveThreshold(){const inp=document.getElementById('big-threshold'),disp=document.getElementById('thresh-display');inp.style.display='none';disp.style.display='';const v=parseInt(inp.value)||20000;disp.textContent=fmt(v);renderUpcomingList();}
 
 
-function renderFinance(){ensurePortfolio();ensureFixedExp();ensureUpcoming();renderPortfolioHero();renderAllocationChart();renderInStocks();renderMFs();renderUSStocks();renderRetirals();renderSIPManagement();renderCashFlow();renderUpcomingList();const rd=(DATA.finance.investments||[]).find(i=>i.type==='rd');if(rd){const ev=rd.value||0,et=rd.target||550000;document.getElementById('ef-label').textContent=fmt(ev)+' / '+fmt(et);document.getElementById('ef-bar').style.width=Math.min(100,(ev/et)*100)+'%';}const subs=DATA.finance.subscriptions||[];document.getElementById('subs-list').innerHTML=subs.length?subs.map(s=>{const aligned=s.date>=2&&s.date<=3;return`<div class="sub-item"><div><div class="finance-name">${s.name}</div><div class="finance-sub">${s.type} · Date: ${s.date||'?'}</div></div><div style="text-align:right"><div class="finance-val">${fmt(s.amount||0)}</div><div class="sub-due ${aligned?'ok':'soon'}">${aligned?'aligned':'misaligned'}</div></div></div>`;}).join(''):'<div style="font-size:0.82rem;color:var(--text3);">No subscriptions yet.</div>';setTimeout(()=>renderProjection(currentProjYears,null),100);}
+
+function openEditIncome(){
+  document.getElementById('inc-yours').value=DATA.finance.yourIncome||177000;
+  document.getElementById('inc-wife').value=DATA.finance.wifeIncome||95000;
+  document.getElementById('inc-incentive').value=DATA.finance.wifeIncentiveAmount||50000;
+  openModal('modal-cf-income');
+}
+function saveIncome(){
+  DATA.finance.yourIncome=parseFloat(document.getElementById('inc-yours').value)||177000;
+  DATA.finance.wifeIncome=parseFloat(document.getElementById('inc-wife').value)||95000;
+  DATA.finance.wifeIncentiveAmount=parseFloat(document.getElementById('inc-incentive').value)||50000;
+  closeModal('modal-cf-income');
+  renderCashFlow();
+  renderPortfolioHero();
+  showToast('Income updated ✓');
+}
+
+function renderFinance(){ensurePortfolio();ensureFixedExp();ensureUpcoming();renderPortfolioHero();renderAllocationChart();renderInStocks();renderMFs();renderUSStocks();renderRetirals();renderSIPManagement();renderCashFlow();renderUpcomingList();const rd=(DATA.finance.investments||[]).find(i=>i.type==='rd');if(rd){const ev=rd.value||0,et=rd.target||550000;document.getElementById('ef-label').textContent=fmt(ev)+' / '+fmt(et);document.getElementById('ef-bar').style.width=Math.min(100,(ev/et)*100)+'%';}const subs=DATA.finance.subscriptions||[];document.getElementById('subs-list').innerHTML=subs.length?subs.map(s=>{const aligned=s.date>=2&&s.date<=3;return`<div class="sub-item"><div style="flex:1"><div class="finance-name">${s.name}</div><div class="finance-sub">${s.type} · Date: ${s.date||'?'}</div></div><div style="text-align:right"><div class="finance-val">${fmt(s.amount||0)}</div><div class="sub-due ${aligned?'ok':'soon'}" style="margin-bottom:3px;">${aligned?'aligned':'misaligned'}</div><div style="display:flex;gap:0.3rem;justify-content:flex-end;"><button class="sip-btn" onclick="editSub(${s.id})">✎</button><button class="sip-btn del" onclick="deleteSub(${s.id})">×</button></div></div></div>`;}).join(''):'<div style="font-size:0.82rem;color:var(--text3);">No subscriptions yet.</div>';setTimeout(()=>renderProjection(currentProjYears,null),100);}
 
 function markTaxPaid(i){if(DATA.finance.taxCalendar)DATA.finance.taxCalendar[i].paid=true;showToast('Marked paid ✓');}
 function saveEF(){const val=parseFloat(document.getElementById('ef-input').value);if(!val)return;const rd=(DATA.finance.investments||[]).find(i=>i.type==='rd');if(rd)rd.value=val;closeModal('modal-ef');renderFinance();showToast('Emergency fund updated');}
-function saveSub(){const name=document.getElementById('sub-name').value.trim(),amount=parseFloat(document.getElementById('sub-amount').value),date=parseInt(document.getElementById('sub-date').value),type=document.getElementById('sub-type').value;if(!name)return;if(!DATA.finance.subscriptions)DATA.finance.subscriptions=[];DATA.finance.subscriptions.push({name,amount,date,type});document.getElementById('sub-name').value='';document.getElementById('sub-amount').value='';document.getElementById('sub-date').value='';closeModal('modal-sub');renderFinance();showToast('Subscription added');}
+function saveSub(){const eid=document.getElementById('sub-edit-id').value,name=document.getElementById('sub-name').value.trim(),amount=parseFloat(document.getElementById('sub-amount').value)||0,date=parseInt(document.getElementById('sub-date').value)||1,type=document.getElementById('sub-type').value;if(!name)return;if(!DATA.finance.subscriptions)DATA.finance.subscriptions=[];if(eid){const s=DATA.finance.subscriptions.find(x=>x.id==eid);if(s){s.name=name;s.amount=amount;s.date=date;s.type=type;}}else{DATA.finance.subscriptions.push({id:Date.now(),name,amount,date,type});}document.getElementById('sub-edit-id').value='';document.getElementById('sub-name').value='';document.getElementById('sub-amount').value='';document.getElementById('sub-date').value='';document.getElementById('sub-modal-title').textContent='Add subscription / NACH';closeModal('modal-sub');renderFinance();showToast('Subscription saved ✓');}
+function editSub(id){const s=(DATA.finance.subscriptions||[]).find(x=>x.id===id);if(!s)return;document.getElementById('sub-edit-id').value=id;document.getElementById('sub-name').value=s.name;document.getElementById('sub-amount').value=s.amount;document.getElementById('sub-date').value=s.date||1;document.getElementById('sub-type').value=s.type||'monthly';document.getElementById('sub-modal-title').textContent='Edit subscription';openModal('modal-sub');}
+function deleteSub(id){if(!confirm('Delete this subscription?'))return;DATA.finance.subscriptions=(DATA.finance.subscriptions||[]).filter(x=>x.id!==id);renderFinance();showToast('Deleted');}
 function pinNext(el,idx){if(el.value.length===1){const pins=document.querySelectorAll('.pin-digit');if(idx<3)pins[idx+1].focus();}}
 function unlockVault(){const pins=document.querySelectorAll('.pin-digit');const entered=Array.from(pins).map(p=>p.value).join('');const stored=DATA.finance.vault?DATA.finance.vault.pin:'';if(!stored){DATA.finance.vault.pin=entered;showVaultContent();showToast('PIN set ✓');return;}if(entered===stored){showVaultContent();}else{showToast('Wrong PIN');pins.forEach(p=>p.value='');pins[0].focus();}}
 function showVaultContent(){vaultUnlocked=true;document.getElementById('vault-locked').style.display='none';document.getElementById('vault-content').style.display='block';renderVault();}
@@ -2699,6 +2755,44 @@ window.addEventListener('DOMContentLoaded', () => {
       <div class="btn-row">
         <button class="btn btn-primary" onclick="saveFixedExp()">Save</button>
         <button class="btn btn-ghost" onclick="closeModal('modal-fixed-exp')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="modal-proj-rates">
+  <div class="modal">
+    <div class="modal-title">Expected annual returns (%)</div>
+    <div class="log-form">
+      <div class="health-grid">
+        <div><label class="field-label">Mutual Funds</label><input class="field-input" id="rate-mf" type="number" step="0.5" placeholder="12"></div>
+        <div><label class="field-label">IN Stocks</label><input class="field-input" id="rate-in" type="number" step="0.5" placeholder="14"></div>
+      </div>
+      <div class="health-grid">
+        <div><label class="field-label">US Stocks</label><input class="field-input" id="rate-us" type="number" step="0.5" placeholder="12"></div>
+        <div><label class="field-label">Retirals (EPF/PPF/NPS)</label><input class="field-input" id="rate-ret" type="number" step="0.5" placeholder="8.5"></div>
+      </div>
+      <div style="font-size:0.72rem;color:var(--text3);font-family:var(--mono);">Rates are applied per category. All = weighted average.</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveProjRates()">Apply</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-proj-rates')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="modal-cf-income">
+  <div class="modal">
+    <div class="modal-title">Edit monthly income</div>
+    <div class="log-form">
+      <div><label class="field-label">Your in-hand (₹/month)</label><input class="field-input" id="inc-yours" type="number" placeholder="177000"></div>
+      <div><label class="field-label">Wife's in-hand (₹/month)</label><input class="field-input" id="inc-wife" type="number" placeholder="95000"></div>
+      <div><label class="field-label">Incentive amount (₹) — added on incentive months</label><input class="field-input" id="inc-incentive" type="number" placeholder="50000"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveIncome()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-cf-income')">Cancel</button>
       </div>
     </div>
   </div>
