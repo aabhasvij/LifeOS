@@ -2448,7 +2448,68 @@ function renderUpcomingList(){ensureUpcoming();renderUpcomingCalendar();const th
 
 function toggleCF(){cfExpanded=!cfExpanded;document.getElementById('cf-detail').style.display=cfExpanded?'block':'none';document.getElementById('cf-toggle-btn').textContent=cfExpanded?'collapse ▴':'details ▾';}
 
-function renderCashFlow(){ensureSIPs();ensureUpcoming();ensureFixedExp();const yourIncome=DATA.finance.yourIncome||177000,wifeIncome=DATA.finance.wifeIncome||95000,wifeBonus=DATA.finance.wifeIncentiveAmount||50000;const isIncentive=document.getElementById('incentive-toggle')?.checked;const totalIncome=yourIncome+wifeIncome+(isIncentive?wifeBonus:0);const now=new Date();const nextMo=new Date(now.getFullYear(),now.getMonth()+1,1);const cfMonthLabel=nextMo.toLocaleDateString('en-IN',{month:'long',year:'numeric'});const ml=document.getElementById('cf-month-label');if(ml)ml.textContent='Cashflow — '+cfMonthLabel;const sips=DATA.finance.sips.filter(s=>s.active&&(s.amount||0)>0);const sipTotal=sips.reduce((t,s)=>t+s.amount,0);const fixedExp=DATA.finance.fixedExpenses.filter(f=>(f.amount||0)>0);const fixedExpTotal=fixedExp.reduce((t,f)=>t+(f.amount||0),0);const subs=(DATA.finance.subscriptions||[]).filter(s=>(s.amount||0)>0);const subsTotal=subs.reduce((t,s)=>t+(s.amount||0),0);// now, thisMonth, thisYear removed — using cfM/cfY aboveconst cfMonth=new Date(now.getFullYear(),now.getMonth()+1,1);const cfM=cfMonth.getMonth(),cfY=cfMonth.getFullYear();const upcomingThisMonth=(DATA.finance.upcomingObligations||[]).filter(u=>{if(!u.due)return false;const d=new Date(u.due);return d.getMonth()===cfM&&d.getFullYear()===cfY;});const upcomingTotal=upcomingThisMonth.reduce((t,u)=>t+(u.amount||0),0);const totalOut=sipTotal+fixedExpTotal+subsTotal+upcomingTotal;const disposable=totalIncome-totalOut;document.getElementById('cf-sum-in').textContent=fmt(totalIncome);document.getElementById('cf-sum-out').textContent='-'+fmt(totalOut);const de=document.getElementById('cf-disposable');de.textContent=fmt(disposable);de.style.color=disposable>=0?'var(--green)':'var(--coral)';const ci=document.getElementById('cf-income');if(ci)ci.innerHTML=`<div class="cf-row"><span>Your in-hand</span><span class="cf-pos">+${fmt(yourIncome)}</span></div><div class="cf-row"><span>Wife's in-hand</span><span class="cf-pos">+${fmt(wifeIncome)}</span></div>${isIncentive?`<div class="cf-row"><span>Incentive</span><span class="cf-pos">+${fmt(wifeBonus)}</span></div>`:''}<div class="cf-row" style="border-top:1px solid var(--border);padding-top:0.3rem;font-weight:500;color:var(--text);"><span>Total income</span><span class="cf-pos">${fmt(totalIncome)}</span></div>`;const cf=document.getElementById('cf-fixed');if(cf)cf.innerHTML=(sips.length?sips.map(s=>`<div class="cf-row"><span>${s.name}</span><span class="cf-neg">-${fmt(s.amount)}</span></div>`).join(''):'<div style="font-size:0.75rem;color:var(--text3);">No active SIPs with amount set</div>')+`<div class="cf-row" style="border-top:1px solid var(--border);padding-top:0.3rem;font-weight:500;color:var(--text);"><span>SIPs total</span><span class="cf-neg">-${fmt(sipTotal)}</span></div>`;const cfe=document.getElementById('cf-fixed-exp');if(cfe)cfe.innerHTML=fixedExp.length?fixedExp.map(f=>`<div class="cf-row"><span style="flex:1">${f.name}</span><div style="display:flex;align-items:center;gap:0.4rem;"><span class="cf-neg">-${fmt(f.amount)}</span><button class="sip-btn" onclick="editFixedExp(${f.id})" style="padding:0 2px;">✎</button><button class="sip-btn del" onclick="deleteFixedExp(${f.id})" style="padding:0 2px;">×</button></div></div>`).join(''):'<div style="font-size:0.75rem;color:var(--text3);">None added</div>';const cfsubs=document.getElementById('cf-subs-cf');if(cfsubs)cfsubs.innerHTML=subs.length?subs.map(s=>`<div class="cf-row"><span>${s.name}</span><span class="cf-neg">-${fmt(s.amount)}</span></div>`).join('')+'<div class="cf-row" style="border-top:1px solid var(--border);padding-top:0.3rem;font-weight:500;color:var(--text);"><span>Subs total</span><span class="cf-neg">-'+fmt(subsTotal)+'</span></div>':'<div style="font-size:0.75rem;color:var(--text3);">No subscriptions added yet</div>';const cu=document.getElementById('cf-upcoming');if(cu)cu.innerHTML=upcomingThisMonth.length?upcomingThisMonth.map(u=>`<div class="cf-row"><span>${u.desc}</span><span class="cf-neg">-${fmt(u.amount||0)}</span></div>`).join(''):'<div style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">None this month</div>';}
+function renderCashFlow(){
+  ensureSIPs();ensureUpcoming();ensureFixedExp();
+  const yourIncome=DATA.finance.yourIncome||177000;
+  const wifeIncome=DATA.finance.wifeIncome||95000;
+  const wifeBonus=DATA.finance.wifeIncentiveAmount||50000;
+  const isIncentive=document.getElementById('incentive-toggle')?.checked;
+  const totalIncome=yourIncome+wifeIncome+(isIncentive?wifeBonus:0);
+  const now=new Date();
+  const nextMo=new Date(now.getFullYear(),now.getMonth()+1,1);
+  const cfMonthLabel=nextMo.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  const ml=document.getElementById('cf-month-label');
+  if(ml)ml.textContent='Cashflow — '+cfMonthLabel;
+  const sips=DATA.finance.sips.filter(function(s){return s.active&&(s.amount||0)>0;});
+  const sipTotal=sips.reduce(function(t,s){return t+s.amount;},0);
+  const fixedExp=DATA.finance.fixedExpenses.filter(function(f){return (f.amount||0)>0;});
+  const fixedExpTotal=fixedExp.reduce(function(t,f){return t+(f.amount||0);},0);
+  const subs=(DATA.finance.subscriptions||[]).filter(function(s){return (s.amount||0)>0;});
+  const subsTotal=subs.reduce(function(t,s){return t+(s.amount||0);},0);
+  const cfM=nextMo.getMonth(),cfY=nextMo.getFullYear();
+  const upcomingThisMonth=(DATA.finance.upcomingObligations||[]).filter(function(u){
+    if(!u.due)return false;
+    const d=new Date(u.due);
+    return d.getMonth()===cfM&&d.getFullYear()===cfY;
+  });
+  const upcomingTotal=upcomingThisMonth.reduce(function(t,u){return t+(u.amount||0);},0);
+  const totalOut=sipTotal+fixedExpTotal+subsTotal+upcomingTotal;
+  const disposable=totalIncome-totalOut;
+  const sumIn=document.getElementById('cf-sum-in');
+  if(sumIn)sumIn.textContent=fmt(totalIncome);
+  const sumOut=document.getElementById('cf-sum-out');
+  if(sumOut)sumOut.textContent='-'+fmt(totalOut);
+  const de=document.getElementById('cf-disposable');
+  if(de){de.textContent=fmt(disposable);de.style.color=disposable>=0?'var(--green)':'var(--coral)';}
+  const ci=document.getElementById('cf-income');
+  if(ci){
+    let incHtml='<div class="cf-row"><span>Your in-hand</span><span class="cf-pos">+'+fmt(yourIncome)+'</span></div>';
+    incHtml+='<div class="cf-row"><span>Wife&#39;s in-hand</span><span class="cf-pos">+'+fmt(wifeIncome)+'</span></div>';
+    if(isIncentive)incHtml+='<div class="cf-row"><span>Incentive</span><span class="cf-pos">+'+fmt(wifeBonus)+'</span></div>';
+    incHtml+='<div class="cf-row" style="border-top:1px solid var(--border);padding-top:0.3rem;font-weight:500;color:var(--text);"><span>Total income</span><span class="cf-pos">'+fmt(totalIncome)+'</span></div>';
+    ci.innerHTML=incHtml;
+  }
+  const cf=document.getElementById('cf-fixed');
+  if(cf){
+    let fixHtml=sips.length?sips.map(function(s){return '<div class="cf-row"><span>'+s.name+'</span><span class="cf-neg">-'+fmt(s.amount)+'</span></div>';}).join(''):'<div style="font-size:0.75rem;color:var(--text3);">No active SIPs with amount set</div>';
+    fixHtml+='<div class="cf-row" style="border-top:1px solid var(--border);padding-top:0.3rem;font-weight:500;color:var(--text);"><span>SIPs total</span><span class="cf-neg">-'+fmt(sipTotal)+'</span></div>';
+    cf.innerHTML=fixHtml;
+  }
+  const cfe=document.getElementById('cf-fixed-exp');
+  if(cfe){
+    cfe.innerHTML=fixedExp.length?fixedExp.map(function(f){
+      return '<div class="cf-row"><span style="flex:1">'+f.name+'</span><div style="display:flex;align-items:center;gap:0.4rem;"><span class="cf-neg">-'+fmt(f.amount)+'</span><button class="sip-btn" onclick="editFixedExp('+f.id+')" style="padding:0 2px;">✎</button><button class="sip-btn del" onclick="deleteFixedExp('+f.id+')" style="padding:0 2px;">×</button></div></div>';
+    }).join(''):'<div style="font-size:0.75rem;color:var(--text3);">None added</div>';
+  }
+  const cfsubs=document.getElementById('cf-subs-cf');
+  if(cfsubs){
+    cfsubs.innerHTML=subs.length?subs.map(function(s){return '<div class="cf-row"><span>'+s.name+'</span><span class="cf-neg">-'+fmt(s.amount)+'</span></div>';}).join('')+'<div class="cf-row" style="border-top:1px solid var(--border);padding-top:0.3rem;font-weight:500;color:var(--text);"><span>Subs total</span><span class="cf-neg">-'+fmt(subsTotal)+'</span></div>':'<div style="font-size:0.75rem;color:var(--text3);">No subscriptions added yet</div>';
+  }
+  const cu=document.getElementById('cf-upcoming');
+  if(cu){
+    cu.innerHTML=upcomingThisMonth.length?upcomingThisMonth.map(function(u){return '<div class="cf-row"><span>'+u.desc+'</span><span class="cf-neg">-'+fmt(u.amount||0)+'</span></div>';}).join(''):'<div style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">None this month</div>';
+  }
+}
 
 function switchHoldTab(id,el){document.querySelectorAll('.hold-panel').forEach(p=>p.style.display='none');document.querySelectorAll('.hold-tab').forEach(t=>t.classList.remove('active'));document.getElementById('hold-'+id).style.display='block';el.classList.add('active');}
 
