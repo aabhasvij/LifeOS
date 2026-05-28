@@ -883,6 +883,44 @@ html, body {
 
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
+
+/* JOBS */
+.job-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:0.6rem;cursor:pointer;transition:border-color 0.15s;}
+.job-card:hover{border-color:var(--border2);}
+.job-card.selected{border-color:var(--accent2);}
+.job-flag{font-size:1.1rem;flex-shrink:0;}
+.job-title{font-size:0.9rem;font-weight:500;color:var(--text);margin-bottom:2px;}
+.job-company{font-size:0.78rem;color:var(--text2);}
+.job-meta{font-size:0.68rem;font-family:var(--mono);color:var(--text3);margin-top:0.35rem;display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;}
+.job-badge{padding:1px 6px;border-radius:4px;font-size:0.6rem;font-family:var(--mono);letter-spacing:0.04em;text-transform:uppercase;}
+.visa-explicit{background:rgba(107,203,119,0.15);color:var(--green);}
+.visa-likely{background:rgba(255,166,43,0.15);color:var(--amber);}
+.visa-unknown{background:rgba(90,88,112,0.2);color:var(--text3);}
+.visa-excluded{background:rgba(255,107,107,0.15);color:var(--coral);}
+.company-large{background:rgba(78,205,196,0.12);color:var(--teal);}
+.company-startup{background:rgba(139,92,246,0.15);color:var(--accent);}
+.days-fresh{color:var(--green);}
+.days-recent{color:var(--text2);}
+.days-old{color:var(--text3);}
+.job-filter-row{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.75rem;align-items:center;}
+.job-filter-btn{padding:0.25rem 0.7rem;border-radius:12px;border:1px solid var(--border2);background:none;color:var(--text3);font-family:var(--mono);font-size:0.65rem;cursor:pointer;transition:all 0.15s;letter-spacing:0.04em;}
+.job-filter-btn.active{background:var(--bg3);color:var(--text);border-color:var(--text3);}
+.job-filter-btn.country-NL.active{background:rgba(255,166,43,0.15);border-color:var(--amber);color:var(--amber);}
+.job-filter-btn.country-DE.active{background:rgba(90,88,112,0.2);border-color:var(--text2);color:var(--text);}
+.job-filter-btn.country-CH.active{background:rgba(255,107,107,0.15);border-color:var(--coral);color:var(--coral);}
+.job-filter-btn.country-LU.active{background:rgba(78,205,196,0.12);border-color:var(--teal);color:var(--teal);}
+.job-filter-btn.country-NZ.active{background:rgba(107,203,119,0.15);border-color:var(--green);color:var(--green);}
+.job-filter-btn.country-CN.active{background:rgba(139,92,246,0.15);border-color:var(--accent);color:var(--accent);}
+.pipeline-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem;flex:1;min-width:0;}
+.pipeline-col-title{font-size:0.62rem;font-family:var(--mono);letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem;}
+.pipeline-item{background:var(--bg3);border-radius:var(--radius-sm);padding:0.5rem 0.6rem;margin-bottom:0.4rem;font-size:0.75rem;color:var(--text2);cursor:pointer;}
+.pipeline-item:hover{color:var(--text);}
+.job-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-bottom:1rem;}
+.country-flag{font-size:0.9rem;}
+.load-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:2rem;text-align:center;cursor:pointer;transition:border-color 0.2s;}
+.load-area:hover{border-color:var(--accent2);}
+.load-area-text{font-size:0.82rem;color:var(--text3);margin-top:0.5rem;}
+
 </style>
 </head>
 <body>
@@ -1375,7 +1413,7 @@ html, body {
             <tbody id="cf-upcoming"></tbody>
             <!-- TOTAL ROW -->
             <tr style="border-top:2px solid var(--border2);">
-              <td style="padding:0.5rem 0;font-weight:700;color:var(--text);font-size:0.9rem;">Monthly Obligations Total</td>
+              <td style="padding:0.5rem 0;font-weight:700;color:var(--text);font-size:0.9rem;">Obligations total</td>
               <td style="text-align:right;font-family:var(--mono);font-weight:600;color:var(--coral);" id="cf-total-out-detail">—</td>
             </tr>
           </table>
@@ -1689,6 +1727,108 @@ html, body {
       </div>
     </div>
 
+
+    <!-- JOBS -->
+    <div class="section" id="sec-jobs">
+      <div class="section-heading">Job Search</div>
+      <div class="section-sub">6 countries · visa sponsored · data science &amp; credit risk</div>
+
+      <!-- Stats -->
+      <div class="job-stats-row" id="job-stats-row"></div>
+
+      <!-- Load feed -->
+      <div class="card" id="job-load-card">
+        <div class="card-title">Job feed</div>
+        <div class="load-area" onclick="document.getElementById('jobs-file-input').click()">
+          <div style="font-size:1.5rem;">📂</div>
+          <div class="load-area-text">Click to load <strong>jobs_feed.json</strong> from your crawler</div>
+          <div style="font-size:0.7rem;color:var(--text3);margin-top:0.3rem;font-family:var(--mono);">Run crawler daily → load output here</div>
+        </div>
+        <input type="file" id="jobs-file-input" accept=".json" style="display:none" onchange="loadJobsFeed(this)">
+        <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="document.getElementById('jobs-file-input').click()">↑ Load feed</button>
+          <button class="btn btn-ghost" onclick="openModal('modal-add-job')">+ Add manually</button>
+          <span id="feed-loaded-at" style="font-family:var(--mono);font-size:0.68rem;color:var(--text3);align-self:center;"></span>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="job-filter-row" id="job-filters">
+        <span style="font-size:0.65rem;font-family:var(--mono);color:var(--text3);">COUNTRY</span>
+        <button class="job-filter-btn country-NL active" onclick="toggleJobFilter('country','NL',this)">🇳🇱 NL</button>
+        <button class="job-filter-btn country-DE active" onclick="toggleJobFilter('country','DE',this)">🇩🇪 DE</button>
+        <button class="job-filter-btn country-CH active" onclick="toggleJobFilter('country','CH',this)">🇨🇭 CH</button>
+        <button class="job-filter-btn country-LU active" onclick="toggleJobFilter('country','LU',this)">🇱🇺 LU</button>
+        <button class="job-filter-btn country-NZ active" onclick="toggleJobFilter('country','NZ',this)">🇳🇿 NZ</button>
+        <button class="job-filter-btn country-CN active" onclick="toggleJobFilter('country','CN',this)">🇨🇳 CN</button>
+        <span style="font-size:0.65rem;font-family:var(--mono);color:var(--text3);margin-left:0.25rem;">VISA</span>
+        <button class="job-filter-btn active" data-filter="visa" data-val="explicit" onclick="toggleJobFilter('visa','explicit',this)">✓ Confirmed</button>
+        <button class="job-filter-btn active" data-filter="visa" data-val="likely" onclick="toggleJobFilter('visa','likely',this)">~ Likely</button>
+        <button class="job-filter-btn active" data-filter="visa" data-val="unknown" onclick="toggleJobFilter('visa','unknown',this)">? Unknown</button>
+        <span style="font-size:0.65rem;font-family:var(--mono);color:var(--text3);margin-left:0.25rem;">AGE</span>
+        <button class="job-filter-btn active" data-filter="age" data-val="7" onclick="setAgeFilter(7,this)">≤7d</button>
+        <button class="job-filter-btn" data-filter="age" data-val="14" onclick="setAgeFilter(14,this)">≤14d</button>
+        <button class="job-filter-btn" data-filter="age" data-val="30" onclick="setAgeFilter(30,this)">≤30d</button>
+      </div>
+
+      <!-- Sort + search -->
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;align-items:center;">
+        <input id="job-search" class="field-input" style="flex:1;padding:0.4rem 0.75rem;font-size:0.8rem;" placeholder="Search title, company..." oninput="renderJobFeed()">
+        <select id="job-sort" class="field-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.75rem;" onchange="renderJobFeed()">
+          <option value="date">Newest first</option>
+          <option value="relevance">Relevance</option>
+          <option value="country">Country</option>
+        </select>
+      </div>
+
+      <!-- Job feed list -->
+      <div id="job-feed-list"></div>
+
+      <!-- Pipeline -->
+      <div class="card" style="margin-top:1rem;">
+        <div class="card-header">
+          <div class="card-title" style="margin-bottom:0;">Application pipeline</div>
+          <div style="font-family:var(--mono);font-size:0.7rem;color:var(--text3);" id="pipeline-count">0 applications</div>
+        </div>
+        <div style="display:flex;gap:0.5rem;overflow-x:auto;padding-bottom:0.25rem;margin-top:0.75rem;">
+          <div class="pipeline-col" style="border-top:2px solid var(--text3);">
+            <div class="pipeline-col-title">Saved</div>
+            <div id="pipe-saved"></div>
+          </div>
+          <div class="pipeline-col" style="border-top:2px solid var(--amber);">
+            <div class="pipeline-col-title">Applied</div>
+            <div id="pipe-applied"></div>
+          </div>
+          <div class="pipeline-col" style="border-top:2px solid var(--teal);">
+            <div class="pipeline-col-title">Screening</div>
+            <div id="pipe-screening"></div>
+          </div>
+          <div class="pipeline-col" style="border-top:2px solid var(--accent2);">
+            <div class="pipeline-col-title">Interview</div>
+            <div id="pipe-interview"></div>
+          </div>
+          <div class="pipeline-col" style="border-top:2px solid var(--green);">
+            <div class="pipeline-col-title">Offer</div>
+            <div id="pipe-offer"></div>
+          </div>
+          <div class="pipeline-col" style="border-top:2px solid var(--coral);">
+            <div class="pipeline-col-title">Rejected</div>
+            <div id="pipe-rejected"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly target -->
+      <div class="card">
+        <div class="card-title">Weekly application target</div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Applications this week</span><strong id="app-week-label">0 / 50</strong></div>
+          <div class="progress-bar"><div class="progress-fill" id="app-week-bar" style="background:var(--accent2);width:0%"></div></div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:0.5rem;">Target: 10/day · 50/week across all countries</div>
+      </div>
+    </div>
+
   </div><!-- end content -->
 
   <!-- NAV -->
@@ -1724,6 +1864,10 @@ html, body {
     <div class="nav-item" onclick="showSection('review',this)">
       <span class="nav-icon">↻</span>
       <span class="nav-label">Review</span>
+    </div>
+    <div class="nav-item" onclick="showSection('jobs',this)">
+      <span class="nav-icon">⊕</span>
+      <span class="nav-label">Jobs</span>
     </div>
   </nav>
 </div>
@@ -1975,6 +2119,7 @@ function safeInitApp() {
     ['renderReview', renderReview],
     ['setDayType', () => setDayType('music', document.querySelector('.day-type-btn'))],
   ];
+  fns.push(['renderJobs', renderJobs]);
   fns.forEach(([name, fn]) => {
     try { fn(); }
     catch(e) { console.error(name + ' crashed:', e.message, e.stack); }
@@ -2548,15 +2693,15 @@ function renderCashFlow(){
     '<button class="sip-btn" onclick="openEditSIP('+s.id+')" title="Edit">✎</button>'+
     '<button class="sip-btn del" onclick="deleteSIP('+s.id+')" title="Delete">×</button>'+
     '</td></tr>';
-  }).join(''):'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">No active SIPs — click "+ Add Obligation" above</td></tr>';
-    h+='<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Obligations Subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(sipTotal)+'</td></tr>';
+  }).join(''):'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">No active SIPs — click "+ add SIP" above</td></tr>';
+    h+='<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Obligations subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(sipTotal)+'</td></tr>';
     cf.innerHTML=h;
   }
   const cfe=document.getElementById('cf-fixed-exp');
   if(cfe){
     cfe.innerHTML=fixedExp.length?fixedExp.map(function(f){
       return trEdit(f.name,f.amount,'editFixedExp('+f.id+')','deleteFixedExp('+f.id+')');
-    }).join('')+'<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Monthly expenses subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(fixedExpTotal)+'</td></tr>':'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">None added yet</td></tr>';
+    }).join('')+'<tr style="border-top:1px solid var(--border);"><td style="padding:0.3rem 0.1rem;font-weight:500;color:var(--text);">Expenses subtotal</td><td style="text-align:right;font-family:var(--mono);color:var(--coral);">-'+fmt(fixedExpTotal)+'</td></tr>':'<tr><td colspan="2" style="font-size:0.75rem;color:var(--text3);padding:0.25rem 0;">None added yet</td></tr>';
   }
   const cfsubs=document.getElementById('cf-subs-cf');
   if(cfsubs){
@@ -2754,6 +2899,281 @@ function navToSIPPlan(){
       if(oc.indexOf('sip-plan')>=0){switchHoldTab('sip-plan',t);}
     });
   },200);
+}
+
+
+// ─── JOBS ─────────────────────────────────────────────────────────────────────
+const COUNTRY_FLAGS = {NL:'🇳🇱',DE:'🇩🇪',CH:'🇨🇭',LU:'🇱🇺',NZ:'🇳🇿',CN:'🇨🇳'};
+const COUNTRY_NAMES = {NL:'Netherlands',DE:'Germany',CH:'Switzerland',LU:'Luxembourg',NZ:'New Zealand',CN:'China'};
+let jobFilters = {countries:new Set(['NL','DE','CH','LU','NZ','CN']),visa:new Set(['explicit','likely','unknown']),maxAge:7};
+let currentJobId = null;
+
+function ensureJobs(){
+  if(!DATA.jobs)DATA.jobs={feed:[],applications:[]};
+  if(!DATA.jobs.feed)DATA.jobs.feed=[];
+  if(!DATA.jobs.applications)DATA.jobs.applications=[];
+}
+
+function loadJobsFeed(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      ensureJobs();
+      const existing=new Set(DATA.jobs.feed.map(j=>j.id));
+      let added=0;
+      (data.jobs||[]).forEach(function(job){
+        if(!existing.has(job.id)){
+          DATA.jobs.feed.push(job);
+          added++;
+        }
+      });
+      DATA.jobs.lastFeedAt=data.fetched_at||new Date().toISOString();
+      const el=document.getElementById('feed-loaded-at');
+      if(el)el.textContent='Loaded '+added+' new jobs · '+new Date(DATA.jobs.lastFeedAt).toLocaleDateString('en-IN');
+      renderJobs();
+      showToast('Loaded '+added+' new jobs');
+    }catch(err){showToast('Invalid JSON file — check crawler output');}
+  };
+  reader.readAsText(file);
+}
+
+function toggleJobFilter(type,val,el){
+  if(type==='country'){
+    if(jobFilters.countries.has(val))jobFilters.countries.delete(val);
+    else jobFilters.countries.add(val);
+    el.classList.toggle('active');
+  } else if(type==='visa'){
+    if(jobFilters.visa.has(val))jobFilters.visa.delete(val);
+    else jobFilters.visa.add(val);
+    el.classList.toggle('active');
+  }
+  renderJobFeed();
+}
+
+function setAgeFilter(days,el){
+  jobFilters.maxAge=days;
+  document.querySelectorAll('[data-filter="age"]').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  renderJobFeed();
+}
+
+function daysAgo(dateStr){
+  if(!dateStr)return 999;
+  const d=new Date(dateStr);
+  return Math.floor((new Date()-d)/86400000);
+}
+
+function daysLabel(n){
+  if(n===0)return 'Today';
+  if(n===1)return 'Yesterday';
+  return n+'d ago';
+}
+
+function daysClass(n){
+  if(n<=3)return 'days-fresh';
+  if(n<=14)return 'days-recent';
+  return 'days-old';
+}
+
+function renderJobFeed(){
+  ensureJobs();
+  const search=(document.getElementById('job-search')||{}).value||'';
+  const sort=(document.getElementById('job-sort')||{}).value||'date';
+  const appliedIds=new Set(DATA.jobs.applications.map(function(a){return a.id;}));
+  
+  let jobs=DATA.jobs.feed.filter(function(j){
+    if(!jobFilters.countries.has(j.country))return false;
+    if(!jobFilters.visa.has(j.visa_signal||'unknown'))return false;
+    const age=daysAgo(j.posted_date);
+    if(age>jobFilters.maxAge)return false;
+    if(search){
+      const q=search.toLowerCase();
+      if(!(j.title||'').toLowerCase().includes(q)&&!(j.company||'').toLowerCase().includes(q))return false;
+    }
+    return true;
+  });
+
+  if(sort==='date')jobs.sort(function(a,b){return daysAgo(a.posted_date)-daysAgo(b.posted_date);});
+  else if(sort==='relevance')jobs.sort(function(a,b){return (b.relevance_score||0)-(a.relevance_score||0);});
+  else if(sort==='country')jobs.sort(function(a,b){return (a.country||'').localeCompare(b.country||'');});
+
+  const el=document.getElementById('job-feed-list');
+  if(!el)return;
+
+  if(jobs.length===0){
+    el.innerHTML='<div class="card" style="text-align:center;padding:2rem;color:var(--text3);font-size:0.82rem;">No jobs match current filters.<br>Load a feed file or adjust filters above.</div>';
+    return;
+  }
+
+  el.innerHTML=jobs.map(function(j){
+    const age=daysAgo(j.posted_date);
+    const isApplied=appliedIds.has(j.id);
+    const visaClass={'explicit':'visa-explicit','likely':'visa-likely','unknown':'visa-unknown','excluded':'visa-excluded'}[j.visa_signal||'unknown']||'visa-unknown';
+    const visaLabel={'explicit':'✓ Visa sponsor','likely':'~ Likely sponsor','unknown':'? Visa unknown','excluded':'✗ No sponsorship'}[j.visa_signal||'unknown']||'? Unknown';
+    const coClass=(j.company_type==='large'?'company-large':j.company_type==='startup'?'company-startup':'');
+    const coLabel=(j.company_type==='large'?'Large/MNC':j.company_type==='startup'?'Startup':'');
+    return '<div class="job-card'+(isApplied?' selected':'')+'" data-jid="'+j.id+'" onclick="openJobDetail(this.dataset.jid)">'
+      +'<div style="display:flex;align-items:flex-start;gap:0.6rem;">'
+      +'<div class="job-flag">'+( COUNTRY_FLAGS[j.country]||'🌐')+'</div>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div class="job-title">'+escHtml(j.title||'')+'</div>'
+      +'<div class="job-company">'+escHtml(j.company||'')+(j.location?' · '+escHtml(j.location):'')+'</div>'
+      +'<div class="job-meta">'
+      +'<span class="job-badge '+visaClass+'">'+visaLabel+'</span>'
+      +(coLabel?'<span class="job-badge '+coClass+'">'+coLabel+'</span>':'')
+      +'<span class="'+daysClass(age)+'">'+daysLabel(age)+'</span>'
+      +'<span style="color:var(--text3);">'+escHtml(j.source||'')+'</span>'
+      +(j.relevance_score?'<span style="color:var(--accent);font-size:0.62rem;">★ '+j.relevance_score+'/10</span>':'')
+      +'</div>'
+      +'</div>'
+      +(isApplied?'<div style="font-size:0.62rem;font-family:var(--mono);color:var(--accent);flex-shrink:0;">TRACKED</div>':'')
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function openJobDetail(id){
+  ensureJobs();
+  currentJobId=id;
+  const job=DATA.jobs.feed.find(function(j){return j.id===id;})||DATA.jobs.applications.find(function(a){return a.id===id;});
+  if(!job)return;
+  const app=DATA.jobs.applications.find(function(a){return a.id===id;});
+  document.getElementById('jd-title').textContent=job.title||'';
+  document.getElementById('jd-company').textContent=(job.company||'')+(job.location?' · '+job.location:'');
+  const age=daysAgo(job.posted_date);
+  const visaLabel={'explicit':'✓ Visa sponsor confirmed','likely':'~ Likely sponsors','unknown':'? Not mentioned','excluded':'✗ No sponsorship'}[job.visa_signal||'unknown']||'?';
+  document.getElementById('jd-meta').innerHTML=
+    '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;font-size:0.72rem;font-family:var(--mono);">'
+    +'<span>'+(COUNTRY_FLAGS[job.country]||'')+' '+(COUNTRY_NAMES[job.country]||job.country||'')+'</span>'
+    +'<span style="color:var(--text3);">'+daysLabel(age)+(job.posted_date?' ('+job.posted_date+')':'')+'</span>'
+    +'<span style="color:var(--text3);">via '+escHtml(job.source||'unknown')+'</span>'
+    +'<span>'+visaLabel+'</span>'
+    +'</div>';
+  document.getElementById('jd-status').value=app?app.status:'feed';
+  document.getElementById('jd-notes').value=app?app.notes||'':'';
+  document.getElementById('jd-snippet').textContent=job.description_snippet||'';
+  const applyBtn=document.getElementById('jd-apply-btn');
+  if(applyBtn)applyBtn.href=job.url||'#';
+  openModal('modal-job-detail');
+}
+
+function saveJobDetail(){
+  ensureJobs();
+  const status=document.getElementById('jd-status').value;
+  const notes=document.getElementById('jd-notes').value;
+  const job=DATA.jobs.feed.find(function(j){return j.id===currentJobId;})||{id:currentJobId};
+  let app=DATA.jobs.applications.find(function(a){return a.id===currentJobId;});
+  if(!app){
+    app={id:currentJobId,title:job.title,company:job.company,country:job.country,url:job.url,status:'feed',notes:'',addedAt:new Date().toISOString()};
+    DATA.jobs.applications.push(app);
+  }
+  app.status=status;
+  app.notes=notes;
+  app.updatedAt=new Date().toISOString();
+  closeModal('modal-job-detail');
+  renderJobs();
+  showToast('Saved');
+}
+
+function updateJobStatus(){
+  // preview only — saved on button click
+}
+
+function deleteJob(){
+  if(!confirm('Remove this job from tracking?'))return;
+  ensureJobs();
+  DATA.jobs.feed=DATA.jobs.feed.filter(function(j){return j.id!==currentJobId;});
+  DATA.jobs.applications=DATA.jobs.applications.filter(function(a){return a.id!==currentJobId;});
+  closeModal('modal-job-detail');
+  renderJobs();
+  showToast('Removed');
+}
+
+function saveJob(){
+  ensureJobs();
+  const eid=document.getElementById('job-edit-id').value;
+  const job={
+    id:eid||'manual-'+Date.now(),
+    title:document.getElementById('job-title-input').value.trim(),
+    company:document.getElementById('job-company-input').value.trim(),
+    country:document.getElementById('job-country-input').value,
+    source:document.getElementById('job-source-input').value.trim()||'Manual',
+    url:document.getElementById('job-url-input').value.trim(),
+    posted_date:document.getElementById('job-date-input').value||new Date().toISOString().split('T')[0],
+    visa_signal:document.getElementById('job-visa-input').value,
+    company_type:document.getElementById('job-company-type-input').value,
+    notes:document.getElementById('job-notes-input').value.trim(),
+    description_snippet:'',
+    relevance_score:0
+  };
+  if(!job.title){showToast('Title required');return;}
+  if(eid){
+    const idx=DATA.jobs.feed.findIndex(function(j){return j.id===eid;});
+    if(idx>=0)DATA.jobs.feed[idx]=job;
+  } else {
+    DATA.jobs.feed.push(job);
+  }
+  ['job-title-input','job-company-input','job-source-input','job-url-input','job-notes-input'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('job-edit-id').value='';
+  document.getElementById('job-modal-title').textContent='Add job manually';
+  closeModal('modal-add-job');
+  renderJobs();
+  showToast('Job saved');
+}
+
+function renderJobStats(){
+  ensureJobs();
+  const apps=DATA.jobs.applications;
+  const el=document.getElementById('job-stats-row');
+  if(!el)return;
+  const thisWeek=apps.filter(function(a){
+    if(!a.addedAt)return false;
+    return (new Date()-new Date(a.addedAt))/86400000<=7;
+  }).length;
+  const applied=apps.filter(function(a){return a.status==='applied';}).length;
+  const active=apps.filter(function(a){return ['screening','interview'].includes(a.status);}).length;
+  const offers=apps.filter(function(a){return a.status==='offer';}).length;
+  el.innerHTML=[
+    {val:DATA.jobs.feed.length,label:'In feed'},
+    {val:thisWeek,label:'This week'},
+    {val:applied,label:'Applied'},
+    {val:active,label:'Active',color:'var(--teal)'},
+  ].map(function(s){
+    return '<div class="stat-box"><div class="stat-val" style="font-size:1.2rem;'+(s.color?'color:'+s.color:'')+'">'+(s.val||0)+'</div><div class="stat-label">'+s.label+'</div></div>';
+  }).join('');
+}
+
+function renderPipeline(){
+  ensureJobs();
+  const apps=DATA.jobs.applications;
+  const stages=['saved','applied','screening','interview','offer','rejected'];
+  stages.forEach(function(stage){
+    const el=document.getElementById('pipe-'+stage);
+    if(!el)return;
+    const items=apps.filter(function(a){return a.status===stage;});
+    el.innerHTML=items.length?items.map(function(a){
+      return '<div class="pipeline-item" data-jid="'+a.id+'" onclick="openJobDetail(this.dataset.jid)">'+escHtml((a.title||'').substring(0,24))+'<br><span style="font-size:0.65rem;color:var(--text3);">'+(COUNTRY_FLAGS[a.country]||'')+' '+escHtml(a.company||'')+'</span></div>';
+    }).join(''):'<div style="font-size:0.68rem;color:var(--text3);padding:0.25rem 0;">—</div>';
+  });
+  const total=apps.length;
+  const pc=document.getElementById('pipeline-count');
+  if(pc)pc.textContent=total+' application'+(total!==1?'s':'');
+  const wk=apps.filter(function(a){return a.addedAt&&(new Date()-new Date(a.addedAt))/86400000<=7;}).length;
+  const bar=document.getElementById('app-week-bar');
+  const lbl=document.getElementById('app-week-label');
+  if(bar)bar.style.width=Math.min(100,(wk/50)*100)+'%';
+  if(lbl)lbl.textContent=wk+' / 50';
+}
+
+function renderJobs(){
+  renderJobStats();
+  renderJobFeed();
+  renderPipeline();
 }
 
 function renderFinance(){ensurePortfolio();ensureFixedExp();ensureUpcoming();renderPortfolioHero();renderAllocationChart();renderInStocks();renderMFs();renderUSStocks();renderRetirals();renderSIPManagement();renderCashFlow();renderUpcomingList();const rd=(DATA.finance.investments||[]).find(i=>i.type==='rd');if(rd){const ev=rd.value||0,et=rd.target||550000;document.getElementById('ef-label').textContent=fmt(ev)+' / '+fmt(et);document.getElementById('ef-bar').style.width=Math.min(100,(ev/et)*100)+'%';}const subs=DATA.finance.subscriptions||[];document.getElementById('subs-list').innerHTML=subs.length?subs.map(s=>{const aligned=s.date>=1&&s.date<=5;return`<div class="sub-item"><div style="flex:1"><div class="finance-name">${s.name}</div><div class="finance-sub">${s.type} · Date: ${s.date||'?'}</div></div><div style="text-align:right"><div class="finance-val">${fmt(s.amount||0)}</div><div class="sub-due ${aligned?'ok':'soon'}" style="margin-bottom:3px;">${aligned?'aligned':'misaligned'}</div><div style="display:flex;gap:0.3rem;justify-content:flex-end;"><button class="sip-btn" onclick="editSub(${s.id})">✎</button><button class="sip-btn del" onclick="deleteSub(${s.id})">×</button></div></div></div>`;}).join(''):'<div style="font-size:0.82rem;color:var(--text3);">No subscriptions yet.</div>';setTimeout(()=>renderProjection(currentProjYears,null),100);}
@@ -3055,6 +3475,82 @@ window.addEventListener('DOMContentLoaded', () => {
         <button class="btn btn-primary" onclick="saveIncome()">Save</button>
         <button class="btn btn-ghost" onclick="closeModal('modal-cf-income')">Cancel</button>
       </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="modal-add-job">
+  <div class="modal">
+    <div class="modal-title" id="job-modal-title">Add job manually</div>
+    <div class="log-form">
+      <input type="hidden" id="job-edit-id">
+      <div><label class="field-label">Job title</label><input class="field-input" id="job-title-input" placeholder="Senior Data Scientist"></div>
+      <div><label class="field-label">Company</label><input class="field-input" id="job-company-input" placeholder="ING Bank"></div>
+      <div class="health-grid">
+        <div><label class="field-label">Country</label>
+          <select class="field-select" id="job-country-input">
+            <option value="NL">🇳🇱 Netherlands</option>
+            <option value="DE">🇩🇪 Germany</option>
+            <option value="CH">🇨🇭 Switzerland</option>
+            <option value="LU">🇱🇺 Luxembourg</option>
+            <option value="NZ">🇳🇿 New Zealand</option>
+            <option value="CN">🇨🇳 China</option>
+          </select>
+        </div>
+        <div><label class="field-label">Source portal</label><input class="field-input" id="job-source-input" placeholder="LinkedIn, StepStone..."></div>
+      </div>
+      <div><label class="field-label">Application URL</label><input class="field-input" id="job-url-input" type="url" placeholder="https://..."></div>
+      <div class="health-grid">
+        <div><label class="field-label">Date posted</label><input class="field-input" id="job-date-input" type="date"></div>
+        <div><label class="field-label">Visa signal</label>
+          <select class="field-select" id="job-visa-input">
+            <option value="explicit">✓ Explicitly sponsors</option>
+            <option value="likely">~ Likely sponsors</option>
+            <option value="unknown">? Not mentioned</option>
+            <option value="excluded">✗ No sponsorship</option>
+          </select>
+        </div>
+      </div>
+      <div><label class="field-label">Company type</label>
+        <select class="field-select" id="job-company-type-input">
+          <option value="large">Large / MNC / Bank</option>
+          <option value="startup">Startup / Scale-up</option>
+          <option value="unknown">Unknown</option>
+        </select>
+      </div>
+      <div><label class="field-label">Notes</label><textarea class="field-textarea" id="job-notes-input" placeholder="Key requirements, salary range, anything relevant..."></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveJob()">Save</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-add-job')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-job-detail">
+  <div class="modal">
+    <div class="modal-title" id="jd-title" style="font-size:1rem;"></div>
+    <div id="jd-company" style="font-size:0.82rem;color:var(--text2);margin-bottom:0.75rem;"></div>
+    <div id="jd-meta" style="margin-bottom:1rem;"></div>
+    <div style="font-size:0.72rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.4rem;">Status</div>
+    <select class="field-select" id="jd-status" onchange="updateJobStatus()" style="margin-bottom:0.75rem;">
+      <option value="feed">In feed</option>
+      <option value="saved">Saved</option>
+      <option value="applied">Applied</option>
+      <option value="screening">Screening</option>
+      <option value="interview">Interview</option>
+      <option value="offer">Offer</option>
+      <option value="rejected">Rejected</option>
+    </select>
+    <div style="font-size:0.72rem;font-family:var(--mono);color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.4rem;">Notes</div>
+    <textarea class="field-textarea" id="jd-notes" placeholder="CV version used, interview notes, contact..."></textarea>
+    <div id="jd-snippet" style="font-size:0.78rem;color:var(--text2);margin-top:0.75rem;line-height:1.6;max-height:120px;overflow-y:auto;"></div>
+    <div class="btn-row" style="margin-top:0.75rem;">
+      <a id="jd-apply-btn" href="#" target="_blank" class="btn btn-primary" style="text-decoration:none;">↗ Open job posting</a>
+      <button class="btn btn-ghost" onclick="saveJobDetail()">Save notes</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-job-detail')">Close</button>
+      <button class="btn btn-danger" onclick="deleteJob()">Delete</button>
     </div>
   </div>
 </div>
