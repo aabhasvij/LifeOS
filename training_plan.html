@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>My Training Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Barlow Condensed', sans-serif; background: #0D0D0D; color: #F0EDE6; min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: #111; border-bottom: 3px solid #E8C547; padding: 22px 18px 18px; }
+  .header-label { font-size: 10px; letter-spacing: 3px; color: #E8C547; margin-bottom: 6px; }
+  .header h1 { font-size: clamp(24px, 7vw, 38px); font-weight: 800; line-height: 1.1; letter-spacing: 1px; }
+  .header h1 span { color: #E8C547; }
+  .stats { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .stat { background: #1A1A1A; border: 1px solid #333; border-radius: 4px; padding: 5px 12px; }
+  .stat-label { font-size: 9px; color: #888; letter-spacing: 2px; }
+  .stat-val { font-size: 14px; font-weight: 700; }
+
+  /* TABS */
+  .tabs { display: flex; border-bottom: 1px solid #222; background: #111; position: sticky; top: 0; z-index: 10; }
+  .tab { flex: 1; padding: 13px 4px; font-size: 10px; letter-spacing: 1.5px; font-weight: 700; background: transparent; color: #666; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; transition: all 0.2s; }
+  .tab.active { background: #1A1A1A; color: #E8C547; border-bottom: 2px solid #E8C547; }
+
+  /* PANELS */
+  .panel { display: none; padding: 18px 16px; }
+  .panel.active { display: block; }
+
+  /* PILLAR CARDS */
+  .section-label { font-size: 10px; color: #666; letter-spacing: 2px; margin-bottom: 14px; }
+  .pillar { border-radius: 6px; margin-bottom: 10px; overflow: hidden; cursor: pointer; transition: transform 0.15s; border: 1px solid #222; background: #141414; }
+  .pillar:active { transform: scale(0.98); }
+  .pillar-header { display: flex; align-items: center; padding: 13px 14px; gap: 12px; }
+  .pillar-icon { font-size: 20px; }
+  .pillar-meta { flex: 1; }
+  .pillar-time { font-size: 9px; color: #666; letter-spacing: 2px; }
+  .pillar-title { font-size: 15px; font-weight: 700; }
+  .pillar-arrow { color: #444; font-size: 12px; transition: transform 0.2s; }
+  .pillar.open .pillar-arrow { transform: rotate(180deg); }
+  .pillar-body { display: none; padding: 0 14px 14px; border-top: 1px solid #1E1E1E; }
+  .pillar.open .pillar-body { display: block; }
+  .pillar-body p { font-family: 'Barlow', sans-serif; font-size: 13px; color: #BBB; line-height: 1.6; margin: 12px 0 10px; }
+  .takeaway { border-radius: 4px; padding: 10px 13px; border-left: 3px solid; }
+  .takeaway-label { font-size: 9px; letter-spacing: 2px; margin-bottom: 3px; }
+  .takeaway-text { font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; }
+
+  /* WEEK PLAN */
+  .day-scroll { overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; }
+  .day-pills { display: flex; gap: 8px; min-width: max-content; }
+  .day-pill { padding: 8px 10px; border-radius: 6px; border: 2px solid #222; background: #141414; cursor: pointer; text-align: center; min-width: 62px; transition: all 0.15s; }
+  .day-pill.active { background: transparent; }
+  .day-pill-name { font-size: 9px; color: #555; letter-spacing: 1px; }
+  .day-pill-type { font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.5px; margin-top: 2px; }
+  .day-detail { border-radius: 8px; overflow: hidden; border: 1px solid #333; background: #141414; }
+  .day-header { padding: 14px 16px; border-bottom: 1px solid #1E1E1E; display: flex; justify-content: space-between; align-items: flex-start; }
+  .day-name-label { font-size: 10px; letter-spacing: 2px; }
+  .day-title { font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
+  .day-focus { font-family: 'Barlow', sans-serif; font-size: 13px; color: #888; margin-top: 2px; }
+  .day-dur { background: #0D0D0D; border: 1px solid #333; border-radius: 6px; padding: 8px 12px; text-align: center; }
+  .day-dur-label { font-size: 9px; color: #666; letter-spacing: 1px; }
+  .day-dur-val { font-size: 15px; font-weight: 700; }
+  .ex-row { display: flex; align-items: center; padding: 11px 16px; gap: 11px; border-bottom: 1px solid #1E1E1E; }
+  .ex-row:last-child { border-bottom: none; }
+  .ex-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .ex-info { flex: 1; }
+  .ex-name { font-size: 14px; font-weight: 700; letter-spacing: 0.3px; }
+  .ex-note { font-family: 'Barlow', sans-serif; font-size: 11px; color: #888; margin-top: 1px; }
+  .ex-sets { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-align: right; min-width: 76px; }
+  .day-footer { padding: 12px 16px; background: #0D0D0D; border-top: 1px solid #1E1E1E; display: flex; gap: 8px; flex-wrap: wrap; }
+  .footer-card { flex: 1; min-width: 150px; border-radius: 4px; padding: 8px 11px; border-left: 3px solid; background: #141414; }
+  .footer-label { font-size: 9px; letter-spacing: 2px; margin-bottom: 2px; }
+  .footer-text { font-family: 'Barlow', sans-serif; font-size: 11px; color: #CCC; }
+
+  /* NOTES */
+  .note-card { background: #141414; border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; border-left: 4px solid; border: 1px solid; }
+  .note-inner { display: flex; gap: 10px; align-items: flex-start; }
+  .note-icon { font-size: 18px; }
+  .note-title { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+  .note-body { font-family: 'Barlow', sans-serif; font-size: 13px; color: #AAA; line-height: 1.6; margin-top: 4px; }
+  .summary-box { background: #141414; border: 1px solid #333; border-radius: 6px; padding: 14px 16px; margin-top: 4px; }
+  .summary-title { font-size: 11px; color: #E8C547; letter-spacing: 2px; margin-bottom: 12px; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1E1E1E; }
+  .summary-row:nth-child(odd) { padding-right: 12px; }
+  .summary-key { font-family: 'Barlow', sans-serif; font-size: 11px; color: #888; }
+  .summary-val { font-size: 13px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">BASED ON BRYAN JOHNSON · YOU'RE EXERCISING WRONG (2026)</div>
+  <h1>YOUR PERSONALISED<br><span>TRAINING PROTOCOL</span></h1>
+  <div class="stats">
+    <div class="stat"><div class="stat-label">WEIGHT</div><div class="stat-val">105 kg</div></div>
+    <div class="stat"><div class="stat-label">HEIGHT</div><div class="stat-val">5'11"</div></div>
+    <div class="stat"><div class="stat-label">BASE</div><div class="stat-val">1.5 months</div></div>
+    <div class="stat"><div class="stat-label">FOOTBALL</div><div class="stat-val">Sundays</div></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('breakdown')">VIDEO BREAKDOWN</button>
+  <button class="tab" onclick="showTab('plan')">WEEKLY PLAN</button>
+  <button class="tab" onclick="showTab('notes')">STRATEGY NOTES</button>
+</div>
+
+<!-- BREAKDOWN -->
+<div id="breakdown" class="panel active">
+  <div class="section-label">6 SEGMENTS · TAP TO EXPAND</div>
+
+  <div class="pillar" style="border-left:4px solid #E8C547" onclick="togglePillar(this)">
+    <div class="pillar-header">
+      <span class="pillar-icon">⏳</span>
+      <div class="pillar-meta">
+        <div class="pillar-time">1:36 – 3:33</div>
+        <div class="pillar-title">Future Bryan's Message</div>
+      </div>
+      <span class="pillar-arrow">▼</span>
+    </div>
+    <div class="pillar-body">
+      <p>Bryan's older self sends a message back: the biggest regret isn't working too hard — it's not taking care of the body sooner. Every workout is a deposit into your future health account.</p>
+      <div class="takeaway" style="border-color:#E8C547;background:#E8C54711">
+        <div class="takeaway-label" style="color:#E8C547">KEY TAKEAWAY</div>
+        <div class="takeaway-text">Start now. Consistency compounds just like interest.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pillar" style="border-left:4px solid #FF6B6B" onclick="togglePillar(this)">
+    <div class="pillar-header">
+      <span class="pillar-icon">🏋️</span>
+      <div class="pillar-meta">
+        <div class="pillar-time">3:33 – 6:02</div>
+        <div class="pillar-title">Strength Training</div>
+      </div>
+      <span class="pillar-arrow">▼</span>
+    </div>
+    <div class="pillar-body">
+      <p>Muscle mass is the #1 predictor of longevity and metabolic health. Resistance training 3×/week protects bone density, insulin sensitivity, and prevents age-related decline. Compound movements (deadlifts, squats, presses) are prioritized over isolation work.</p>
+      <div class="takeaway" style="border-color:#FF6B6B;background:#FF6B6B11">
+        <div class="takeaway-label" style="color:#FF6B6B">KEY TAKEAWAY</div>
+        <div class="takeaway-text">Train for the 80-year-old version of you. Strength is survival.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pillar" style="border-left:4px solid #4ECDC4" onclick="togglePillar(this)">
+    <div class="pillar-header">
+      <span class="pillar-icon">🚶</span>
+      <div class="pillar-meta">
+        <div class="pillar-time">6:02 – 7:47</div>
+        <div class="pillar-title">Zone 2 Cardio (Low Intensity)</div>
+      </div>
+      <span class="pillar-arrow">▼</span>
+    </div>
+    <div class="pillar-body">
+      <p>Zone 2 is 60–70% max HR — a pace where you can hold a conversation but it's slightly effortful. This trains mitochondrial density and fat oxidation. 150–180 min/week is the target. Brisk walking, light jogging, cycling all count.</p>
+      <div class="takeaway" style="border-color:#4ECDC4;background:#4ECDC411">
+        <div class="takeaway-label" style="color:#4ECDC4">KEY TAKEAWAY</div>
+        <div class="takeaway-text">This is your aerobic base. Most people skip it chasing intensity.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pillar" style="border-left:4px solid #FF8C42" onclick="togglePillar(this)">
+    <div class="pillar-header">
+      <span class="pillar-icon">🔥</span>
+      <div class="pillar-meta">
+        <div class="pillar-time">7:47 – 10:39</div>
+        <div class="pillar-title">Zone 4–5 Cardio (High Intensity)</div>
+      </div>
+      <span class="pillar-arrow">▼</span>
+    </div>
+    <div class="pillar-body">
+      <p>Zone 4–5 is 85–100% max HR. Used in small doses (1–2×/week), it spikes VO2 max — one of the strongest longevity biomarkers. Protocol: 4 min all-out effort, 4 min recovery, 4–5 rounds. Your Sunday football match already covers this.</p>
+      <div class="takeaway" style="border-color:#FF8C42;background:#FF8C4211">
+        <div class="takeaway-label" style="color:#FF8C42">KEY TAKEAWAY</div>
+        <div class="takeaway-text">VO2 max improvement = years added to your life.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pillar" style="border-left:4px solid #A29BFE" onclick="togglePillar(this)">
+    <div class="pillar-header">
+      <span class="pillar-icon">🧘</span>
+      <div class="pillar-meta">
+        <div class="pillar-time">10:39 – 11:59</div>
+        <div class="pillar-title">Mobility & Flexibility</div>
+      </div>
+      <span class="pillar-arrow">▼</span>
+    </div>
+    <div class="pillar-body">
+      <p>Often neglected, mobility is what lets you keep training as you age. Focus on hip flexors, thoracic spine, hamstrings, and ankles. 10–15 min daily is sufficient. Dynamic stretching before training, static after.</p>
+      <div class="takeaway" style="border-color:#A29BFE;background:#A29BFE11">
+        <div class="takeaway-label" style="color:#A29BFE">KEY TAKEAWAY</div>
+        <div class="takeaway-text">Flexibility is your insurance policy against injury.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pillar" style="border-left:4px solid #55EFC4" onclick="togglePillar(this)">
+    <div class="pillar-header">
+      <span class="pillar-icon">⚖️</span>
+      <div class="pillar-meta">
+        <div class="pillar-time">11:59 – 13:27</div>
+        <div class="pillar-title">Balance</div>
+      </div>
+      <span class="pillar-arrow">▼</span>
+    </div>
+    <div class="pillar-body">
+      <p>Balance training is the most underrated pillar. Single-leg work, proprioception drills, and unstable surface training protect you from falls and build deep stabilizer muscles. Directly translates to football agility.</p>
+      <div class="takeaway" style="border-color:#55EFC4;background:#55EFC411">
+        <div class="takeaway-label" style="color:#55EFC4">KEY TAKEAWAY</div>
+        <div class="takeaway-text">Balance declines fast if untrained. It compounds fast if trained.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEKLY PLAN -->
+<div id="plan" class="panel">
+  <div class="day-scroll">
+    <div class="day-pills" id="dayPills"></div>
+  </div>
+  <div id="dayDetail"></div>
+</div>
+
+<!-- NOTES -->
+<div id="notes" class="panel">
+  <div class="note-card" style="border-left-color:#F9CA24;border-color:#F9CA2433">
+    <div class="note-inner">
+      <span class="note-icon">⚽</span>
+      <div>
+        <div class="note-title" style="color:#F9CA24">Football = Your HIIT Session</div>
+        <div class="note-body">The 30–40 min match hits Zone 4–5 naturally. No separate HIIT needed. Sunday football checks your high-intensity box for the week. Saturday is intentionally light — fresh legs going into Sunday means better performance on the pitch.</div>
+      </div>
+    </div>
+  </div>
+  <div class="note-card" style="border-left-color:#4ECDC4;border-color:#4ECDC433">
+    <div class="note-inner">
+      <span class="note-icon">📊</span>
+      <div>
+        <div class="note-title" style="color:#4ECDC4">Zone 2 Is Your Biggest Gap</div>
+        <div class="note-body">At 105 kg, fat oxidation and aerobic base need the most work. Tuesday and Saturday Zone 2 sessions plus Thursday brisk walk are non-negotiable. This is where body composition changes happen.</div>
+      </div>
+    </div>
+  </div>
+  <div class="note-card" style="border-left-color:#FF6B6B;border-color:#FF6B6B33">
+    <div class="note-inner">
+      <span class="note-icon">💪</span>
+      <div>
+        <div class="note-title" style="color:#FF6B6B">Progressive Overload — The Only Rule</div>
+        <div class="note-body">Add weight or reps each week on big lifts (Squat, Deadlift, Press, Row). Even 2.5 kg added per week on 3 lifts means you're 30+ kg stronger in 10 weeks. Track it.</div>
+      </div>
+    </div>
+  </div>
+  <div class="note-card" style="border-left-color:#A29BFE;border-color:#A29BFE33">
+    <div class="note-inner">
+      <span class="note-icon">🧘</span>
+      <div>
+        <div class="note-title" style="color:#A29BFE">Mobility After Football Is Critical</div>
+        <div class="note-body">At your size, hip flexors and hamstrings take a beating in football. 10 minutes of static stretching post-match dramatically reduces injury risk and next-day soreness. Don't skip it.</div>
+      </div>
+    </div>
+  </div>
+  <div class="note-card" style="border-left-color:#55EFC4;border-color:#55EFC433">
+    <div class="note-inner">
+      <span class="note-icon">⚖️</span>
+      <div>
+        <div class="note-title" style="color:#55EFC4">Balance Work = Football Performance</div>
+        <div class="note-body">Single-leg work (Bulgarian split squat, single-leg RDL, BOSU) isn't just for longevity — it directly improves your agility, cutting ability, and injury resilience on the pitch.</div>
+      </div>
+    </div>
+  </div>
+  <div class="note-card" style="border-left-color:#E8C547;border-color:#E8C54733">
+    <div class="note-inner">
+      <span class="note-icon">🔄</span>
+      <div>
+        <div class="note-title" style="color:#E8C547">Reassess in 6 Weeks</div>
+        <div class="note-body">After 6 weeks your fitness baseline will have meaningfully shifted. Add a 5th strength session, extend Zone 2 duration, or increase intensity on high-intensity days.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">WEEKLY VOLUME SUMMARY</div>
+    <div class="summary-grid">
+      <div class="summary-row"><span class="summary-key">Strength Sessions</span><span class="summary-val" style="color:#FF6B6B">3×/week</span></div>
+      <div class="summary-row"><span class="summary-key">Zone 2 Cardio</span><span class="summary-val" style="color:#4ECDC4">~90–100 min</span></div>
+      <div class="summary-row"><span class="summary-key">HIIT (Football)</span><span class="summary-val" style="color:#F9CA24">~40 min</span></div>
+      <div class="summary-row"><span class="summary-key">Mobility</span><span class="summary-val" style="color:#A29BFE">~35–40 min</span></div>
+      <div class="summary-row"><span class="summary-key">Balance Training</span><span class="summary-val" style="color:#55EFC4">2×/week</span></div>
+      <div class="summary-row"><span class="summary-key">Active Days</span><span class="summary-val" style="color:#E8C547">6 of 7</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const weekPlan = [
+  {
+    day:"Monday", label:"Strength A", type:"strength", color:"#FF6B6B", focus:"Lower Body + Core", duration:"~65 min",
+    exercises:[
+      {name:"Barbell Back Squat", sets:"4 × 6–8", note:"Control the descent (3 sec)"},
+      {name:"Romanian Deadlift", sets:"3 × 8–10", note:"Hip hinge focus, full stretch"},
+      {name:"Walking Lunges", sets:"3 × 12/leg", note:"Weighted dumbbells"},
+      {name:"Leg Press", sets:"3 × 10–12", note:"Full range, feet shoulder-width"},
+      {name:"Hanging Leg Raises", sets:"3 × 12–15", note:"Slow and controlled"},
+      {name:"Plank", sets:"3 × 45 sec", note:"Squeeze glutes + core hard"}
+    ],
+    cardio:"10 min Zone 2 (incline walk) post-workout",
+    mobility:"Hip flexor + hamstring stretch 5 min"
+  },
+  {
+    day:"Tuesday", label:"Zone 2 + Balance", type:"cardio", color:"#4ECDC4", focus:"Aerobic Base + Stability", duration:"~55 min",
+    exercises:[
+      {name:"Treadmill / Brisk Walk", sets:"35–40 min", note:"Conversational pace, ~130–140 BPM"},
+      {name:"Single-Leg Romanian Deadlift", sets:"3 × 10/leg", note:"Bodyweight or light DB"},
+      {name:"Single-Leg Calf Raises", sets:"3 × 15/leg", note:"Slow tempo"},
+      {name:"Bosu Balance Stand", sets:"3 × 30 sec/leg", note:"Eyes open → eyes closed progression"}
+    ],
+    cardio:null,
+    mobility:"Full body dynamic mobility — 10 min"
+  },
+  {
+    day:"Wednesday", label:"Strength B", type:"strength", color:"#FF6B6B", focus:"Upper Body Push + Pull", duration:"~65 min",
+    exercises:[
+      {name:"Barbell / DB Bench Press", sets:"4 × 6–8", note:"Full ROM, controlled"},
+      {name:"Bent Over Barbell Row", sets:"4 × 6–8", note:"Squeeze shoulder blades"},
+      {name:"Overhead Press (DB/BB)", sets:"3 × 8–10", note:"Strict form, no leg drive"},
+      {name:"Lat Pulldown", sets:"3 × 10–12", note:"Full stretch at top"},
+      {name:"Incline DB Curl", sets:"3 × 12", note:"Slow eccentric"},
+      {name:"Tricep Dips / Pushdowns", sets:"3 × 12", note:"Lock out at bottom"}
+    ],
+    cardio:"10 min Zone 2 (bike/walk) post-workout",
+    mobility:"Thoracic spine + shoulder mobility 5 min"
+  },
+  {
+    day:"Thursday", label:"Zone 2 + Core", type:"cardio", color:"#4ECDC4", focus:"Aerobic Base + Stability", duration:"~55 min",
+    exercises:[
+      {name:"Treadmill / Brisk Walk / Cycle", sets:"35–40 min", note:"Conversational pace, ~130–140 BPM"},
+      {name:"Dead Bug", sets:"3 × 10/side", note:"Core stability for football"},
+      {name:"Pallof Press", sets:"3 × 12/side", note:"Anti-rotation core strength"},
+      {name:"Side Plank", sets:"3 × 35 sec/side", note:"Lateral stability for cutting"}
+    ],
+    cardio:null,
+    mobility:"Hip flexor + thoracic rotation — 8 min (football prep)"
+  },
+  {
+    day:"Friday", label:"Strength C", type:"strength", color:"#FF6B6B", focus:"Deadlift + Athletic Power", duration:"~60 min",
+    exercises:[
+      {name:"Conventional Deadlift", sets:"4 × 5", note:"Build from 70% 1RM, form first"},
+      {name:"Bulgarian Split Squat", sets:"3 × 8/leg", note:"Rear foot elevated, brutal but essential"},
+      {name:"Trap Bar Shrug / Farmer Carry", sets:"3 × 40m", note:"Builds grip + traps + posture"},
+      {name:"Cable Face Pulls", sets:"3 × 15", note:"Shoulder health and posture"},
+      {name:"Ab Wheel Rollout", sets:"3 × 10", note:"Full extension if possible"}
+    ],
+    cardio:"5 min Zone 2 warm-up on bike before lifting",
+    mobility:"Hip flexor + pigeon pose stretch post-session"
+  },
+  {
+    day:"Saturday", label:"Zone 2 + Mobility", type:"cardio", color:"#4ECDC4", focus:"Pre-Football Active Recovery", duration:"~50 min",
+    exercises:[
+      {name:"Outdoor Walk / Light Jog", sets:"30–35 min", note:"Easy pace — saving legs for Sunday"},
+      {name:"Full Body Stretch Routine", sets:"15 min", note:"Hips, quads, calves, hamstrings"},
+      {name:"Dead Hang (bar)", sets:"3 × 20–30 sec", note:"Decompresses spine, builds grip"}
+    ],
+    cardio:null,
+    mobility:"This IS the mobility day — be thorough for Sunday"
+  },
+  {
+    day:"Sunday", label:"Football", type:"football", color:"#F9CA24", focus:"Zone 4–5 + Agility", duration:"~100 min",
+    exercises:[
+      {name:"Drill Session", sets:"60 min", note:"Lateral cuts = balance training in disguise"},
+      {name:"Match Play", sets:"30–40 min", note:"Your HIIT/Zone 4–5 session for the week"}
+    ],
+    cardio:"Covered by the match",
+    mobility:"Post-football mandatory: calf, quad, hamstring, hip flexor static stretch — 10 min"
+  }
+];
+
+const typeLabels = {strength:"STRENGTH", cardio:"CARDIO", football:"FOOTBALL", rest:"REST"};
+let activeDay = "Monday";
+
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function togglePillar(el) {
+  el.classList.toggle('open');
+}
+
+function renderPills() {
+  const container = document.getElementById('dayPills');
+  container.innerHTML = weekPlan.map(d => `
+    <div class="day-pill ${d.day === activeDay ? 'active' : ''}"
+         style="border-color:${d.day === activeDay ? d.color : '#222'};background:${d.day === activeDay ? d.color+'18' : '#141414'}"
+         onclick="selectDay('${d.day}')">
+      <div class="day-pill-name" style="color:${d.day === activeDay ? d.color : '#555'}">${d.day.slice(0,3).toUpperCase()}</div>
+      <div class="day-pill-type" style="color:${d.day === activeDay ? d.color : '#888'}">${typeLabels[d.type]}</div>
+    </div>
+  `).join('');
+}
+
+function renderDay() {
+  const d = weekPlan.find(x => x.day === activeDay);
+  const exRows = d.exercises.map((ex, i) => `
+    <div class="ex-row">
+      <div class="ex-num" style="background:${d.color}22;border:1px solid ${d.color}55;color:${d.color}">${i+1}</div>
+      <div class="ex-info">
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-note">${ex.note}</div>
+      </div>
+      <div class="ex-sets" style="color:${d.color}">${ex.sets}</div>
+    </div>
+  `).join('');
+
+  const footer = `
+    <div class="day-footer">
+      ${d.cardio ? `<div class="footer-card" style="border-left-color:#4ECDC4">
+        <div class="footer-label" style="color:#4ECDC4">CARDIO</div>
+        <div class="footer-text">${d.cardio}</div>
+      </div>` : ''}
+      <div class="footer-card" style="border-left-color:#A29BFE">
+        <div class="footer-label" style="color:#A29BFE">MOBILITY</div>
+        <div class="footer-text">${d.mobility}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('dayDetail').innerHTML = `
+    <div class="day-detail" style="border-top:3px solid ${d.color};border-color:${d.color}44">
+      <div class="day-header">
+        <div>
+          <div class="day-name-label" style="color:${d.color}">${d.day.toUpperCase()}</div>
+          <div class="day-title">${d.label}</div>
+          <div class="day-focus">${d.focus}</div>
+        </div>
+        <div class="day-dur" style="border-color:${d.color}55">
+          <div class="day-dur-label">DURATION</div>
+          <div class="day-dur-val" style="color:${d.color}">${d.duration}</div>
+        </div>
+      </div>
+      <div>${exRows}</div>
+      ${footer}
+    </div>
+  `;
+}
+
+function selectDay(day) {
+  activeDay = day;
+  renderPills();
+  renderDay();
+}
+
+renderPills();
+renderDay();
+</script>
+</body>
+</html>
