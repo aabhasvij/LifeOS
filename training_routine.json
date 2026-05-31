@@ -1,0 +1,628 @@
+{
+  "schemaVersion": 1,
+  "routineType": "training",
+  "version": 1,
+  "effectiveFrom": "2026-05-01",
+  "label": "Fat-loss + strength base (5 pillars)",
+  "weekTypeMap": {
+    "Monday": "strength",
+    "Tuesday": "cardio",
+    "Wednesday": "strength",
+    "Thursday": "cardio",
+    "Friday": "strength",
+    "Saturday": "cardio",
+    "Sunday": "football"
+  },
+  "exerciseLibrary": {
+    "Monday": [
+      "Barbell Back Squat",
+      "Romanian Deadlift",
+      "Walking Lunges",
+      "Leg Press",
+      "Hanging Leg Raises",
+      "Plank"
+    ],
+    "Tuesday": [
+      "Treadmill / Brisk Walk",
+      "Single-Leg Romanian Deadlift",
+      "Single-Leg Calf Raises",
+      "Bosu Ball / Balance Stand"
+    ],
+    "Wednesday": [
+      "Barbell / DB Bench Press",
+      "Bent Over Barbell Row",
+      "Overhead Press",
+      "Lat Pulldown",
+      "Incline DB Curl",
+      "Tricep Pushdowns / Dips"
+    ],
+    "Thursday": [
+      "Treadmill / Brisk Walk / Cycle",
+      "Dead Bug",
+      "Pallof Press",
+      "Side Plank"
+    ],
+    "Friday": [
+      "Conventional Deadlift",
+      "Bulgarian Split Squat",
+      "Farmer Carry",
+      "Cable Face Pulls",
+      "Ab Wheel Rollout"
+    ],
+    "Saturday": [
+      "Outdoor Walk / Light Jog",
+      "Full Body Stretch Routine",
+      "Dead Hang"
+    ],
+    "Sunday": [
+      "Drill Session",
+      "Match Play"
+    ]
+  },
+  "days": [
+    {
+      "day": "Monday",
+      "label": "Strength A",
+      "type": "strength",
+      "color": "#FF6B6B",
+      "focus": "Lower Body + Core",
+      "duration": "~70 min",
+      "warmup": [
+        {
+          "text": "5 min incline treadmill walk (speed 5, incline 4)",
+          "sub": "Gets blood into legs and hips"
+        },
+        {
+          "text": "10 bodyweight squats - slow (3 sec down, 1 sec up)",
+          "sub": "Pattern the squat movement"
+        },
+        {
+          "text": "10 hip circles each leg + 10 glute bridges",
+          "sub": "Activates glutes before loading them"
+        },
+        {
+          "text": "10 leg swings front/back + 10 lateral each leg",
+          "sub": "Opens hip flexors and adductors"
+        }
+      ],
+      "exercises": [
+        {
+          "name": "Barbell Back Squat",
+          "sets": "4 x 6-8",
+          "short": "Compound lower body - king lift",
+          "tempo": "3 sec down / 1 sec pause / drive up",
+          "rest": "90 sec between sets",
+          "weight": "Start at 60% of your max. Add 2.5 kg each week.",
+          "cues": "<b>Setup:</b> Bar on upper traps, feet shoulder-width, toes 15-30° out. <b>Descent:</b> Push knees out in line with toes, chest stays tall - don't let it cave forward. <b>Depth:</b> Hip crease below knee if mobility allows, parallel minimum. <b>Drive:</b> Push the floor away, squeeze glutes at the top. Don't lock knees aggressively."
+        },
+        {
+          "name": "Romanian Deadlift",
+          "sets": "3 x 8-10",
+          "short": "Hip hinge - hamstrings + glutes",
+          "tempo": "3 sec lowering / squeeze at top",
+          "rest": "75 sec between sets",
+          "weight": "Lighter than you think. Feel the stretch, not the load.",
+          "cues": "<b>Setup:</b> Barbell or DBs, hip-width stance, soft bend in knees. <b>Hinge:</b> Push hips back as bar slides down your thighs - the bar should drag your legs the whole way. <b>Range:</b> Go until you feel a strong hamstring stretch (mid-shin for most). <b>Drive:</b> Push hips forward to stand - not a back extension. Squeeze glutes hard at top."
+        },
+        {
+          "name": "Walking Lunges",
+          "sets": "3 x 12/leg",
+          "short": "Single-leg strength + balance",
+          "tempo": "Controlled step, no bouncing",
+          "rest": "60 sec between sets",
+          "weight": "Hold dumbbells at sides. Start light - form first.",
+          "cues": "<b>Step:</b> Long stride forward, drop back knee toward floor without slamming it. <b>Front knee:</b> Stays stacked over ankle, doesn't cave inward. <b>Torso:</b> Upright - don't lean forward. <b>Drive:</b> Push off front heel to step through. This also trains your football stride pattern."
+        },
+        {
+          "name": "Leg Press",
+          "sets": "3 x 10-12",
+          "short": "Quad overload - safe volume",
+          "tempo": "2 sec down / push up",
+          "rest": "75 sec between sets",
+          "weight": "Heavy enough to feel it by rep 10. Not so heavy form breaks.",
+          "cues": "<b>Foot position:</b> Shoulder-width, mid-platform. <b>Range:</b> Lower until knees near 90° - don't let lower back peel off the pad. <b>Push:</b> Through the whole foot, not just toes. <b>Lock:</b> Don't fully lock knees at top - keeps tension on muscle."
+        },
+        {
+          "name": "Hanging Leg Raises",
+          "sets": "3 x 12-15",
+          "short": "Core - hip flexors + lower abs",
+          "tempo": "Slow and controlled, no swinging",
+          "rest": "60 sec between sets",
+          "weight": "Bodyweight. Can progress to ankle weights later.",
+          "cues": "<b>Hang:</b> Dead hang, shoulders packed (not shrugged to ears). <b>Raise:</b> Bring legs up by tilting pelvis - don't just swing hips. <b>Goal:</b> Legs parallel or higher. <b>Lower:</b> Slow controlled descent - this is where most of the work happens. No kipping."
+        },
+        {
+          "name": "Plank",
+          "sets": "3 x 45 sec",
+          "short": "Core stability - anti-extension",
+          "tempo": "Hold position, breathe steadily",
+          "rest": "45 sec between sets",
+          "weight": "Bodyweight. Progress to 60 sec over time.",
+          "cues": "<b>Setup:</b> Forearms on floor, elbows under shoulders. <b>Body:</b> Straight line from head to heel - no hips in the air, no sagging. <b>Activation:</b> Squeeze glutes, brace abs as if about to take a punch. <b>Breathe:</b> Don't hold your breath. Steady inhale/exhale throughout."
+        }
+      ],
+      "cooldown": [
+        {
+          "text": "Couch stretch - 60 sec/leg",
+          "sub": "Kneeling lunge against wall. Best hip flexor stretch you can do."
+        },
+        {
+          "text": "Lying hamstring stretch - 45 sec/leg",
+          "sub": "Flat on back, pull one leg toward chest with straight knee."
+        },
+        {
+          "text": "Pigeon pose - 60 sec/leg",
+          "sub": "Or figure-4 stretch if pigeon is too intense. Deep glute release."
+        },
+        {
+          "text": "Child's pose - 60 sec",
+          "sub": "Decompress the lower back after squatting."
+        }
+      ]
+    },
+    {
+      "day": "Tuesday",
+      "label": "Zone 2 + Balance",
+      "type": "cardio",
+      "color": "#4ECDC4",
+      "focus": "Aerobic Base + Stability",
+      "duration": "~60 min",
+      "warmup": [
+        {
+          "text": "2 min slow walk to start treadmill session",
+          "sub": "Let heart rate rise gradually"
+        },
+        {
+          "text": "Ankle circles - 10 each direction, each foot",
+          "sub": "Prep ankle joints for balance work"
+        }
+      ],
+      "exercises": [
+        {
+          "name": "Treadmill / Brisk Walk",
+          "sets": "35-40 min",
+          "short": "Zone 2 aerobic base",
+          "tempo": "Conversational pace - ~130-140 BPM",
+          "rest": "N/A - continuous",
+          "weight": "Bodyweight. Incline 2-3 to increase effort without raising HR too much.",
+          "cues": "<b>Target HR:</b> 130-140 BPM. If you don't have a monitor, use the talk test - you can speak in full sentences but wouldn't want to sing. <b>Treadmill:</b> Speed ~5.5-6.5 km/h at incline 2-3. <b>Outdoor:</b> Brisk walk pace where you're breathing noticeably but not panting. <b>Consistency:</b> Don't let pace surge - keep it steady the entire time."
+        },
+        {
+          "name": "Single-Leg Romanian Deadlift",
+          "sets": "3 x 10/leg",
+          "short": "Balance + posterior chain",
+          "tempo": "Slow and controlled - 3 sec hinge",
+          "rest": "60 sec between sets",
+          "weight": "Light DB (5-10 kg) or bodyweight to start. Balance first.",
+          "cues": "<b>Stand:</b> On one leg, soft bend in standing knee. <b>Hinge:</b> Push hips back, let torso lower and back leg rise simultaneously - like a seesaw. <b>Spine:</b> Neutral throughout - don't round. <b>Balance cue:</b> Focus on a spot on the floor 1m ahead. <b>Return:</b> Squeeze glute of standing leg to drive back to upright. If wobbling badly, hold a wall to learn the pattern first."
+        },
+        {
+          "name": "Single-Leg Calf Raises",
+          "sets": "3 x 15/leg",
+          "short": "Ankle stability + calf strength",
+          "tempo": "2 sec up / 1 sec hold / 2 sec down",
+          "rest": "45 sec between sets",
+          "weight": "Bodyweight on a step edge for full range. Progress to holding a DB.",
+          "cues": "<b>Position:</b> Stand on the ball of one foot on a step edge, other foot crossed behind. <b>Lower:</b> Let heel drop below step level for full stretch. <b>Rise:</b> Drive up as high as possible onto toes. <b>Balance:</b> Use fingertips on wall only for balance, not support. This is your ankle injury prevention exercise - critical for football."
+        },
+        {
+          "name": "Bosu Ball / Balance Stand",
+          "sets": "3 x 30 sec/leg",
+          "short": "Proprioception + stabiliser training",
+          "tempo": "Hold steady - fight the wobble",
+          "rest": "30 sec between sets",
+          "weight": "Bodyweight. Progress: eyes open → eyes closed → eyes closed on Bosu.",
+          "cues": "<b>If Bosu available:</b> Stand on flat side (dome down) on one leg. <b>If not:</b> Stand on one leg on flat floor - eyes closed to add challenge. <b>Focus:</b> Micro-adjustments through the foot and ankle - this is the work. <b>Arms:</b> Out to sides for balance. <b>Progression:</b> Week 1 eyes open, Week 2 eyes closed, Week 3+ add small arm movements while balancing."
+        }
+      ],
+      "cooldown": [
+        {
+          "text": "Standing quad stretch - 45 sec/leg",
+          "sub": "Pull ankle to glute, stand tall. Balances the hip flexor work."
+        },
+        {
+          "text": "Doorframe chest opener - 60 sec",
+          "sub": "Arms in goalpost position, lean through doorframe. Counters forward posture."
+        },
+        {
+          "text": "Seated figure-4 glute stretch - 45 sec/side",
+          "sub": "Cross ankle over knee, hinge forward gently."
+        },
+        {
+          "text": "Full body mobility flow - 5 min",
+          "sub": "Cat-cow x 10, thoracic rotations x 10/side, world's greatest stretch x 5/side."
+        }
+      ]
+    },
+    {
+      "day": "Wednesday",
+      "label": "Strength B",
+      "type": "strength",
+      "color": "#FF6B6B",
+      "focus": "Upper Body Push + Pull",
+      "duration": "~70 min",
+      "warmup": [
+        {
+          "text": "5 min light rowing machine or arm bike",
+          "sub": "Warms shoulders and upper back without loading them"
+        },
+        {
+          "text": "Band pull-aparts x 15 or face pulls x 15 (light)",
+          "sub": "Activates rear delts and rotator cuff before pressing"
+        },
+        {
+          "text": "Arm circles - 10 forward + 10 backward each arm",
+          "sub": "Shoulder mobility prep"
+        },
+        {
+          "text": "Cat-cow x 10 reps",
+          "sub": "Thoracic spine warm-up for overhead pressing"
+        }
+      ],
+      "exercises": [
+        {
+          "name": "Barbell / DB Bench Press",
+          "sets": "4 x 6-8",
+          "short": "Primary horizontal push",
+          "tempo": "2 sec down / press up strong",
+          "rest": "90 sec between sets",
+          "weight": "Start at a weight you can do 10 reps cleanly. Add 2.5 kg/week.",
+          "cues": "<b>Setup:</b> Feet flat on floor, slight arch in lower back, shoulder blades pinched and pulled down. <b>Grip:</b> Slightly wider than shoulder width. <b>Descent:</b> Bar to lower chest (nipple line), elbows at 45-75° from torso - not flared out wide. <b>Drive:</b> Push bar up and very slightly back. <b>Common mistake:</b> Letting shoulder blades unpin at bottom - keep them retracted throughout the rep."
+        },
+        {
+          "name": "Bent Over Barbell Row",
+          "sets": "4 x 6-8",
+          "short": "Primary horizontal pull",
+          "tempo": "Pull 1 sec / lower 2 sec controlled",
+          "rest": "90 sec between sets",
+          "weight": "Match your bench press weight to start. Balance pushing and pulling.",
+          "cues": "<b>Setup:</b> Hip-width stance, hinge forward to 45°, slight knee bend, back flat. <b>Grip:</b> Just outside shoulder width, overhand (or underhand to hit biceps more). <b>Pull:</b> Drive elbows back and toward hips - not up. Row to lower rib cage. <b>Squeeze:</b> 1 sec hold at top with shoulder blades squeezed. <b>Lower:</b> Fully extend arms - full range matters."
+        },
+        {
+          "name": "Overhead Press (DB or BB)",
+          "sets": "3 x 8-10",
+          "short": "Vertical push - shoulders + triceps",
+          "tempo": "Strict - no leg drive",
+          "rest": "75 sec between sets",
+          "weight": "Lighter than bench. Strict press - no bouncing from legs.",
+          "cues": "<b>Standing preferred</b> (more core engagement). <b>Start:</b> Bar at shoulder height, elbows slightly forward. <b>Press:</b> Drive bar straight up - slightly behind head at top (bar travels over the head, not in front). <b>Core:</b> Brace hard - don't hyperextend lower back. <b>Seated DB option:</b> Both DBs pressed simultaneously, end position with pinkies slightly higher than thumbs."
+        },
+        {
+          "name": "Lat Pulldown",
+          "sets": "3 x 10-12",
+          "short": "Vertical pull - lats + biceps",
+          "tempo": "Pull 1 sec / stretch up 2 sec",
+          "rest": "75 sec between sets",
+          "weight": "Should be challenging by rep 10. Don't use momentum.",
+          "cues": "<b>Grip:</b> Slightly wider than shoulder width, overhand. <b>Lean:</b> Very slight backward lean (10-15°). <b>Pull:</b> Drive elbows down and back - imagine trying to put elbows in back pockets. Pull bar to upper chest. <b>Stretch:</b> Let arms fully extend at top - feel the lat stretch. <b>Common mistake:</b> Pulling with biceps not lats - focus on the elbow driving down."
+        },
+        {
+          "name": "Incline DB Curl",
+          "sets": "3 x 12",
+          "short": "Bicep isolation - full stretch",
+          "tempo": "Slow eccentric - 3 sec down",
+          "rest": "60 sec between sets",
+          "weight": "Light-moderate. The incline increases stretch - you'll need less weight.",
+          "cues": "<b>Setup:</b> Bench at 45-60°, arms hang straight down behind body. <b>Curl:</b> Supinate (rotate) wrist as you curl up - pinky higher than thumb at top. <b>Squeeze:</b> Hard contraction at top for 1 sec. <b>Lower:</b> 3 sec controlled - don't let gravity drop your arms. The stretch at the bottom is the growth stimulus."
+        },
+        {
+          "name": "Tricep Pushdowns (cable) / Dips",
+          "sets": "3 x 12",
+          "short": "Tricep isolation",
+          "tempo": "Lock out at bottom / 2 sec return",
+          "rest": "60 sec between sets",
+          "weight": "Cable pushdown: medium weight. Full lockout every rep.",
+          "cues": "<b>Pushdown:</b> Elbows pinned to sides - they must not move. Push handle straight down until arms fully locked. <b>Return:</b> Slow and controlled back to start. <b>Dip alternative:</b> Bench dip or parallel bar dip, going deep enough to feel tricep stretch at top. <b>Key:</b> The lockout at the bottom is where triceps fully contract - don't cut it short."
+        }
+      ],
+      "cooldown": [
+        {
+          "text": "Cross-body shoulder stretch - 45 sec/arm",
+          "sub": "Pull elbow across chest. Rear delt and rotator cuff release."
+        },
+        {
+          "text": "Overhead tricep stretch - 30 sec/arm",
+          "sub": "Hand behind head, elbow pointing up. Post-pressing relief."
+        },
+        {
+          "text": "Doorframe chest stretch - 60 sec",
+          "sub": "Elbows at 90°, lean through door. Counters bench press tightening."
+        },
+        {
+          "text": "Thoracic rotations on floor - 10/side",
+          "sub": "Lie on side, knees bent 90°, rotate top arm to open chest to ceiling."
+        }
+      ]
+    },
+    {
+      "day": "Thursday",
+      "label": "Zone 2 + Core",
+      "type": "cardio",
+      "color": "#4ECDC4",
+      "focus": "Aerobic Base + Football Core",
+      "duration": "~55 min",
+      "warmup": [
+        {
+          "text": "2 min slow walk / gentle pace to ease in",
+          "sub": "No formal warm-up needed before Zone 2 - just start easy"
+        }
+      ],
+      "exercises": [
+        {
+          "name": "Treadmill / Brisk Walk / Cycle",
+          "sets": "35-40 min",
+          "short": "Zone 2 aerobic base",
+          "tempo": "Conversational pace - ~130-140 BPM",
+          "rest": "N/A - continuous",
+          "weight": "Bodyweight. Bike at resistance level 5-7 or treadmill at 5.5-6.5 km/h incline 2.",
+          "cues": "<b>Same rules as Tuesday Zone 2.</b> Target 130-140 BPM. You should be able to speak in complete sentences. <b>Variety tip:</b> Alternate between treadmill and bike week-to-week to reduce boredom. <b>No music with a fast BPM</b> - it unconsciously drives you to go harder than Zone 2. Podcasts work better for this session."
+        },
+        {
+          "name": "Dead Bug",
+          "sets": "3 x 10/side",
+          "short": "Anti-extension core - spine stability",
+          "tempo": "Slow and deliberate - 3 sec per rep",
+          "rest": "45 sec between sets",
+          "weight": "Bodyweight. Can hold a small plate above chest to progress.",
+          "cues": "<b>Setup:</b> Lie on back, arms pointing at ceiling, knees bent 90° above hips. <b>Move:</b> Simultaneously lower opposite arm (overhead) and opposite leg (extend to hover above floor). <b>Key:</b> Lower back must stay flat on floor throughout - if it arches, you're going too far. <b>Return:</b> Slowly back to start. Exhale as you extend. This trains the exact core stability needed for football contact situations."
+        },
+        {
+          "name": "Pallof Press",
+          "sets": "3 x 12/side",
+          "short": "Anti-rotation core",
+          "tempo": "Press out / hold 2 sec / return",
+          "rest": "45 sec between sets",
+          "weight": "Cable or resistance band at chest height. Light enough to hold position steady.",
+          "cues": "<b>Setup:</b> Stand side-on to cable/band anchor, hold handle at chest with both hands. <b>Press:</b> Extend arms straight out in front of chest - the cable tries to rotate you, resist it. <b>Hold:</b> 2 sec extended, feel the anti-rotation work. <b>Return:</b> Controlled back to chest. <b>Key:</b> Hips and shoulders stay square throughout. This is exactly the core pattern used when shielding the ball in football."
+        },
+        {
+          "name": "Side Plank",
+          "sets": "3 x 35 sec/side",
+          "short": "Lateral core - obliques + hip stability",
+          "tempo": "Hold position, breathe steady",
+          "rest": "30 sec between sets",
+          "weight": "Bodyweight. Progress to 50 sec, then add a hip dip for reps.",
+          "cues": "<b>Setup:</b> Forearm on floor, elbow under shoulder, feet stacked or staggered. <b>Lift:</b> Raise hips - body in a straight diagonal line from head to feet. <b>Don't:</b> Let hips sag down or pike up. <b>Stack:</b> Hips fully extended, core braced. <b>Breathe:</b> Don't hold breath. <b>Progress:</b> When 35 sec feels easy, add a hip dip - lower hip to tap floor and raise back up."
+        }
+      ],
+      "cooldown": [
+        {
+          "text": "Hip flexor kneeling stretch - 60 sec/side",
+          "sub": "One knee on floor, other foot forward. Gently push hips forward and down. Undoes sitting posture and pre-empts Sunday football."
+        },
+        {
+          "text": "Thoracic rotation stretch - 10/side",
+          "sub": "Seated on floor, cross one leg, rotate toward crossed leg with both hands on knee."
+        },
+        {
+          "text": "Cat-cow - 10 slow reps",
+          "sub": "Mobilises the spine after the cardio session."
+        }
+      ]
+    },
+    {
+      "day": "Friday",
+      "label": "Strength C",
+      "type": "strength",
+      "color": "#FF6B6B",
+      "focus": "Deadlift + Athletic Power",
+      "duration": "~65 min",
+      "warmup": [
+        {
+          "text": "5 min bike at easy pace (resistance 4-5)",
+          "sub": "Low impact warm-up before heavy hinging"
+        },
+        {
+          "text": "10 Romanian deadlifts - empty bar or very light",
+          "sub": "Groove the hinge pattern before loading it"
+        },
+        {
+          "text": "10 banded monster walks - 5 steps each direction",
+          "sub": "Activates glutes before deadlift. Use a light resistance band above knees."
+        },
+        {
+          "text": "Hip 90/90 stretch - 60 sec/side",
+          "sub": "Sits hips into the position needed for deadlift setup"
+        }
+      ],
+      "exercises": [
+        {
+          "name": "Conventional Deadlift",
+          "sets": "4 x 5",
+          "short": "The king of all lifts",
+          "tempo": "Controlled setup / drive hard / lower with control",
+          "rest": "2 min between sets - this one earns full rest",
+          "weight": "Build from 70% of estimated max. Add 5 kg/week. Form > weight always.",
+          "cues": "<b>Setup:</b> Hip-width stance, bar over mid-foot, hinge and grip just outside legs. <b>Brace:</b> Big breath into belly (360° brace), chest up, lats locked (imagine protecting your armpits). <b>Pull:</b> Push the floor away - don't think 'pull up'. <b>Hip hinge:</b> Bar stays dragging up your shins and thighs the entire lift. <b>Lockout:</b> Hips and knees extend simultaneously - squeeze glutes hard. <b>Lower:</b> Hinge back, controlled. Don't drop the bar."
+        },
+        {
+          "name": "Bulgarian Split Squat",
+          "sets": "3 x 8/leg",
+          "short": "Single-leg strength - brutal but essential",
+          "tempo": "3 sec down / drive up",
+          "rest": "75 sec between sets",
+          "weight": "Bodyweight first session. Add DBs once balance is secure. Hardest exercise in the plan.",
+          "cues": "<b>Setup:</b> Rear foot elevated on bench, front foot far enough forward that front shin is vertical at bottom. <b>Descend:</b> Drop straight down - don't lunge forward. Back knee toward floor. <b>Front knee:</b> Tracks over toes, doesn't cave in. <b>Drive:</b> Push through front heel to stand. <b>Common mistake:</b> Front foot too close - causes forward lean and knee stress. If knees hurting, step forward more."
+        },
+        {
+          "name": "Farmer Carry",
+          "sets": "3 x 40 metres",
+          "short": "Grip + traps + posture + core",
+          "tempo": "Walk tall - not too fast",
+          "rest": "60 sec between carries",
+          "weight": "Heavy DBs or plates - aim for challenging. Start at 20 kg/hand.",
+          "cues": "<b>Pick up:</b> Deadlift them up - don't round back to grab. <b>Walk:</b> Tall posture, shoulders back and down, core braced. <b>Don't:</b> Let shoulders creep up to ears or let the load pull you sideways. <b>This builds:</b> Grip strength (helps all pulling lifts), upper trap thickness, and spinal stability under load. One of the highest-return exercises for overall strength."
+        },
+        {
+          "name": "Cable Face Pulls",
+          "sets": "3 x 15",
+          "short": "Shoulder health + posture",
+          "tempo": "Pull slow / squeeze / return slow",
+          "rest": "45 sec between sets",
+          "weight": "Light. This is health work, not a strength exercise.",
+          "cues": "<b>Setup:</b> Cable at forehead height, rope attachment, step back. <b>Pull:</b> Elbows up and back - pull rope toward face, hands ending beside ears. <b>External rotation:</b> At the end of the pull, rotate hands so thumbs point back (like a 'double bicep' pose). <b>Squeeze:</b> 1 sec hold at full contraction. <b>Why:</b> Counters the internal rotation from all the pressing this week. Keeps shoulders healthy long-term."
+        },
+        {
+          "name": "Ab Wheel Rollout",
+          "sets": "3 x 8-10",
+          "short": "Anti-extension core - advanced",
+          "tempo": "Slow out (3 sec) / pull back",
+          "rest": "60 sec between sets",
+          "weight": "Bodyweight. Start with partial range if needed (wall stop).",
+          "cues": "<b>Start:</b> Kneeling, wheel directly under shoulders, arms straight. <b>Roll out:</b> Let wheel roll forward as you lower body toward floor - spine absolutely neutral (no sagging hips). <b>Range:</b> Start at 50% extension, build to full over weeks. <b>Pull back:</b> Contract abs hard to pull wheel back to start. <b>Key:</b> This is NOT a hip flexor exercise - the abs must be the anchor. If lower back hurts, reduce range immediately."
+        }
+      ],
+      "cooldown": [
+        {
+          "text": "Pigeon pose - 90 sec/leg",
+          "sub": "Best post-deadlift hip release. Hold in the deep stretch."
+        },
+        {
+          "text": "Child's pose with lateral reach - 45 sec each side",
+          "sub": "Reach arms to each side in child's pose to open the lat."
+        },
+        {
+          "text": "Standing hip flexor stretch - 60 sec/side",
+          "sub": "Kneeling lunge, push hip forward and slightly rotate toward front leg."
+        },
+        {
+          "text": "Foam roll lower back and glutes - 2 min",
+          "sub": "Sit on roller, cross one ankle over knee, roll glute side to side. Don't roll the spine directly."
+        }
+      ]
+    },
+    {
+      "day": "Saturday",
+      "label": "Zone 2 + Mobility",
+      "type": "cardio",
+      "color": "#4ECDC4",
+      "focus": "Pre-Football Active Recovery",
+      "duration": "~50 min",
+      "warmup": [
+        {
+          "text": "No structured warm-up needed - the walk IS the warm-up",
+          "sub": "Start slow and build pace over first 5 min"
+        }
+      ],
+      "exercises": [
+        {
+          "name": "Outdoor Walk / Light Jog",
+          "sets": "30-35 min",
+          "short": "Easy Zone 2 - saving legs for Sunday",
+          "tempo": "Easy conversational pace - RPE 4/10",
+          "rest": "N/A",
+          "weight": "Bodyweight. No treadmill today if possible - outdoor walk preferred.",
+          "cues": "<b>Purpose today:</b> Flush the legs from the week's training, get blood moving, without digging into the recovery you need for Sunday football. <b>Pace:</b> Notably easier than Tuesday/Thursday Zone 2. If HR is above 130, slow down. <b>Outdoor benefit:</b> Uneven terrain activates ankle stabilisers passively - good pre-football stimulus. <b>Target:</b> 6,000-8,000 steps minimum."
+        },
+        {
+          "name": "Full Body Stretch Routine",
+          "sets": "15 min - hold each 45-60 sec",
+          "short": "Pre-football flexibility reset",
+          "tempo": "Static holds - breathe into each stretch",
+          "rest": "Move directly from one to next",
+          "weight": "Bodyweight.",
+          "cues": "In order: <b>1)</b> Kneeling hip flexor stretch (60 sec/side) - most important for football. <b>2)</b> Standing quad stretch (45 sec/side). <b>3)</b> Seated hamstring stretch (45 sec/side). <b>4)</b> Lying glute/piriformis stretch - figure 4 (45 sec/side). <b>5)</b> Doorframe chest opener (60 sec). <b>6)</b> Child's pose (60 sec). Do this in order. Don't rush it - this is your Sunday prep."
+        },
+        {
+          "name": "Dead Hang",
+          "sets": "3 x 20-30 sec",
+          "short": "Spinal decompression + grip",
+          "tempo": "Passive hang - fully relax",
+          "rest": "45 sec between hangs",
+          "weight": "Bodyweight on any pull-up bar.",
+          "cues": "<b>Let go:</b> Fully decompress - shoulders should rise toward ears, entire spine lengthens. <b>Don't:</b> Engage lats or try to hold a tight position. This is passive. <b>Benefit:</b> After a week of loading, hanging passively reverses the compressive forces on the spine. <b>Also:</b> Grip endurance improves weekly - helps your Thursday and Friday lifts."
+        }
+      ],
+      "cooldown": [
+        {
+          "text": "Calf stretches - 60 sec/leg against a wall",
+          "sub": "Straight leg (gastrocnemius) then bent knee (soleus). Football destroys calves - prep them now."
+        },
+        {
+          "text": "Ankle circles + foot rolling on tennis ball - 2 min",
+          "sub": "Roll sole of foot on a tennis ball. Activates intrinsic foot muscles for Sunday."
+        }
+      ]
+    },
+    {
+      "day": "Sunday",
+      "label": "Football",
+      "type": "football",
+      "color": "#F9CA24",
+      "focus": "Zone 4-5 + Agility",
+      "duration": "~100 min + 10 min cooldown",
+      "warmup": [
+        {
+          "text": "5-8 min light jog around the pitch",
+          "sub": "Don't start drills cold. Blood needs to be moving first."
+        },
+        {
+          "text": "Dynamic leg swings - 10 front/back + 10 lateral, each leg",
+          "sub": "Opens hips actively - better than static stretching pre-match"
+        },
+        {
+          "text": "High knees + butt kicks - 2 x 20m each",
+          "sub": "Activates hip flexors and glutes for sprinting"
+        },
+        {
+          "text": "Lateral shuffles - 2 x 10m each direction",
+          "sub": "Wakes up the agility patterns you'll use in the match"
+        },
+        {
+          "text": "3-4 short explosive accelerations (50% effort)",
+          "sub": "Primes the nervous system for match-speed movement"
+        }
+      ],
+      "exercises": [
+        {
+          "name": "Drill Session",
+          "sets": "60 min",
+          "short": "Skill + Zone 3 conditioning",
+          "tempo": "Variable - follow the session",
+          "rest": "As given by session structure",
+          "weight": "N/A",
+          "cues": "<b>Treat drills seriously:</b> Every direction change is balance training. Every passing drill is coordination work. <b>Focus areas:</b> First touch, receiving under pressure, quick release, positioning. <b>Your gym work pays off here:</b> The Bulgarian split squats = better deceleration. The core work = better balance under contact. <b>Don't hold back</b> - this is an active training session, not a social warmup."
+        },
+        {
+          "name": "Match Play",
+          "sets": "30-40 min",
+          "short": "Zone 4-5 high intensity",
+          "tempo": "Match intensity - full effort",
+          "rest": "Substitutions / natural breaks",
+          "weight": "N/A",
+          "cues": "<b>This is your HIIT session for the week.</b> Heart rate will spike to Zone 4-5 (165-185 BPM) during sprints and defensive pressures. <b>Positioning:</b> Use your improving fitness to work hard off the ball - this is where matches are won. <b>Hydration:</b> Drink water at every break - at 105 kg you sweat significantly. <b>Half-time:</b> Light jog / walk - don't sit down completely or legs will stiffen."
+        }
+      ],
+      "cooldown": [
+        {
+          "text": "5 min slow walk after final whistle - don't stop suddenly",
+          "sub": "Lets heart rate come down gradually. Prevents blood pooling in legs."
+        },
+        {
+          "text": "Standing quad stretch - 60 sec/leg",
+          "sub": "Pull ankle to glute. Quads take huge load in football."
+        },
+        {
+          "text": "Kneeling hip flexor stretch - 90 sec/leg",
+          "sub": "Most critical post-football stretch. Sprinting tightens hip flexors severely."
+        },
+        {
+          "text": "Seated hamstring stretch - 60 sec/leg",
+          "sub": "Legs straight, reach toward feet. Hold without bouncing."
+        },
+        {
+          "text": "Standing calf stretch against wall - 45 sec/leg",
+          "sub": "Calves cramp overnight if you skip this. Straight leg first, then bent knee."
+        },
+        {
+          "text": "Lying glute stretch (figure 4) - 60 sec/side",
+          "sub": "On your back, cross ankle over knee, pull both legs toward chest."
+        },
+        {
+          "text": "Thoracic rotation - 10 reps/side on floor",
+          "sub": "Lie on side, rotate top arm to open chest. Undoes the hunching from fatigue."
+        }
+      ]
+    }
+  ]
+}

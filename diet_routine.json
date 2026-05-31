@@ -1,0 +1,449 @@
+{
+  "schemaVersion": 1,
+  "routineType": "diet",
+  "version": 1,
+  "effectiveFrom": "2026-05-01",
+  "label": "2450 kcal fat-loss, veg + chicken/eggs/tofu",
+  "nutrientTargets": {
+    "kcal": 2450,
+    "protein": 170,
+    "carbs": 285,
+    "fat": 70,
+    "fibre": 35
+  },
+  "calorieTargets": {
+    "strength": 2450,
+    "cardio": 2350,
+    "football": 2600,
+    "rest": 2300
+  },
+  "energyExpenditure": {
+    "strength": "300-400 kcal",
+    "cardio": "350-450 kcal",
+    "football": "500-700 kcal",
+    "rest": "0 (recovery)"
+  },
+  "plan": {
+    "note": "Each slot has interchangeable options of similar kcal/protein. Mix & match across the month. If you have chicken at lunch, pick eggs/paneer/tofu at dinner (don't eat chicken twice a day). Gym = morning; Sunday football = evening (afternoon pre-fuel + recovery dinner).",
+    "training": {
+      "preWorkout": {
+        "time": "6:30 AM",
+        "options": [
+          {
+            "label": "1 banana",
+            "kcal": 105,
+            "protein": 1,
+            "carbs": 14,
+            "fat": 5,
+            "fibre": 2
+          },
+          {
+            "label": "Black coffee + 2 dates",
+            "kcal": 110,
+            "protein": 1,
+            "carbs": 15,
+            "fat": 5,
+            "fibre": 2
+          },
+          {
+            "label": "1/2 scoop whey in water",
+            "kcal": 65,
+            "protein": 15,
+            "carbs": 1,
+            "fat": 0,
+            "fibre": 0
+          }
+        ]
+      },
+      "breakfast": {
+        "time": "9:15 AM (post-workout)",
+        "options": [
+          {
+            "label": "4-egg bhurji + 2 multigrain roti + 2 scoops whey in milk",
+            "kcal": 600,
+            "protein": 48,
+            "carbs": 56,
+            "fat": 20,
+            "fibre": 7
+          },
+          {
+            "label": "Tofu scramble 200g + 2 toast + whey shake + fruit",
+            "kcal": 600,
+            "protein": 45,
+            "carbs": 58,
+            "fat": 21,
+            "fibre": 7
+          },
+          {
+            "label": "Greek yogurt 200g + 2 scoops whey + banana + 40g oats + almonds",
+            "kcal": 610,
+            "protein": 46,
+            "carbs": 59,
+            "fat": 21,
+            "fibre": 7
+          }
+        ]
+      },
+      "lunch": {
+        "time": "1:00 PM",
+        "options": [
+          {
+            "label": "Grilled chicken 150g + 2 roti + sabzi + salad",
+            "kcal": 650,
+            "protein": 45,
+            "carbs": 65,
+            "fat": 24,
+            "fibre": 8
+          },
+          {
+            "label": "Tofu/paneer sabzi 150g + 1/2 cup rice + dal + salad",
+            "kcal": 650,
+            "protein": 40,
+            "carbs": 67,
+            "fat": 24,
+            "fibre": 8
+          },
+          {
+            "label": "Rajma/chole + 2 roti + curd bowl + salad",
+            "kcal": 640,
+            "protein": 38,
+            "carbs": 67,
+            "fat": 24,
+            "fibre": 8
+          }
+        ]
+      },
+      "snack": {
+        "time": "4:30 PM",
+        "options": [
+          {
+            "label": "Buttermilk + roasted chana 30g",
+            "kcal": 200,
+            "protein": 12,
+            "carbs": 21,
+            "fat": 8,
+            "fibre": 3
+          },
+          {
+            "label": "Apple/guava + 15g almonds",
+            "kcal": 220,
+            "protein": 6,
+            "carbs": 27,
+            "fat": 10,
+            "fibre": 3
+          },
+          {
+            "label": "Sprouts salad bowl",
+            "kcal": 180,
+            "protein": 12,
+            "carbs": 18,
+            "fat": 7,
+            "fibre": 2
+          }
+        ]
+      },
+      "dinner": {
+        "time": "8:00 PM (finish by 8:30)",
+        "options": [
+          {
+            "label": "Grilled chicken 150g + sauteed veg + small salad",
+            "kcal": 600,
+            "protein": 45,
+            "carbs": 58,
+            "fat": 21,
+            "fibre": 7
+          },
+          {
+            "label": "Tofu/tempeh stir-fry 200g + veg",
+            "kcal": 580,
+            "protein": 38,
+            "carbs": 59,
+            "fat": 21,
+            "fibre": 7
+          },
+          {
+            "label": "Egg curry (3 eggs) + 1 roti + veg",
+            "kcal": 600,
+            "protein": 30,
+            "carbs": 66,
+            "fat": 24,
+            "fibre": 8
+          },
+          {
+            "label": "Paneer tikka 150g + grilled veg",
+            "kcal": 600,
+            "protein": 40,
+            "carbs": 61,
+            "fat": 22,
+            "fibre": 7
+          }
+        ]
+      }
+    },
+    "football": {
+      "breakfast": {
+        "time": "8:30 AM",
+        "options": [
+          {
+            "label": "3-4 egg bhurji + 1-2 roti + 1 scoop whey",
+            "kcal": 520,
+            "protein": 40,
+            "carbs": 50,
+            "fat": 18,
+            "fibre": 6
+          },
+          {
+            "label": "Greek yogurt 200g + 1 scoop whey + oats + banana",
+            "kcal": 520,
+            "protein": 42,
+            "carbs": 48,
+            "fat": 18,
+            "fibre": 6
+          },
+          {
+            "label": "Tofu scramble 200g + 2 toast",
+            "kcal": 480,
+            "protein": 32,
+            "carbs": 48,
+            "fat": 18,
+            "fibre": 6
+          }
+        ]
+      },
+      "lunch": {
+        "time": "1:00 PM (main fuel-up)",
+        "options": [
+          {
+            "label": "Chicken curry + 1 roti + 3/4 cup rice + salad",
+            "kcal": 720,
+            "protein": 45,
+            "carbs": 74,
+            "fat": 27,
+            "fibre": 9
+          },
+          {
+            "label": "Paneer/tofu + rice + dal + salad",
+            "kcal": 700,
+            "protein": 40,
+            "carbs": 74,
+            "fat": 27,
+            "fibre": 9
+          },
+          {
+            "label": "Rajma/chole + 2 roti + curd + salad",
+            "kcal": 680,
+            "protein": 38,
+            "carbs": 73,
+            "fat": 26,
+            "fibre": 9
+          }
+        ]
+      },
+      "preFootball": {
+        "time": "4:30 PM (~1.5h before play)",
+        "options": [
+          {
+            "label": "Banana + black coffee",
+            "kcal": 110,
+            "protein": 1,
+            "carbs": 15,
+            "fat": 5,
+            "fibre": 2
+          },
+          {
+            "label": "2 dates + handful nuts",
+            "kcal": 150,
+            "protein": 4,
+            "carbs": 18,
+            "fat": 7,
+            "fibre": 2
+          },
+          {
+            "label": "Small fruit bowl",
+            "kcal": 120,
+            "protein": 2,
+            "carbs": 15,
+            "fat": 6,
+            "fibre": 2
+          }
+        ]
+      },
+      "dinner": {
+        "time": "8:00 PM (post-football recovery)",
+        "options": [
+          {
+            "label": "Chicken 150g + 1 roti + veg + 2nd scoop whey",
+            "kcal": 680,
+            "protein": 55,
+            "carbs": 63,
+            "fat": 23,
+            "fibre": 8
+          },
+          {
+            "label": "Paneer/tofu 200g + 1 roti + veg + whey",
+            "kcal": 660,
+            "protein": 50,
+            "carbs": 63,
+            "fat": 23,
+            "fibre": 8
+          },
+          {
+            "label": "Egg curry (3) + 1 roti + veg + whey",
+            "kcal": 640,
+            "protein": 45,
+            "carbs": 63,
+            "fat": 23,
+            "fibre": 8
+          }
+        ]
+      }
+    },
+    "rest": {
+      "breakfast": {
+        "time": "8:30 AM",
+        "options": [
+          {
+            "label": "3-egg bhurji + 1 roti + 1 scoop whey in yogurt",
+            "kcal": 480,
+            "protein": 38,
+            "carbs": 45,
+            "fat": 16,
+            "fibre": 5
+          },
+          {
+            "label": "Tofu scramble 200g + 1 toast + sauteed veg",
+            "kcal": 470,
+            "protein": 32,
+            "carbs": 47,
+            "fat": 17,
+            "fibre": 6
+          },
+          {
+            "label": "Greek yogurt 200g + 1 scoop whey + banana",
+            "kcal": 470,
+            "protein": 40,
+            "carbs": 43,
+            "fat": 16,
+            "fibre": 5
+          },
+          {
+            "label": "Besan chilla (2) + curd + chutney",
+            "kcal": 460,
+            "protein": 28,
+            "carbs": 48,
+            "fat": 17,
+            "fibre": 6
+          }
+        ]
+      },
+      "snack1": {
+        "time": "11:00 AM",
+        "options": [
+          {
+            "label": "Buttermilk + roasted chana 30g",
+            "kcal": 200,
+            "protein": 12,
+            "carbs": 21,
+            "fat": 8,
+            "fibre": 3
+          },
+          {
+            "label": "Apple/guava + 15g almonds",
+            "kcal": 220,
+            "protein": 6,
+            "carbs": 27,
+            "fat": 10,
+            "fibre": 3
+          }
+        ]
+      },
+      "lunch": {
+        "time": "1:00 PM",
+        "options": [
+          {
+            "label": "Grilled chicken 150g + 1-2 roti + sabzi + salad",
+            "kcal": 620,
+            "protein": 45,
+            "carbs": 61,
+            "fat": 22,
+            "fibre": 7
+          },
+          {
+            "label": "Tofu/paneer 150g + 1/2 cup rice + dal + salad",
+            "kcal": 620,
+            "protein": 40,
+            "carbs": 63,
+            "fat": 23,
+            "fibre": 8
+          },
+          {
+            "label": "Chole/rajma + 2 roti + curd + salad",
+            "kcal": 600,
+            "protein": 36,
+            "carbs": 63,
+            "fat": 23,
+            "fibre": 8
+          }
+        ]
+      },
+      "snack2": {
+        "time": "4:30 PM",
+        "options": [
+          {
+            "label": "Sprouts salad bowl",
+            "kcal": 180,
+            "protein": 12,
+            "carbs": 18,
+            "fat": 7,
+            "fibre": 2
+          },
+          {
+            "label": "Buttermilk + handful nuts",
+            "kcal": 200,
+            "protein": 8,
+            "carbs": 23,
+            "fat": 8,
+            "fibre": 3
+          }
+        ]
+      },
+      "dinner": {
+        "time": "8:00 PM (finish by 8:30)",
+        "options": [
+          {
+            "label": "Grilled chicken 150g + lots of veg + salad",
+            "kcal": 560,
+            "protein": 45,
+            "carbs": 52,
+            "fat": 19,
+            "fibre": 6
+          },
+          {
+            "label": "Tofu/tempeh stir-fry 200g + veg",
+            "kcal": 550,
+            "protein": 38,
+            "carbs": 55,
+            "fat": 20,
+            "fibre": 7
+          },
+          {
+            "label": "Egg curry (3 eggs) + veg (no roti)",
+            "kcal": 520,
+            "protein": 28,
+            "carbs": 56,
+            "fat": 20,
+            "fibre": 7
+          },
+          {
+            "label": "Paneer tikka 150g + grilled veg",
+            "kcal": 560,
+            "protein": 40,
+            "carbs": 55,
+            "fat": 20,
+            "fibre": 7
+          }
+        ]
+      }
+    }
+  }
+}
