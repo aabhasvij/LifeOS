@@ -1347,33 +1347,25 @@ html, body {
       <div class="section-heading">Health</div>
       <div class="section-sub">weight · training · diet · recovery</div>
 
-      <!-- SNAPSHOT -->
+      <!-- SNAPSHOT + LOG (merged) -->
       <div class="hx-card">
         <div class="hx-card-title">Today</div>
         <div class="hx-stats" id="hx-snapshot"></div>
-        <div style="display:flex; gap:0.5rem; align-items:flex-end; margin-top:0.85rem;">
-          <div style="flex:1;"><label class="hx-label">Log today's weight (kg)</label><input class="hx-input" id="hx-quick-weight" type="number" step="0.1" inputmode="decimal" placeholder="105.7"></div>
-          <button class="hx-btn hx-btn-primary" style="flex:0 0 auto; width:auto; padding:0.7rem 1.1rem;" onclick="logQuickWeight()">Save</button>
-        </div>
-      </div>
-
-      <!-- DAILY LOG (collapsed by default) -->
-      <div class="hx-card">
-        <div class="hx-row" onclick="hxToggle('hx-log-body')" style="cursor:pointer;">
-          <div class="hx-card-title" style="margin-bottom:0;">Log a day</div>
-          <span class="hx-chev" id="hx-log-chev">▾</span>
-        </div>
-        <div id="hx-log-body" style="display:none; margin-top:0.9rem;">
-          <div style="margin-bottom:0.7rem;">
+        <div style="border-top:1px solid var(--hx-border); margin-top:0.9rem; padding-top:0.9rem;">
+          <div class="hx-row" style="margin-bottom:0.5rem;">
+            <span class="hx-label" style="margin-bottom:0;">Log today's weight &amp; sleep</span>
+            <span id="hx-backdate-link" onclick="toggleBackdate()" style="cursor:pointer; font-size:0.7rem; color:var(--hx-accent);">log another day</span>
+          </div>
+          <div id="hx-backdate-row" style="display:none; margin-bottom:0.6rem;">
             <label class="hx-label">Date</label>
             <input class="hx-input" id="h-date" type="date">
           </div>
-          <div class="hx-grid2" style="margin-bottom:0.7rem;">
-            <div><label class="hx-label">Weight (kg)</label><input class="hx-input" id="h-weight" type="number" step="0.1" placeholder="105.0"></div>
-            <div><label class="hx-label">Sleep (hrs)</label><input class="hx-input" id="h-sleep" type="number" step="0.5" placeholder="7.0"></div>
+          <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+            <div style="flex:1;"><label class="hx-label">Weight (kg)</label><input class="hx-input" id="h-weight" type="number" step="0.1" inputmode="decimal" placeholder="105.7"></div>
+            <div style="flex:1;"><label class="hx-label">Sleep (hrs)</label><input class="hx-input" id="h-sleep" type="number" step="0.5" inputmode="decimal" placeholder="7.0"></div>
+            <button class="hx-btn hx-btn-primary" style="flex:0 0 auto; width:auto; padding:0.7rem 1.1rem;" onclick="logHealth()">Save</button>
           </div>
-          <div style="margin-bottom:0.7rem;"><label class="hx-label">Notes</label><textarea class="hx-input" id="h-notes" rows="2" placeholder="How you felt, slip-ups, anything"></textarea></div>
-          <button class="hx-btn hx-btn-primary" onclick="logHealth()">Save log</button>
+          <textarea class="hx-input" id="h-notes" rows="2" placeholder="Notes (optional): how you felt, slip-ups" style="margin-top:0.6rem;"></textarea>
         </div>
       </div>
 
@@ -2549,8 +2541,10 @@ function setRating(type, val, el) {
 }
 
 function logHealth() {
-  const dateVal = document.getElementById('h-date').value;
-  const dateStr = dateVal ? new Date(dateVal + 'T00:00:00').toLocaleDateString() : new Date().toLocaleDateString();
+  const dateEl = document.getElementById('h-date');
+  const dateStr = (backdateOpen && dateEl && dateEl.value)
+    ? new Date(dateEl.value + 'T00:00:00').toLocaleDateString()
+    : new Date().toLocaleDateString();
   const w = parseFloat(document.getElementById('h-weight').value);
   const sl = parseFloat(document.getElementById('h-sleep').value);
   const notesEl = document.getElementById('h-notes');
@@ -2569,18 +2563,6 @@ function logHealth() {
   document.getElementById('h-sleep').value = '';
   if (notesEl) notesEl.value = '';
   renderHealthChart(); renderSnapshot(); saveData(); showToast('Logged');
-}
-// quick one-tap weight from the top of Health
-function logQuickWeight() {
-  const w = parseFloat(document.getElementById('hx-quick-weight').value);
-  if (!w) { showToast('Enter weight'); return; }
-  const dateStr = new Date().toLocaleDateString();
-  if (!DATA.health.dailyLog) DATA.health.dailyLog = [];
-  const existing = DATA.health.dailyLog.find(l => l.date === dateStr);
-  if (existing) existing.weight = w; else DATA.health.dailyLog.push({date:dateStr, weight:w});
-  DATA.health.dailyLog.sort((a,b) => new Date(a.date) - new Date(b.date));
-  document.getElementById('hx-quick-weight').value = '';
-  renderHealthChart(); renderSnapshot(); saveData(); showToast('Weight logged: '+w+'kg');
 }
 
 // ─── HEALTH (redesigned) ──────────────────────────────────────────────────────
@@ -2623,20 +2605,27 @@ function renderHealth() {
 
 function renderSnapshot() {
   const logs = (DATA.health.dailyLog || []).filter(l => l.weight);
-  const curr = logs.length ? logs[logs.length-1].weight : (DATA.health.startWeight || 105.7);
   const start = DATA.health.startWeight || 105.7;
+  const curr = logs.length ? logs[logs.length-1].weight : start;
   const target = DATA.health.targetWeight || 88;
   const lost = start - curr;
   const toGo = curr - target;
-  const todayName = DIET_DAYS[(new Date().getDay()+6)%7];
-  const effType = effectiveDietType(todayName);
-  const kcalType = (effType === 'rest') ? 'rest' : DATA.health.weekTypeMap[todayName];
-  const kcal = DATA.health.calorieTargets[kcalType] || 2300;
   document.getElementById('hx-snapshot').innerHTML = `
-    <div class="hx-stat"><div class="hx-stat-val">${curr.toFixed(1)}</div><div class="hx-stat-lbl">Weight kg</div></div>
+    <div class="hx-stat"><div class="hx-stat-val">${start.toFixed(1)}</div><div class="hx-stat-lbl">Start kg</div></div>
+    <div class="hx-stat"><div class="hx-stat-val">${curr.toFixed(1)}</div><div class="hx-stat-lbl">Today kg</div></div>
     <div class="hx-stat"><div class="hx-stat-val" style="color:${lost>0?'var(--hx-pos)':'var(--hx-dim)'}">${lost>0?'−':''}${Math.abs(lost).toFixed(1)}</div><div class="hx-stat-lbl">Lost kg</div></div>
     <div class="hx-stat"><div class="hx-stat-val">${toGo.toFixed(1)}</div><div class="hx-stat-lbl">To target</div></div>
-    <div class="hx-stat"><div class="hx-stat-val" style="font-size:0.95rem; padding-top:0.18rem;">${kcal}</div><div class="hx-stat-lbl">kcal today</div></div>`;
+    <div class="hx-stat"><div class="hx-stat-val" style="color:var(--hx-pos)">${target}</div><div class="hx-stat-lbl">Target kg</div></div>`;
+}
+let backdateOpen = false;
+function toggleBackdate() {
+  backdateOpen = !backdateOpen;
+  const row = document.getElementById('hx-backdate-row');
+  const link = document.getElementById('hx-backdate-link');
+  row.style.display = backdateOpen ? 'block' : 'none';
+  link.textContent = backdateOpen ? 'log for today instead' : 'log another day';
+  const dateEl = document.getElementById('h-date');
+  if (backdateOpen && dateEl && !dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
 }
 
 const TYPE_LABEL = { strength:'Strength', cardio:'Cardio', football:'Football', rest:'Rest' };
