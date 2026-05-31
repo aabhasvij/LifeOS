@@ -2172,6 +2172,41 @@ async function loadData() {
 // Fetch the versioned routine files (public repo, same origin as index.html) and
 // graft their content onto DATA.health. Routine files are the canonical source for
 // the workout/diet TEMPLATES; logs live in data.json and are never touched here.
+function migrateHealthDates() {
+  if (!DATA.health) return;
+  // Normalize dailyLog date keys to canonical YYYY-MM-DD, merging same-day dups (latest wins).
+  if (Array.isArray(DATA.health.dailyLog)) {
+    const merged = {};
+    DATA.health.dailyLog.forEach(e => {
+      const k = dayKeyOf(e.date);
+      merged[k] = { ...(merged[k]||{}), ...e, date: k };
+    });
+    DATA.health.dailyLog = Object.values(merged).sort((a,b)=> a.date < b.date ? -1 : 1);
+  }
+  // Normalize workoutLog + foodLog object keys.
+  ['workoutLog','foodLog'].forEach(store => {
+    const obj = DATA.health[store];
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      const out = {};
+      Object.keys(obj).forEach(k => {
+        const nk = dayKeyOf(k);
+        out[nk] = out[nk] ? mergeLogDay(out[nk], obj[k], store) : obj[k];
+      });
+      DATA.health[store] = out;
+    }
+  });
+}
+function mergeLogDay(a, b, store){
+  if (store==='foodLog') return (a||[]).concat(b||[]);
+  // workoutLog: merge exercises
+  const ex = (a.exercises||[]).slice();
+  (b.exercises||[]).forEach(be => {
+    const m = ex.find(e=>e.name===be.name);
+    if (m){ m.sets=(m.sets||[]).concat(be.sets||[]); m.entries=(m.entries||[]).concat(be.entries||[]); }
+    else ex.push(be);
+  });
+  return { ...a, ...b, exercises: ex, trained: a.trained||b.trained };
+}
 async function loadRoutines() {
   const fb = (DATA.health && DATA.health._routineFallback) || {};
   // sensible fallback if a routine file is missing/unreachable
@@ -2185,6 +2220,7 @@ async function loadRoutines() {
     DATA.health.exerciseLibrary = DATA.health.exerciseLibrary || {};
   };
   try {
+    migrateHealthDates();
     const [tr, dr] = await Promise.all([
       fetch('training_routine.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
       fetch('diet_routine.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
@@ -2543,11 +2579,18 @@ function setRating(type, val, el) {
   });
 }
 
+// Canonical date key — YYYY-MM-DD, locale-independent, always matches for the same day.
+function dayKeyOf(d){
+  const x = d ? new Date(d) : new Date();
+  if (isNaN(x)) return new Date().toISOString().slice(0,10);
+  const y=x.getFullYear(), m=String(x.getMonth()+1).padStart(2,'0'), dd=String(x.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
 function logHealth() {
   const dateEl = document.getElementById('h-date');
   const dateStr = (backdateOpen && dateEl && dateEl.value)
-    ? new Date(dateEl.value + 'T00:00:00').toLocaleDateString()
-    : new Date().toLocaleDateString();
+    ? dayKeyOf(dateEl.value + 'T00:00:00')
+    : dayKeyOf();
   const w = parseFloat(document.getElementById('h-weight').value);
   const sl = parseFloat(document.getElementById('h-sleep').value);
   const notesEl = document.getElementById('h-notes');
@@ -2712,7 +2755,7 @@ function renderWorkoutPlan() {
     let lastTxt;
     if (last) lastTxt = last.mode==='duration' ? `last: ${last.minutes}min` : `last: ${last.weight?last.weight+'kg × ':''}${last.reps}`;
     else lastTxt = 'no log yet';
-    const dayKeySel = new Date(wlDate+'T00:00:00').toLocaleDateString();
+    const dayKeySel = dayKeyOf(wlDate+'T00:00:00');
     const todayLog = ((DATA.health.workoutLog||{})[dayKeySel]||{}).exercises||[];
     const logged = todayLog.find(x=>x.name===e.name);
     let loggedTxt='';
@@ -2767,7 +2810,7 @@ function renderWorkoutPlan() {
   const otherBtn = `<button class="hx-btn hx-btn-ghost" style="margin:0.6rem 0;" onclick="openOtherExercise()">+ Log a different exercise</button>`;
 
   // today's workout summary (for selected date)
-  const dayKey=new Date(wlDate+'T00:00:00').toLocaleDateString();
+  const dayKey=dayKeyOf(wlDate+'T00:00:00');
   const dayLog=(DATA.health.workoutLog||{})[dayKey];
   let summary='';
   if(dayLog&&(dayLog.exercises||[]).length){
@@ -2812,7 +2855,7 @@ function logDurationInline(name, idx){
   writeDuration(name, mins, intensity);
 }
 function ensureDayLog(){
-  const dayKey=new Date(wlDate+'T00:00:00').toLocaleDateString();
+  const dayKey=dayKeyOf(wlDate+'T00:00:00');
   const dayName=DIET_DAYS[(new Date(wlDate+'T00:00:00').getDay()+6)%7];
   if(!DATA.health.workoutLog) DATA.health.workoutLog={};
   if(!DATA.health.workoutLog[dayKey]) DATA.health.workoutLog[dayKey]={type:DATA.health.weekTypeMap[dayName],exercises:[],trained:true};
@@ -2993,7 +3036,7 @@ function isoForDay(dayName) {
   // nearest date for that weekday within current week (for toggle key); use today if it's today
   const today = new Date();
   const todayName = DIET_DAYS[(today.getDay()+6)%7];
-  if (dayName === todayName) return today.toLocaleDateString();
+  if (dayName === todayName) return dayKeyOf(today);
   return dayName; // fallback key for non-today planning
 }
 
@@ -3061,7 +3104,7 @@ function renderDietPlan() {
 
 // ─── FOOD LOGGING ─────────────────────────────────────────────────────────────
 const NUTRIENTS = [['kcal','Calories','k'],['protein','Protein','g'],['carbs','Carbs','g'],['fat','Fat','g'],['fibre','Fibre','g']];
-function todayKey(){ return new Date().toLocaleDateString(); }
+function todayKey(){ return dayKeyOf(); }
 function getFoodLog(dateKey){ return (DATA.health.foodLog && DATA.health.foodLog[dateKey]) || []; }
 function sumNutrients(entries){
   const t={kcal:0,protein:0,carbs:0,fat:0,fibre:0};
