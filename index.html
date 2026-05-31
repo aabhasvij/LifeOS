@@ -2053,6 +2053,30 @@ html, body {
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-custom-meal">
+  <div class="modal">
+    <div class="modal-title">Log a meal</div>
+    <div style="font-size:0.7rem; letter-spacing:0.1em; color:#6c6f7c; text-transform:uppercase; margin-bottom:0.5rem;">Quick-pick saved</div>
+    <div id="cm-library" style="margin-bottom:1rem;"></div>
+    <div style="font-size:0.7rem; letter-spacing:0.1em; color:#6c6f7c; text-transform:uppercase; margin-bottom:0.5rem;">Or log new</div>
+    <div class="log-form">
+      <div><label class="field-label">Meal name *</label><input class="field-input" id="cm-name" placeholder="McVeggie Burger"></div>
+      <div><label class="field-label">Calories * (kcal)</label><input class="field-input" id="cm-kcal" type="number" placeholder="450"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">
+        <div><label class="field-label">Protein (g)</label><input class="field-input" id="cm-protein" type="number" placeholder="optional"></div>
+        <div><label class="field-label">Carbs (g)</label><input class="field-input" id="cm-carbs" type="number" placeholder="optional"></div>
+        <div><label class="field-label">Fat (g)</label><input class="field-input" id="cm-fat" type="number" placeholder="optional"></div>
+        <div><label class="field-label">Fibre (g)</label><input class="field-input" id="cm-fibre" type="number" placeholder="optional"></div>
+      </div>
+      <div style="font-size:0.72rem; color:#6c6f7c; line-height:1.4;">Add macros once and this meal is saved for one-tap logging next time.</div>
+    </div>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="saveCustomMeal()">Log meal</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-custom-meal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-vault-bank">
   <div class="modal">
     <div class="modal-title">Add bank account</div>
@@ -2144,7 +2168,7 @@ async function loadData() {
     if (res.status === 404) throw new Error('Repo or file not found. Check your GitHub username and repo name. Make sure data.json exists in the repo root.');
     if (!res.ok) throw new Error('GitHub API error ' + res.status + '. Check your token permissions.');
     const json = await res.json();
-    DATA = JSON.parse(atob(json.content.replace(/\n/g, '')));
+    DATA = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\n/g, '')))));
     DATA._sha = json.sha;
     safeInitApp();
   } catch(e) {
@@ -2704,11 +2728,14 @@ function renderDietPlan() {
     ? [['breakfast','Breakfast'],['lunch','Lunch (main fuel-up)'],['preFootball','Pre-football'],['dinner','Post-football dinner']]
     : [['preWorkout','Pre-workout'],['breakfast','Post-workout breakfast'],['lunch','Lunch'],['snack','Afternoon snack'],['dinner','Dinner']];
 
-  document.getElementById('hx-diet-view').innerHTML = slotOrder.map(([slot,label]) => {
+  document.getElementById('hx-diet-view').innerHTML = renderNutrientTally() + slotOrder.map(([slot,label]) => {
     const s = dp[slot]; if (!s) return '';
-    const opts = s.options.map(o => `<div class="hx-meal">
+    const opts = s.options.map((o,oi) => `<div class="hx-meal">
         <span class="hx-meal-txt">${o.label}</span>
-        <span class="hx-meal-macro">${o.kcal}k · ${o.protein}p</span>
+        <span style="display:flex; flex-direction:column; align-items:flex-end; gap:0.3rem;">
+          <span class="hx-meal-macro">${o.kcal}k · ${o.protein}p</span>
+          <span onclick='logPlanMeal(${JSON.stringify(o).replace(/'/g,"&#39;")})' style="cursor:pointer; font-size:0.66rem; color:var(--hx-accent); border:1px solid var(--hx-accent); border-radius:6px; padding:1px 7px;">+ Log</span>
+        </span>
       </div>`).join('');
     return `<div style="margin-bottom:1rem;">
       <div class="hx-row" style="margin-bottom:0.4rem;">
@@ -2716,7 +2743,93 @@ function renderDietPlan() {
         <span style="font-size:0.66rem; color:var(--hx-faint);">${s.time}</span>
       </div>${opts}
     </div>`;
+  }).join('') + renderFoodLogToday();
+}
+
+// ─── FOOD LOGGING ─────────────────────────────────────────────────────────────
+const NUTRIENTS = [['kcal','Calories','k'],['protein','Protein','g'],['carbs','Carbs','g'],['fat','Fat','g'],['fibre','Fibre','g']];
+function todayKey(){ return new Date().toLocaleDateString(); }
+function getFoodLog(dateKey){ return (DATA.health.foodLog && DATA.health.foodLog[dateKey]) || []; }
+function sumNutrients(entries){
+  const t={kcal:0,protein:0,carbs:0,fat:0,fibre:0};
+  entries.forEach(e=>NUTRIENTS.forEach(([k])=> t[k]+=(e[k]||0)));
+  return t;
+}
+function renderNutrientTally(){
+  const log = getFoodLog(todayKey());
+  const sum = sumNutrients(log);
+  const tgt = DATA.health.nutrientTargets;
+  const bars = NUTRIENTS.map(([k,lbl,u])=>{
+    const have=Math.round(sum[k]), goal=tgt[k], pct=Math.min(100,Math.round(have/goal*100));
+    const col = pct>=90?'var(--hx-pos)':pct>=60?'var(--hx-accent)':'var(--hx-warn)';
+    return `<div style="margin-bottom:0.55rem;">
+      <div class="hx-row" style="margin-bottom:0.2rem;"><span style="font-size:0.72rem; color:var(--hx-dim);">${lbl}</span>
+      <span class="hx-num" style="font-size:0.72rem; color:${col};">${have}/${goal}${u}</span></div>
+      <div style="height:5px; background:var(--hx-surface2); border-radius:3px; overflow:hidden;"><div style="height:100%; width:${pct}%; background:${col}; border-radius:3px;"></div></div>
+    </div>`;
   }).join('');
+  return `<div style="background:var(--hx-surface2); border-radius:var(--hx-r-sm); padding:0.85rem; margin-bottom:1rem;">
+    <div class="hx-row" style="margin-bottom:0.7rem;"><span style="font-size:0.66rem; letter-spacing:0.1em; color:var(--hx-faint); text-transform:uppercase;">Today's intake</span>
+    <span onclick="openCustomMeal()" style="cursor:pointer; font-size:0.68rem; color:var(--hx-accent); border:1px solid var(--hx-accent); border-radius:6px; padding:2px 9px;">+ Custom / cheat</span></div>
+    ${bars}</div>`;
+}
+function renderFoodLogToday(){
+  const log = getFoodLog(todayKey());
+  if(!log.length) return '';
+  return `<div style="margin-top:0.5rem;"><div style="font-size:0.62rem; letter-spacing:0.1em; color:var(--hx-faint); margin-bottom:0.4rem;">LOGGED TODAY</div>` +
+    log.map((e,i)=>`<div class="hx-row" style="padding:0.45rem 0.6rem; background:var(--hx-surface2); border-radius:8px; margin-bottom:0.3rem;">
+      <span style="font-size:0.82rem; color:var(--hx-text);">${e.name}</span>
+      <span class="hx-num" style="font-size:0.72rem; color:var(--hx-faint);">${e.kcal}k <span onclick="removeFoodLog(${i})" style="color:var(--hx-neg); cursor:pointer; margin-left:0.4rem;">x</span></span>
+    </div>`).join('') + `</div>`;
+}
+function logPlanMeal(o){
+  pushFood({name:o.label, kcal:o.kcal, protein:o.protein, carbs:o.carbs||0, fat:o.fat||0, fibre:o.fibre||0, source:'plan'});
+  showToast('Logged: '+o.label.slice(0,24));
+}
+function pushFood(entry){
+  const k=todayKey();
+  if(!DATA.health.foodLog) DATA.health.foodLog={};
+  if(!DATA.health.foodLog[k]) DATA.health.foodLog[k]=[];
+  DATA.health.foodLog[k].push(entry);
+  renderDietPlan(); renderSnapshot(); saveData();
+}
+function removeFoodLog(i){
+  const k=todayKey();
+  DATA.health.foodLog[k].splice(i,1);
+  renderDietPlan(); renderSnapshot(); saveData();
+}
+function openCustomMeal(){
+  // build library chips + form
+  const lib = DATA.health.foodLibrary||[];
+  const chips = lib.length ? lib.map((m,i)=>`<span onclick="logFromLibrary(${i})" style="cursor:pointer; display:inline-block; font-size:0.76rem; background:var(--hx-surface2); border:1px solid var(--hx-border); border-radius:16px; padding:0.35rem 0.8rem; margin:0 0.35rem 0.4rem 0; color:var(--hx-text);">${m.name} <span style="color:var(--hx-faint);">${m.kcal}k</span></span>`).join('') : '<div class="hx-sub" style="color:var(--hx-faint);">No saved meals yet. Log one below and it gets saved for next time.</div>';
+  document.getElementById('cm-library').innerHTML = chips;
+  ['cm-name','cm-kcal','cm-protein','cm-carbs','cm-fat','cm-fibre'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modal-custom-meal').classList.add('active');
+}
+function logFromLibrary(i){
+  const m=DATA.health.foodLibrary[i];
+  pushFood({...m, source:'library'});
+  document.getElementById('modal-custom-meal').classList.remove('active');
+  showToast('Logged: '+m.name.slice(0,24));
+}
+function saveCustomMeal(){
+  const name=document.getElementById('cm-name').value.trim();
+  const kcal=parseInt(document.getElementById('cm-kcal').value);
+  if(!name){ showToast('Name required'); return; }
+  if(!kcal){ showToast('Calories required'); return; }
+  const entry={name, kcal,
+    protein:parseInt(document.getElementById('cm-protein').value)||0,
+    carbs:parseInt(document.getElementById('cm-carbs').value)||0,
+    fat:parseInt(document.getElementById('cm-fat').value)||0,
+    fibre:parseInt(document.getElementById('cm-fibre').value)||0, source:'custom'};
+  // save to library if macros provided (so it's reusable)
+  if(!DATA.health.foodLibrary) DATA.health.foodLibrary=[];
+  if(!DATA.health.foodLibrary.find(m=>m.name.toLowerCase()===name.toLowerCase())){
+    DATA.health.foodLibrary.push({name, kcal, protein:entry.protein, carbs:entry.carbs, fat:entry.fat, fibre:entry.fibre});
+  }
+  pushFood(entry);
+  document.getElementById('modal-custom-meal').classList.remove('active');
+  showToast('Logged & saved: '+name.slice(0,20));
 }
 
 function selectDietDay(dn) { dietActiveDay = dn; renderDayPills(); renderDietPlan(); renderWorkoutPlan(); }
