@@ -2663,6 +2663,10 @@ function estKcalForSets(sets, isWeighted){
   const bwScale = bodyWeight()/90; // normalize around 90kg
   return Math.round(sets.length * perSet * bwScale);
 }
+function estKcalForDuration(minutes, intensity){
+  const MET = {easy:4, moderate:7, hard:10}[intensity] || 6;
+  return Math.round(MET * 3.5 * bodyWeight() / 200 * minutes);
+}
 function allExerciseNames(){
   const lib=DATA.health.exerciseLibrary||{};
   const set=new Set();
@@ -2676,7 +2680,10 @@ function lastLoggedSet(exName){
   const keys=Object.keys(wl).sort((a,b)=>new Date(b)-new Date(a));
   for(const k of keys){
     const ex=(wl[k].exercises||[]).find(e=>e.name===exName);
-    if(ex&&ex.sets&&ex.sets.length){ const s=ex.sets[ex.sets.length-1]; return {date:k, reps:s.reps, weight:s.weight}; }
+    if(ex){
+      if(ex.mode==='duration' && ex.entries && ex.entries.length){ const s=ex.entries[ex.entries.length-1]; return {date:k, mode:'duration', minutes:s.minutes, intensity:s.intensity}; }
+      if(ex.sets && ex.sets.length){ const s=ex.sets[ex.sets.length-1]; return {date:k, mode:'strength', reps:s.reps, weight:s.weight}; }
+    }
   }
   return null;
 }
@@ -2702,12 +2709,21 @@ function renderWorkoutPlan() {
     </div>`;
 
   const ex = (tp.exercises||[]).map((e,i) => {
-    const isW = !!e.weight || /squat|deadlift|bench|press|row|lunge|curl|pulldown|carry|split/i.test(e.name);
+    const mode = e.logMode || (e.weight ? 'strength' : 'duration');
+    const isW = mode==='strength';
     const last = lastLoggedSet(e.name);
-    const lastTxt = last ? `last: ${last.weight?last.weight+'kg × ':''}${last.reps}` : 'no log yet';
-    const todayLog = ((DATA.health.workoutLog||{})[new Date(wlDate+'T00:00:00').toLocaleDateString()]||{}).exercises||[];
+    let lastTxt;
+    if (last) lastTxt = last.mode==='duration' ? `last: ${last.minutes}min` : `last: ${last.weight?last.weight+'kg × ':''}${last.reps}`;
+    else lastTxt = 'no log yet';
+    const dayKeySel = new Date(wlDate+'T00:00:00').toLocaleDateString();
+    const todayLog = ((DATA.health.workoutLog||{})[dayKeySel]||{}).exercises||[];
     const logged = todayLog.find(x=>x.name===e.name);
-    const loggedTxt = logged ? logged.sets.map(s=>`${s.reps}×${s.weight||0}`).join('  ') : '';
+    let loggedTxt='';
+    if(logged){
+      loggedTxt = logged.mode==='duration'
+        ? logged.entries.map(s=>`${s.minutes}min ${s.intensity||''}`).join('  ')
+        : logged.sets.map(s=>`${s.reps}×${s.weight||0}`).join('  ');
+    }
     const detail = e.cues ? `
         <div class="hx-meta">
           ${e.tempo?`<div><div class="hx-meta-l">Tempo</div><div class="hx-meta-v">${e.tempo}</div></div>`:''}
@@ -2715,6 +2731,24 @@ function renderWorkoutPlan() {
         </div>
         ${e.weight?`<div style="padding:0.4rem 0; border-top:1px solid var(--hx-border);"><div class="hx-meta-l">Load guide</div><div class="hx-meta-v">${e.weight}</div></div>`:''}
         <div class="hx-cue" style="border-top:1px solid var(--hx-border); padding-top:0.5rem; margin-top:0.2rem;">${e.cues}</div>` : `<div class="hx-cue">${e.short||''}</div>`;
+
+    // logging input depends on mode
+    let logInput;
+    if (mode==='strength') {
+      logInput = `<div style="display:flex; gap:0.4rem; align-items:flex-end;">
+        <div style="flex:1;"><label class="hx-label">Reps</label><input class="hx-input" id="set-reps-${i}" type="number" inputmode="numeric" placeholder="8" style="padding:0.5rem;"></div>
+        <div style="flex:1;"><label class="hx-label">Weight (kg)</label><input class="hx-input" id="set-wt-${i}" type="number" inputmode="decimal" step="0.5" placeholder="${last&&last.weight?last.weight:''}" style="padding:0.5rem;"></div>
+        <button class="hx-btn hx-btn-primary" style="flex:0 0 auto; width:auto; padding:0.5rem 0.9rem;" onclick="logSetInline('${e.name.replace(/'/g,"\\'")}', ${i})">Log set</button>
+      </div>`;
+    } else {
+      const preset = e.presetMin || (parseInt((e.sets||'').match(/\d+/)?.[0])||30);
+      logInput = `<div style="display:flex; gap:0.4rem; align-items:flex-end; flex-wrap:wrap;">
+        <div style="flex:1; min-width:90px;"><label class="hx-label">Minutes</label><input class="hx-input" id="dur-min-${i}" type="number" inputmode="numeric" placeholder="${preset}" value="${preset}" style="padding:0.5rem;"></div>
+        <div style="flex:1.3; min-width:120px;"><label class="hx-label">Intensity</label>
+          <select class="hx-select" id="dur-int-${i}" style="padding:0.5rem;"><option value="easy">Easy</option><option value="moderate" selected>Moderate</option><option value="hard">Hard</option></select></div>
+        <button class="hx-btn hx-btn-primary" style="flex:0 0 auto; width:auto; padding:0.5rem 0.9rem;" onclick="logDurationInline('${e.name.replace(/'/g,"\\'")}', ${i})">Log</button>
+      </div>`;
+    }
     return `<div class="hx-ex">
       <div class="hx-ex-head" onclick="this.parentElement.classList.toggle('open')">
         <div class="hx-ex-num" style="background:${c}22; color:${c};">${i+1}</div>
@@ -2726,11 +2760,7 @@ function renderWorkoutPlan() {
         ${detail}
         <div style="border-top:1px solid var(--hx-border); margin-top:0.6rem; padding-top:0.6rem;">
           ${loggedTxt?`<div style="font-size:0.72rem; color:var(--hx-pos); margin-bottom:0.5rem;">✓ logged: ${loggedTxt}</div>`:''}
-          <div style="display:flex; gap:0.4rem; align-items:flex-end;">
-            <div style="flex:1;"><label class="hx-label">Reps</label><input class="hx-input" id="set-reps-${i}" type="number" placeholder="8" style="padding:0.5rem;"></div>
-            <div style="flex:1;"><label class="hx-label">Weight (kg)</label><input class="hx-input" id="set-wt-${i}" type="number" step="0.5" placeholder="${last&&last.weight?last.weight:''}" style="padding:0.5rem;"></div>
-            <button class="hx-btn hx-btn-primary" style="flex:0 0 auto; width:auto; padding:0.5rem 0.9rem;" onclick="logSetInline('${e.name.replace(/'/g,"\\'")}', ${i}, ${isW})">Log set</button>
-          </div>
+          ${logInput}
         </div>
       </div>
     </div>`;
@@ -2748,7 +2778,12 @@ function renderWorkoutPlan() {
     summary=`<div style="background:var(--hx-surface2); border-radius:var(--hx-r-sm); padding:0.8rem; margin-top:0.6rem;">
       <div class="hx-row" style="margin-bottom:0.5rem;"><span style="font-size:0.66rem; letter-spacing:0.1em; color:var(--hx-faint); text-transform:uppercase;">Logged ${dayKey}</span>
       <span class="hx-num" style="font-size:0.74rem; color:var(--hx-warn);">~${totKcal} kcal est</span></div>
-      ${(dayLog.exercises||[]).map(e=>`<div style="margin:0.25rem 0;"><span style="font-size:0.84rem; color:var(--hx-dim);">${e.name}</span> <span class="hx-num" style="font-size:0.74rem; color:var(--hx-faint);">${e.sets.map(s=>`${s.reps}×${s.weight||0}`).join(', ')}</span></div>`).join('')}
+      ${(dayLog.exercises||[]).map(e=>{
+        const detail = e.mode==='duration'
+          ? (e.entries||[]).map(s=>`${s.minutes}min ${s.intensity||''}`).join(', ')
+          : (e.sets||[]).map(s=>`${s.reps}x${s.weight||0}`).join(', ');
+        return `<div style="margin:0.25rem 0;"><span style="font-size:0.84rem; color:var(--hx-dim);">${e.name}</span> <span class="hx-num" style="font-size:0.74rem; color:var(--hx-faint);">${detail}</span></div>`;
+      }).join('')}
     </div>`;
   }
 
@@ -2759,25 +2794,61 @@ function renderWorkoutPlan() {
   el.innerHTML = head + dateRow + ex + otherBtn + summary + warm + cool;
 }
 
-function logSetInline(name, idx, isWeighted){
+function exMode(name){
+  // look up the exercise's logMode from the current training plan
+  for(const d of (DATA.health.trainingPlan||[])){
+    const e=(d.exercises||[]).find(x=>x.name===name);
+    if(e) return e.logMode || (e.weight?'strength':'duration');
+  }
+  return 'strength';
+}
+function logSetInline(name, idx){
   const reps=parseInt(document.getElementById('set-reps-'+idx).value);
   const wt=parseFloat(document.getElementById('set-wt-'+idx).value)||0;
   if(!reps){ showToast('Enter reps'); return; }
-  writeSet(name, reps, wt, isWeighted);
+  writeSet(name, reps, wt);
 }
-function writeSet(name, reps, wt, isWeighted){
+function logDurationInline(name, idx){
+  const mins=parseInt(document.getElementById('dur-min-'+idx).value);
+  const intensity=document.getElementById('dur-int-'+idx).value;
+  if(!mins){ showToast('Enter minutes'); return; }
+  writeDuration(name, mins, intensity);
+}
+function ensureDayLog(){
   const dayKey=new Date(wlDate+'T00:00:00').toLocaleDateString();
   const dayName=DIET_DAYS[(new Date(wlDate+'T00:00:00').getDay()+6)%7];
   if(!DATA.health.workoutLog) DATA.health.workoutLog={};
   if(!DATA.health.workoutLog[dayKey]) DATA.health.workoutLog[dayKey]={type:DATA.health.weekTypeMap[dayName],exercises:[],trained:true};
-  const log=DATA.health.workoutLog[dayKey];
-  log.trained=true;
+  DATA.health.workoutLog[dayKey].trained=true;
+  return DATA.health.workoutLog[dayKey];
+}
+function writeSet(name, reps, wt){
+  const log=ensureDayLog();
   let ex=log.exercises.find(e=>e.name===name);
-  if(!ex){ ex={name,sets:[],estKcal:0}; log.exercises.push(ex); }
+  if(!ex){ ex={name,mode:'strength',sets:[],estKcal:0}; log.exercises.push(ex); }
+  if(!ex.sets) ex.sets=[];
+  ex.mode='strength';
   ex.sets.push({reps,weight:wt});
-  ex.estKcal=estKcalForSets(ex.sets, isWeighted);
+  ex.estKcal=estKcalForSets(ex.sets, wt>0);
   renderWorkoutPlan(); renderSnapshot(); saveData();
   showToast('Set logged: '+name.slice(0,18));
+}
+function writeDuration(name, mins, intensity){
+  const log=ensureDayLog();
+  let ex=log.exercises.find(e=>e.name===name);
+  if(!ex){ ex={name,mode:'duration',entries:[],estKcal:0}; log.exercises.push(ex); }
+  if(!ex.entries) ex.entries=[];
+  ex.mode='duration';
+  ex.entries.push({minutes:mins, intensity});
+  ex.estKcal=estKcalForDuration(ex.entries);
+  renderWorkoutPlan(); renderSnapshot(); saveData();
+  showToast('Logged: '+name.slice(0,18)+' '+mins+'min');
+}
+function estKcalForDuration(entries){
+  // MET by intensity: easy 4, moderate 7, hard 10; x bodyweight x time
+  const bw=bodyWeight(); let kcal=0;
+  entries.forEach(e=>{ const met=e.intensity==='hard'?10:e.intensity==='easy'?4:7; kcal+=met*3.5*bw/200*(e.minutes||0); });
+  return Math.round(kcal);
 }
 function openOtherExercise(){
   const names=allExerciseNames();
@@ -2785,7 +2856,7 @@ function openOtherExercise(){
   document.getElementById('oe-custom').value='';
   document.getElementById('oe-reps').value='';
   document.getElementById('oe-wt').value='';
-  document.getElementById('modal-other-ex').classList.add('active');
+  openModal('modal-other-ex');
 }
 function logOtherExercise(){
   let name=document.getElementById('oe-select').value;
@@ -2796,7 +2867,7 @@ function logOtherExercise(){
   if(!reps){ showToast('Enter reps'); return; }
   const isW=wt>0||/squat|deadlift|bench|press|row|lunge|curl|pulldown|carry|split/i.test(name);
   writeSet(name, reps, wt, isW);
-  document.getElementById('modal-other-ex').classList.remove('active');
+  closeModal('modal-other-ex');
 }
 
 function renderHealthChart() {
@@ -2965,12 +3036,12 @@ function openCustomMeal(){
   const chips = lib.length ? lib.map((m,i)=>`<span onclick="logFromLibrary(${i})" style="cursor:pointer; display:inline-block; font-size:0.76rem; background:var(--hx-surface2); border:1px solid var(--hx-border); border-radius:16px; padding:0.35rem 0.8rem; margin:0 0.35rem 0.4rem 0; color:var(--hx-text);">${m.name} <span style="color:var(--hx-faint);">${m.kcal}k</span></span>`).join('') : '<div class="hx-sub" style="color:var(--hx-faint);">No saved meals yet. Log one below and it gets saved for next time.</div>';
   document.getElementById('cm-library').innerHTML = chips;
   ['cm-name','cm-kcal','cm-protein','cm-carbs','cm-fat','cm-fibre'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('modal-custom-meal').classList.add('active');
+  openModal('modal-custom-meal');
 }
 function logFromLibrary(i){
   const m=DATA.health.foodLibrary[i];
   pushFood({...m, source:'library'});
-  document.getElementById('modal-custom-meal').classList.remove('active');
+  closeModal('modal-custom-meal');
   showToast('Logged: '+m.name.slice(0,24));
 }
 function saveCustomMeal(){
@@ -2989,7 +3060,7 @@ function saveCustomMeal(){
     DATA.health.foodLibrary.push({name, kcal, protein:entry.protein, carbs:entry.carbs, fat:entry.fat, fibre:entry.fibre});
   }
   pushFood(entry);
-  document.getElementById('modal-custom-meal').classList.remove('active');
+  closeModal('modal-custom-meal');
   showToast('Logged & saved: '+name.slice(0,20));
 }
 
