@@ -1373,8 +1373,11 @@ html, body {
       <!-- WEIGHT TREND -->
       <div class="hx-card">
         <div class="hx-row" style="margin-bottom:0.7rem;">
-          <div class="hx-card-title" style="margin-bottom:0;">Weight trend</div>
-          <div style="text-align:right;"><div class="hx-stat-lbl">Target</div><div class="hx-num" style="color:var(--hx-pos); font-size:1rem;">88 kg</div></div>
+          <div style="display:flex; gap:0.4rem; align-items:center;">
+            <span class="hx-seg" id="trend-seg-weight" onclick="setTrendMetric('weight')" style="cursor:pointer;">Weight</span>
+            <span class="hx-seg" id="trend-seg-sleep" onclick="setTrendMetric('sleep')" style="cursor:pointer;">Sleep</span>
+          </div>
+          <div style="text-align:right;" id="trend-target-wrap"><div class="hx-stat-lbl">Target</div><div class="hx-num" id="trend-target" style="color:var(--hx-pos); font-size:1rem;">88 kg</div></div>
         </div>
         <div class="hx-pills" id="weight-range-pills" style="margin-bottom:0.8rem;"></div>
         <div style="height:170px;"><canvas id="weight-chart"></canvas><div id="weight-empty" style="display:none; text-align:center; padding-top:3.5rem; color:var(--hx-faint); font-size:0.82rem;">Log your weight to start the trend.</div></div>
@@ -2911,8 +2914,18 @@ function logOtherExercise(){
 }
 
 let weightRange = '30D';
+let trendMetric = 'weight'; // 'weight' | 'sleep'
 const RANGE_DAYS = { '7D':7, '30D':30, '3M':90, '1Y':365, 'All':null };
 function setWeightRange(r){ weightRange = r; renderHealthChart(); }
+function setTrendMetric(m){ trendMetric = m; renderHealthChart(); }
+// Parse a canonical YYYY-MM-DD key as LOCAL midnight (not UTC) so points align with local-time axis ticks.
+function parseDayKey(k){
+  if (typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k)) {
+    const [y,m,d] = k.split('-').map(Number);
+    return new Date(y, m-1, d);
+  }
+  return new Date(k);
+}
 
 function renderWeightRangePills(){
   const el = document.getElementById('weight-range-pills'); if(!el) return;
@@ -2945,8 +2958,28 @@ function renderHealthChart() {
 }
 function _renderHealthChart() {
   renderWeightRangePills();
-  let logs = (DATA.health.dailyLog || []).filter(l => l.weight)
-    .map(l => ({ t: new Date(l.date), y: l.weight }))
+  // metric config
+  const isWeight = trendMetric === 'weight';
+  const field = isWeight ? 'weight' : 'sleep';
+  const accent = isWeight ? '#aab4ff' : '#6fc7c2';
+  const accentFill = isWeight ? 'rgba(170,180,255,0.10)' : 'rgba(111,199,194,0.10)';
+  const unit = isWeight ? 'kg' : 'h';
+
+  // update segmented toggle styling
+  const segW = document.getElementById('trend-seg-weight'), segS = document.getElementById('trend-seg-sleep');
+  if (segW && segS) {
+    segW.style.cssText = `cursor:pointer; background:${isWeight?'var(--hx-accent-soft)':'transparent'}; color:${isWeight?'var(--hx-accent)':'var(--hx-faint)'}; border:1px solid ${isWeight?'var(--hx-accent)':'var(--hx-border)'};`;
+    segS.style.cssText = `cursor:pointer; background:${!isWeight?'rgba(111,199,194,0.14)':'transparent'}; color:${!isWeight?'var(--hx-cardio)':'var(--hx-faint)'}; border:1px solid ${!isWeight?'var(--hx-cardio)':'var(--hx-border)'};`;
+  }
+  // target display only meaningful for weight
+  const targetWrap = document.getElementById('trend-target-wrap');
+  if (targetWrap) {
+    if (isWeight) { targetWrap.style.visibility='visible'; const t=document.getElementById('trend-target'); if(t) t.textContent=(DATA.health.targetWeight||88)+' kg'; }
+    else targetWrap.style.visibility='hidden';
+  }
+
+  let logs = (DATA.health.dailyLog || []).filter(l => l[field] != null)
+    .map(l => ({ t: parseDayKey(l.date), y: l[field] }))
     .filter(p => !isNaN(p.t))
     .sort((a,b)=>a.t-b.t);
   // apply range filter (by real calendar date)
@@ -2961,7 +2994,7 @@ function _renderHealthChart() {
   const emptyEl = document.getElementById('weight-empty');
   if (!logs.length) {
     if (weightChart) { weightChart.destroy(); weightChart = null; }
-    if (emptyEl) emptyEl.style.display = 'block';
+    if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = `Log your ${field} to start the trend.`; }
     canvas.style.display = 'none';
     document.getElementById('weight-stats').innerHTML = '';
     return;
@@ -2970,15 +3003,15 @@ function _renderHealthChart() {
   canvas.style.display = 'block';
 
   const raw = logs.map(p=>({x:p.t.getTime(), y:p.y}));
-  const weights = logs.map(p=>p.y);
+  const vals = logs.map(p=>p.y);
   // rolling average only when data is dense enough to be meaningful (>=5 points & spans >=10d)
   const spanDays = (logs[logs.length-1].t - logs[0].t)/86400000;
   const showAvg = logs.length >= 5 && spanDays >= 10;
   const avg = showAvg ? rollingAvg(logs, 7).map(p=>({x:p.x.getTime(), y:p.y})) : null;
 
   const datasets = [{
-    label:'Weight', data: raw, borderColor:'#aab4ff', backgroundColor:'rgba(170,180,255,0.10)',
-    borderWidth: showAvg?1:2, pointRadius: logs.length===1?6:3, pointBackgroundColor:'#aab4ff',
+    label:isWeight?'Weight':'Sleep', data: raw, borderColor:accent, backgroundColor:accentFill,
+    borderWidth: showAvg?1:2, pointRadius: logs.length===1?6:3, pointBackgroundColor:accent,
     tension:0.3, fill:!showAvg
   }];
   if (showAvg) datasets.push({
@@ -2991,6 +3024,16 @@ function _renderHealthChart() {
     return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
   };
 
+  // y-axis bounds: weight includes target; sleep clamps to a sensible 0-12-ish window
+  let yMin, yMax;
+  if (isWeight) {
+    yMin = Math.min(...vals, DATA.health.targetWeight||88)-1;
+    yMax = Math.max(...vals)+1;
+  } else {
+    yMin = Math.max(0, Math.min(...vals)-1);
+    yMax = Math.min(12, Math.max(...vals)+1);
+  }
+
   const ctx = canvas.getContext('2d');
   if (weightChart) weightChart.destroy();
   weightChart = new Chart(ctx, {
@@ -2999,7 +3042,10 @@ function _renderHealthChart() {
       responsive:true, maintainAspectRatio:false, parsing:false,
       plugins:{
         legend:{ display:showAvg, labels:{ color:'#a2a4af', font:{family:'DM Mono', size:9}, boxWidth:10, usePointStyle:true } },
-        tooltip:{ callbacks:{ title:(items)=> items.length?fmtDate(items[0].parsed.x):'' } }
+        tooltip:{ callbacks:{
+          title:(items)=> items.length?fmtDate(items[0].parsed.x):'',
+          label:(item)=> ` ${item.parsed.y}${unit}`
+        } }
       },
       scales:{
         x:{ type:'linear',
@@ -3009,8 +3055,7 @@ function _renderHealthChart() {
             ticks:{ color:'#6c6f7c', font:{family:'DM Mono', size:9}, maxRotation:0, autoSkip:true, maxTicksLimit:6,
                     callback:(val)=>fmtDate(val) } },
         y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#6c6f7c', font:{family:'DM Mono', size:10} },
-            suggestedMin: Math.min(...weights, DATA.health.targetWeight||88)-1,
-            suggestedMax: Math.max(...weights)+1 }
+            suggestedMin: yMin, suggestedMax: yMax }
       },
       animation:{ duration:400 }
     }
@@ -3018,13 +3063,24 @@ function _renderHealthChart() {
   setTimeout(()=>{ if(weightChart){ try{ weightChart.resize(); }catch(e){} } }, 60);
   requestAnimationFrame(()=>{ if(weightChart){ try{ weightChart.resize(); }catch(e){} } });
 
-  const curr = weights[weights.length-1];
-  const target = DATA.health.targetWeight || 88;
-  const lost = (DATA.health.startWeight || weights[0]) - curr;
-  document.getElementById('weight-stats').innerHTML = `
-    <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem;">${curr.toFixed(1)}</div><div class="hx-stat-lbl">Current kg</div></div>
-    <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem; color:var(--hx-pos);">${target}</div><div class="hx-stat-lbl">Target kg</div></div>
-    <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem; color:${lost>0?'var(--hx-pos)':'var(--hx-faint)'};">${lost>0?'−':''}${Math.abs(lost).toFixed(1)}</div><div class="hx-stat-lbl">Lost kg</div></div>`;
+  // stats footer — metric-aware
+  const curr = vals[vals.length-1];
+  if (isWeight) {
+    const target = DATA.health.targetWeight || 88;
+    const lost = (DATA.health.startWeight || vals[0]) - curr;
+    document.getElementById('weight-stats').innerHTML = `
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem;">${curr.toFixed(1)}</div><div class="hx-stat-lbl">Current kg</div></div>
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem; color:var(--hx-pos);">${target}</div><div class="hx-stat-lbl">Target kg</div></div>
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem; color:${lost>0?'var(--hx-pos)':'var(--hx-faint)'};">${lost>0?'−':''}${Math.abs(lost).toFixed(1)}</div><div class="hx-stat-lbl">Lost kg</div></div>`;
+  } else {
+    const mean = vals.reduce((a,b)=>a+b,0)/vals.length;
+    const last7 = logs.slice(-7).map(p=>p.y);
+    const mean7 = last7.reduce((a,b)=>a+b,0)/last7.length;
+    document.getElementById('weight-stats').innerHTML = `
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem;">${curr.toFixed(1)}</div><div class="hx-stat-lbl">Last night h</div></div>
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem; color:var(--hx-cardio);">${mean7.toFixed(1)}</div><div class="hx-stat-lbl">7-day avg h</div></div>
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem;">${mean.toFixed(1)}</div><div class="hx-stat-lbl">All-time avg h</div></div>`;
+  }
 }
 
 // ─── DIET: day-wise view driven by training type + train/rest toggle ──────────
