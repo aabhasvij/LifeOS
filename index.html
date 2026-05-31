@@ -2336,6 +2336,10 @@ function showSection(id, el) {
   document.getElementById('sec-' + id).classList.add('active');
   el.classList.add('active');
   document.querySelector('.content').scrollTop = 0;
+  // Charts can't size into a hidden canvas — re-render once the section is visible.
+  if (id === 'health') {
+    requestAnimationFrame(() => { try { renderHealthChart(); } catch(e){ console.error('chart redraw', e); } });
+  }
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
@@ -2955,7 +2959,8 @@ function renderHealthChart() {
       animation:{ duration:400 }
     }
   });
-  setTimeout(()=>{ if(weightChart) weightChart.resize(); }, 50);
+  setTimeout(()=>{ if(weightChart){ try{ weightChart.resize(); }catch(e){} } }, 60);
+  requestAnimationFrame(()=>{ if(weightChart){ try{ weightChart.resize(); }catch(e){} } });
 
   const curr = weights[weights.length-1];
   const target = DATA.health.targetWeight || 88;
