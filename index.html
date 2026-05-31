@@ -986,7 +986,6 @@ html, body {
 </style>
 </head>
 <body>
-<div id="DBG" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#1a1d24;color:#6fcf8e;font:12px monospace;padding:6px 10px;white-space:pre-wrap;max-height:40vh;overflow:auto;border-bottom:2px solid #aab4ff;"></div>
 
 
 <!-- SETUP SCREEN -->
@@ -2545,7 +2544,6 @@ function setRating(type, val, el) {
 }
 
 function logHealth() {
-  dbg('logHealth called. DATA.health exists: '+(!!(DATA&&DATA.health))+', dailyLog len: '+((DATA&&DATA.health&&DATA.health.dailyLog)?DATA.health.dailyLog.length:'n/a'));
   const dateEl = document.getElementById('h-date');
   const dateStr = (backdateOpen && dateEl && dateEl.value)
     ? new Date(dateEl.value + 'T00:00:00').toLocaleDateString()
@@ -2566,8 +2564,7 @@ function logHealth() {
   DATA.health.dailyLog.sort((a,b) => new Date(a.date) - new Date(b.date));
   document.getElementById('h-weight').value = '';
   document.getElementById('h-sleep').value = '';
-  if (notesEl) notesEl.value = '';
-  dbg('logHealth: saved entry, dailyLog now '+DATA.health.dailyLog.length+' items. calling renders.'); renderHealthChart(); renderSnapshot(); saveData(); showToast('Logged');
+  if (notesEl) notesEl.value = ''; renderHealthChart(); renderSnapshot(); saveData(); showToast('Logged');
 }
 
 // ─── HEALTH (redesigned) ──────────────────────────────────────────────────────
@@ -2612,7 +2609,6 @@ function renderHealth() {
 }
 
 function renderSnapshot() {
-  dbg('renderSnapshot running. snapshot el exists: '+(!!document.getElementById('hx-snapshot')));
   const logs = (DATA.health.dailyLog || []).filter(l => l.weight);
   const start = DATA.health.startWeight || 105.7;
   const curr = logs.length ? logs[logs.length-1].weight : start;
