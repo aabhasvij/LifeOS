@@ -1288,6 +1288,10 @@ html, body {
       <div class="card">
         <div class="card-title">Today's log</div>
         <div class="log-form">
+          <div>
+            <label class="field-label">Date</label>
+            <input class="field-input" id="h-date" type="date">
+          </div>
           <div class="health-grid">
             <div>
               <label class="field-label">Weight (kg)</label>
@@ -1345,9 +1349,40 @@ html, body {
       </div>
 
       <div class="card">
-        <div class="card-title">Weekly diet plan</div>
+        <div class="card-header">
+          <div class="card-title" style="margin-bottom:0">Diet &amp; training day</div>
+          <div id="diet-kcal-badge" style="font-family:var(--mono); font-size:0.8rem; color:var(--gold);"></div>
+        </div>
+        <div id="diet-day-pills" style="display:flex; gap:6px; overflow-x:auto; padding:0.5rem 0 0.65rem;"></div>
+        <div id="diet-train-toggle" style="margin-bottom:0.75rem;"></div>
         <div id="diet-plan-display"></div>
-        <button class="btn btn-ghost" style="margin-top:0.75rem; width:100%" onclick="openModal('modal-diet')">Edit diet plan</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Workout log — progressive load</div>
+        <div id="wl-day-label" style="font-size:0.8rem; color:var(--text3); margin-bottom:0.6rem;"></div>
+        <div>
+          <label class="field-label">Date</label>
+          <input class="field-input" id="wl-date" type="date">
+        </div>
+        <div>
+          <label class="field-label">Exercise</label>
+          <select class="field-input" id="wl-exercise"></select>
+        </div>
+        <div class="health-grid">
+          <div>
+            <label class="field-label">Reps</label>
+            <input class="field-input" id="wl-reps" type="number" placeholder="8">
+          </div>
+          <div>
+            <label class="field-label">Weight (kg)</label>
+            <input class="field-input" id="wl-weight" type="number" step="0.5" placeholder="40">
+          </div>
+        </div>
+        <button class="btn btn-ghost" style="width:100%; margin-bottom:0.6rem" onclick="addSet()">+ Add set</button>
+        <div id="wl-pending-sets" style="margin-bottom:0.6rem;"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="saveWorkout()">Save workout</button>
+        <div id="wl-history" style="margin-top:1rem;"></div>
       </div>
 
       <div class="card">
@@ -1957,17 +1992,6 @@ html, body {
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-diet">
-  <div class="modal">
-    <div class="modal-title">Edit weekly diet plan</div>
-    <div id="diet-edit-form"></div>
-    <div class="btn-row" style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="saveDietPlan()">Save plan</button>
-      <button class="btn btn-ghost" onclick="closeModal('modal-diet')">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="modal-vault-bank">
   <div class="modal">
     <div class="modal-title">Add bank account</div>
@@ -2397,28 +2421,37 @@ function setRating(type, val, el) {
 }
 
 function logHealth() {
+  const dateVal = document.getElementById('h-date').value;
+  const dateStr = dateVal ? new Date(dateVal + 'T00:00:00').toLocaleDateString() : new Date().toLocaleDateString();
   const w = parseFloat(document.getElementById('h-weight').value);
   const sl = parseFloat(document.getElementById('h-sleep').value);
   const pr = parseInt(document.getElementById('h-protein').value);
   const notes = document.getElementById('h-notes').value.trim();
   if (!DATA.health.dailyLog) DATA.health.dailyLog = [];
-  DATA.health.dailyLog.push({
-    date: new Date().toLocaleDateString(),
+  const existing = DATA.health.dailyLog.find(l => l.date === dateStr);
+  const entry = {
+    date: dateStr,
     weight: w || null, sleep: sl || null, protein: pr || null,
     energy: currentRatings.energy, diet: currentRatings.diet, notes
-  });
+  };
+  if (existing) Object.assign(existing, entry);
+  else DATA.health.dailyLog.push(entry);
+  DATA.health.dailyLog.sort((a,b) => new Date(a.date) - new Date(b.date));
   document.getElementById('h-weight').value = '';
   document.getElementById('h-sleep').value = '';
   document.getElementById('h-protein').value = '';
   document.getElementById('h-notes').value = '';
   currentRatings = { energy: 0, diet: 0 };
   document.querySelectorAll('.rating-dot').forEach(d => d.classList.remove('selected'));
-  renderHealthChart(); showToast('Health logged ✓');
+  renderHealthChart(); saveData(); showToast('Health logged ✓');
 }
 
 function renderHealth() {
+  const hd = document.getElementById('h-date');
+  if (hd && !hd.value) hd.value = new Date().toISOString().slice(0,10);
   renderHealthChart();
   renderDietPlan();
+  initWorkoutLogger();
   renderSupplements();
   const reports = DATA.health.medicalReports || [];
   document.getElementById('reports-list').innerHTML = reports.length ?
@@ -2468,62 +2501,173 @@ function renderHealthChart() {
   }
 }
 
+// ─── DIET: day-wise view driven by training type + train/rest toggle ──────────
+const DIET_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DAY_COLORS = { strength:'#ff6b6b', cardio:'#4ecdc4', football:'#f5c842', rest:'#9896a0' };
+let dietActiveDay = DIET_DAYS[(new Date().getDay()+6)%7]; // Mon=0 index
+
+function isoForDay(dayName) {
+  // nearest date for that weekday within current week (for toggle key); use today if it's today
+  const today = new Date();
+  const todayName = DIET_DAYS[(today.getDay()+6)%7];
+  if (dayName === todayName) return today.toLocaleDateString();
+  return dayName; // fallback key for non-today planning
+}
+
+function dayTrainedState(dayName) {
+  const plannedType = DATA.health.weekTypeMap[dayName];
+  const key = isoForDay(dayName);
+  const wl = (DATA.health.workoutLog || {})[key];
+  if (wl && typeof wl.trained === 'boolean') return wl.trained;
+  return plannedType !== 'rest'; // default: planned training days = true
+}
+
+function effectiveDietType(dayName) {
+  const planned = DATA.health.weekTypeMap[dayName];
+  if (planned === 'rest') return 'rest';
+  if (!dayTrainedState(dayName)) return 'rest'; // unchecked → rest-day diet
+  return planned === 'football' ? 'football' : 'training';
+}
+
 function renderDietPlan() {
-  const plan = DATA.health.weeklyDietPlan || {};
-  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-  const dayLabels = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  const meals = ['breakfast','midMorning','lunch','eveningSnack','dinner'];
-  const mealLabels = ['Breakfast','Mid-morning','Lunch','Eve snack','Dinner'];
-  document.getElementById('diet-plan-display').innerHTML = days.map((d, di) => {
-    const dp = plan[d] || {};
-    const hasMeals = meals.some(m => dp[m]);
-    return `<div class="diet-day">
-      <div class="diet-day-header" onclick="toggleDietDay('dd-${d}')">
-        <span>${dayLabels[di]}</span><span>▾</span>
-      </div>
-      <div class="diet-meals" id="dd-${d}" ${di > 0 ? 'style="display:none"' : ''}>
-        ${meals.map((m, mi) => `<div class="diet-meal-row">
-          <div class="diet-meal-label">${mealLabels[mi]}</div>
-          <div class="diet-meal-val">${dp[m] || '—'}</div>
-        </div>`).join('')}
-      </div>
+  const pills = DIET_DAYS.map(dn => {
+    const t = DATA.health.weekTypeMap[dn];
+    const active = dn === dietActiveDay;
+    const c = DAY_COLORS[t] || '#9896a0';
+    return `<div onclick="selectDietDay('${dn}')" style="flex:0 0 auto; cursor:pointer; text-align:center; padding:0.45rem 0.6rem; border-radius:10px; border:1.5px solid ${active?c:'var(--border)'}; background:${active?c+'18':'var(--bg3)'};">
+      <div style="font-size:0.6rem; font-family:var(--mono); letter-spacing:0.06em; color:${active?c:'var(--text3)'}">${dn.slice(0,3).toUpperCase()}</div>
+      <div style="font-size:0.62rem; color:${active?c:'var(--text2)'}; text-transform:capitalize; margin-top:1px;">${t}</div>
     </div>`;
   }).join('');
-  renderDietEditForm();
+  document.getElementById('diet-day-pills').innerHTML = pills;
+
+  const planned = DATA.health.weekTypeMap[dietActiveDay];
+  const trained = dayTrainedState(dietActiveDay);
+  const effType = effectiveDietType(dietActiveDay);
+  const kcal = DATA.health.calorieTargets[effType] || DATA.health.calorieTargets.rest;
+  document.getElementById('diet-kcal-badge').textContent = `~${kcal} kcal · ${effType}`;
+
+  // toggle (only meaningful on planned training days)
+  const toggleEl = document.getElementById('diet-train-toggle');
+  if (planned === 'rest') {
+    toggleEl.innerHTML = `<div style="font-size:0.78rem; color:var(--text3);">Planned rest day — recovery meals.</div>`;
+  } else {
+    toggleEl.innerHTML = `<div style="display:flex; align-items:center; justify-content:space-between; background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:0.6rem 0.8rem;">
+      <span style="font-size:0.82rem; color:var(--text2);">Did you train ${dietActiveDay}?</span>
+      <span onclick="toggleTrained('${dietActiveDay}')" style="cursor:pointer; font-family:var(--mono); font-size:0.78rem; padding:0.25rem 0.7rem; border-radius:20px; background:${trained?'var(--green)':'var(--bg4)'}22; color:${trained?'var(--green)':'var(--text3)'}; border:1px solid ${trained?'var(--green)':'var(--border2)'};">${trained?'✓ Trained':'✗ Rested'}</span>
+    </div>`;
+  }
+
+  // meals for effective type
+  const dp = DATA.health.dietPlan[effType];
+  const slotOrder = effType === 'rest'
+    ? [['breakfast','Breakfast'],['snack1','Mid-morning'],['lunch','Lunch'],['snack2','Afternoon'],['dinner','Dinner']]
+    : effType === 'football'
+    ? [['preWorkout','Pre-match'],['breakfast','Post-match'],['lunch','Lunch'],['snack','Snack'],['dinner','Dinner']]
+    : [['preWorkout','Pre-workout'],['breakfast','Post-workout breakfast'],['lunch','Lunch'],['snack','Afternoon snack'],['dinner','Dinner']];
+
+  document.getElementById('diet-plan-display').innerHTML = slotOrder.map(([slot,label]) => {
+    const s = dp[slot]; if (!s) return '';
+    const opts = s.options.map((o,i) => `<div style="padding:0.4rem 0.55rem; border-radius:8px; background:var(--bg2); margin-bottom:0.3rem; display:flex; justify-content:space-between; gap:0.5rem;">
+        <span style="font-size:0.78rem; color:var(--text); line-height:1.35;">${o.label}</span>
+        <span style="font-size:0.66rem; font-family:var(--mono); color:var(--text3); white-space:nowrap;">${o.kcal}k · ${o.protein}p</span>
+      </div>`).join('');
+    return `<div style="margin-bottom:0.85rem;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
+        <span style="font-size:0.7rem; font-family:var(--mono); letter-spacing:0.05em; color:var(--accent); text-transform:uppercase;">${label}</span>
+        <span style="font-size:0.66rem; color:var(--text3);">${s.time}</span>
+      </div>${opts}
+    </div>`;
+  }).join('');
 }
 
-function toggleDietDay(id) {
-  const el = document.getElementById(id);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+function selectDietDay(dn) { dietActiveDay = dn; renderDietPlan(); }
+function toggleTrained(dn) {
+  const key = isoForDay(dn);
+  if (!DATA.health.workoutLog) DATA.health.workoutLog = {};
+  if (!DATA.health.workoutLog[key]) DATA.health.workoutLog[key] = { type: DATA.health.weekTypeMap[dn], exercises: [] };
+  const cur = dayTrainedState(dn);
+  DATA.health.workoutLog[key].trained = !cur;
+  renderDietPlan(); saveData();
 }
 
-function renderDietEditForm() {
-  const plan = DATA.health.weeklyDietPlan || {};
-  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-  const dayLabels = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  const meals = ['breakfast','midMorning','lunch','eveningSnack','dinner'];
-  const mealLabels = ['Breakfast','Mid-morning','Lunch','Evening snack','Dinner'];
-  document.getElementById('diet-edit-form').innerHTML = days.map((d, di) =>
-    `<div style="margin-bottom:1.25rem;">
-      <div style="font-size:0.72rem; font-family:var(--mono); color:var(--accent); letter-spacing:0.07em; text-transform:uppercase; margin-bottom:0.6rem;">${dayLabels[di]}</div>
-      ${meals.map((m, mi) => `<div style="margin-bottom:0.5rem;">
-        <label class="field-label">${mealLabels[mi]}</label>
-        <input class="field-input" id="de-${d}-${m}" value="${(plan[d]||{})[m]||''}" placeholder="${mealLabels[mi]}">
-      </div>`).join('')}
+// ─── WORKOUT LOG: progressive load ────────────────────────────────────────────
+let pendingSets = [];
+function initWorkoutLogger() {
+  const todayName = DIET_DAYS[(new Date().getDay()+6)%7];
+  document.getElementById('wl-day-label').textContent = `${todayName} · ${DATA.health.weekTypeMap[todayName]} day`;
+  const dateEl = document.getElementById('wl-date');
+  if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+  populateExerciseDropdown();
+  dateEl.onchange = populateExerciseDropdown;
+  renderPendingSets(); renderWorkoutHistory();
+}
+function populateExerciseDropdown() {
+  const dateVal = document.getElementById('wl-date').value;
+  const d = dateVal ? new Date(dateVal+'T00:00:00') : new Date();
+  const dayName = DIET_DAYS[(d.getDay()+6)%7];
+  const lib = (DATA.health.exerciseLibrary || {})[dayName] || [];
+  const allExtra = ['(other / custom)'];
+  document.getElementById('wl-exercise').innerHTML =
+    lib.concat(allExtra).map(e => `<option>${e}</option>`).join('');
+  document.getElementById('wl-day-label').textContent = `${dayName} · ${DATA.health.weekTypeMap[dayName]} day`;
+}
+function addSet() {
+  const ex = document.getElementById('wl-exercise').value;
+  const reps = parseInt(document.getElementById('wl-reps').value);
+  const wt = parseFloat(document.getElementById('wl-weight').value);
+  if (!reps) { showToast('Enter reps'); return; }
+  pendingSets.push({ exercise: ex, reps, weight: wt || 0 });
+  document.getElementById('wl-reps').value = '';
+  document.getElementById('wl-weight').value = '';
+  renderPendingSets();
+}
+function renderPendingSets() {
+  const el = document.getElementById('wl-pending-sets');
+  if (!pendingSets.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div style="font-size:0.66rem; font-family:var(--mono); color:var(--text3); margin-bottom:0.3rem;">PENDING SETS</div>` +
+    pendingSets.map((s,i) => `<div style="display:flex; justify-content:space-between; padding:0.3rem 0.5rem; background:var(--bg3); border-radius:7px; margin-bottom:0.25rem;">
+      <span style="font-size:0.76rem; color:var(--text);">${s.exercise}</span>
+      <span style="font-size:0.72rem; font-family:var(--mono); color:var(--accent);">${s.reps} × ${s.weight}kg <span onclick="rmSet(${i})" style="color:var(--coral); cursor:pointer; margin-left:0.4rem;">✕</span></span>
     </div>`).join('');
 }
-
-function saveDietPlan() {
-  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-  const meals = ['breakfast','midMorning','lunch','eveningSnack','dinner'];
-  if (!DATA.health.weeklyDietPlan) DATA.health.weeklyDietPlan = {};
-  days.forEach(d => {
-    DATA.health.weeklyDietPlan[d] = {};
-    meals.forEach(m => {
-      DATA.health.weeklyDietPlan[d][m] = document.getElementById(`de-${d}-${m}`).value.trim();
-    });
+function rmSet(i) { pendingSets.splice(i,1); renderPendingSets(); }
+function saveWorkout() {
+  if (!pendingSets.length) { showToast('Add at least one set'); return; }
+  const dateVal = document.getElementById('wl-date').value;
+  const d = dateVal ? new Date(dateVal+'T00:00:00') : new Date();
+  const key = d.toLocaleDateString();
+  const dayName = DIET_DAYS[(d.getDay()+6)%7];
+  if (!DATA.health.workoutLog) DATA.health.workoutLog = {};
+  if (!DATA.health.workoutLog[key]) DATA.health.workoutLog[key] = { type: DATA.health.weekTypeMap[dayName], exercises: [] };
+  const log = DATA.health.workoutLog[key];
+  log.trained = true;
+  // merge sets into exercises grouped by name
+  pendingSets.forEach(ps => {
+    let ex = log.exercises.find(e => e.name === ps.exercise);
+    if (!ex) { ex = { name: ps.exercise, sets: [] }; log.exercises.push(ex); }
+    ex.sets.push({ reps: ps.reps, weight: ps.weight });
   });
-  closeModal('modal-diet'); renderDietPlan(); showToast('Diet plan saved');
+  pendingSets = [];
+  renderPendingSets(); renderWorkoutHistory(); renderDietPlan(); saveData();
+  showToast('Workout saved ✓');
+}
+function renderWorkoutHistory() {
+  const wl = DATA.health.workoutLog || {};
+  const keys = Object.keys(wl).filter(k => (wl[k].exercises||[]).length)
+    .sort((a,b)=>new Date(b)-new Date(a)).slice(0,8);
+  const el = document.getElementById('wl-history');
+  if (!keys.length) { el.innerHTML = '<div style="font-size:0.76rem; color:var(--text3);">No workouts logged yet.</div>'; return; }
+  el.innerHTML = `<div style="font-size:0.66rem; font-family:var(--mono); color:var(--text3); margin-bottom:0.4rem;">RECENT WORKOUTS</div>` +
+    keys.map(k => {
+      const w = wl[k];
+      const exs = (w.exercises||[]).map(e =>
+        `<div style="margin:0.2rem 0;"><span style="font-size:0.76rem; color:var(--text2);">${e.name}</span>
+          <span style="font-size:0.7rem; font-family:var(--mono); color:var(--text3);"> — ${e.sets.map(s=>`${s.reps}×${s.weight}`).join(', ')}</span></div>`).join('');
+      return `<div style="padding:0.5rem 0.6rem; background:var(--bg3); border-radius:9px; margin-bottom:0.4rem;">
+        <div style="font-size:0.68rem; font-family:var(--mono); color:var(--accent); margin-bottom:0.2rem;">${k} · ${w.type||''}</div>${exs}
+      </div>`;
+    }).join('');
 }
 
 function renderSupplements() {
