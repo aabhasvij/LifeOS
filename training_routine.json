@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "routineType": "training",
-  "version": 1,
-  "effectiveFrom": "2026-05-01",
+  "version": 2,
+  "effectiveFrom": "2026-05-31",
   "label": "Fat-loss + strength base (5 pillars)",
   "weekTypeMap": {
     "Monday": "strength",
@@ -93,7 +93,8 @@
           "tempo": "3 sec down / 1 sec pause / drive up",
           "rest": "90 sec between sets",
           "weight": "Start at 60% of your max. Add 2.5 kg each week.",
-          "cues": "<b>Setup:</b> Bar on upper traps, feet shoulder-width, toes 15-30° out. <b>Descent:</b> Push knees out in line with toes, chest stays tall - don't let it cave forward. <b>Depth:</b> Hip crease below knee if mobility allows, parallel minimum. <b>Drive:</b> Push the floor away, squeeze glutes at the top. Don't lock knees aggressively."
+          "cues": "<b>Setup:</b> Bar on upper traps, feet shoulder-width, toes 15-30° out. <b>Descent:</b> Push knees out in line with toes, chest stays tall - don't let it cave forward. <b>Depth:</b> Hip crease below knee if mobility allows, parallel minimum. <b>Drive:</b> Push the floor away, squeeze glutes at the top. Don't lock knees aggressively.",
+          "logMode": "strength"
         },
         {
           "name": "Romanian Deadlift",
@@ -102,7 +103,8 @@
           "tempo": "3 sec lowering / squeeze at top",
           "rest": "75 sec between sets",
           "weight": "Lighter than you think. Feel the stretch, not the load.",
-          "cues": "<b>Setup:</b> Barbell or DBs, hip-width stance, soft bend in knees. <b>Hinge:</b> Push hips back as bar slides down your thighs - the bar should drag your legs the whole way. <b>Range:</b> Go until you feel a strong hamstring stretch (mid-shin for most). <b>Drive:</b> Push hips forward to stand - not a back extension. Squeeze glutes hard at top."
+          "cues": "<b>Setup:</b> Barbell or DBs, hip-width stance, soft bend in knees. <b>Hinge:</b> Push hips back as bar slides down your thighs - the bar should drag your legs the whole way. <b>Range:</b> Go until you feel a strong hamstring stretch (mid-shin for most). <b>Drive:</b> Push hips forward to stand - not a back extension. Squeeze glutes hard at top.",
+          "logMode": "strength"
         },
         {
           "name": "Walking Lunges",
@@ -111,7 +113,8 @@
           "tempo": "Controlled step, no bouncing",
           "rest": "60 sec between sets",
           "weight": "Hold dumbbells at sides. Start light - form first.",
-          "cues": "<b>Step:</b> Long stride forward, drop back knee toward floor without slamming it. <b>Front knee:</b> Stays stacked over ankle, doesn't cave inward. <b>Torso:</b> Upright - don't lean forward. <b>Drive:</b> Push off front heel to step through. This also trains your football stride pattern."
+          "cues": "<b>Step:</b> Long stride forward, drop back knee toward floor without slamming it. <b>Front knee:</b> Stays stacked over ankle, doesn't cave inward. <b>Torso:</b> Upright - don't lean forward. <b>Drive:</b> Push off front heel to step through. This also trains your football stride pattern.",
+          "logMode": "strength"
         },
         {
           "name": "Leg Press",
@@ -120,7 +123,8 @@
           "tempo": "2 sec down / push up",
           "rest": "75 sec between sets",
           "weight": "Heavy enough to feel it by rep 10. Not so heavy form breaks.",
-          "cues": "<b>Foot position:</b> Shoulder-width, mid-platform. <b>Range:</b> Lower until knees near 90° - don't let lower back peel off the pad. <b>Push:</b> Through the whole foot, not just toes. <b>Lock:</b> Don't fully lock knees at top - keeps tension on muscle."
+          "cues": "<b>Foot position:</b> Shoulder-width, mid-platform. <b>Range:</b> Lower until knees near 90° - don't let lower back peel off the pad. <b>Push:</b> Through the whole foot, not just toes. <b>Lock:</b> Don't fully lock knees at top - keeps tension on muscle.",
+          "logMode": "strength"
         },
         {
           "name": "Hanging Leg Raises",
@@ -129,7 +133,8 @@
           "tempo": "Slow and controlled, no swinging",
           "rest": "60 sec between sets",
           "weight": "Bodyweight. Can progress to ankle weights later.",
-          "cues": "<b>Hang:</b> Dead hang, shoulders packed (not shrugged to ears). <b>Raise:</b> Bring legs up by tilting pelvis - don't just swing hips. <b>Goal:</b> Legs parallel or higher. <b>Lower:</b> Slow controlled descent - this is where most of the work happens. No kipping."
+          "cues": "<b>Hang:</b> Dead hang, shoulders packed (not shrugged to ears). <b>Raise:</b> Bring legs up by tilting pelvis - don't just swing hips. <b>Goal:</b> Legs parallel or higher. <b>Lower:</b> Slow controlled descent - this is where most of the work happens. No kipping.",
+          "logMode": "strength"
         },
         {
           "name": "Plank",
@@ -138,7 +143,9 @@
           "tempo": "Hold position, breathe steadily",
           "rest": "45 sec between sets",
           "weight": "Bodyweight. Progress to 60 sec over time.",
-          "cues": "<b>Setup:</b> Forearms on floor, elbows under shoulders. <b>Body:</b> Straight line from head to heel - no hips in the air, no sagging. <b>Activation:</b> Squeeze glutes, brace abs as if about to take a punch. <b>Breathe:</b> Don't hold your breath. Steady inhale/exhale throughout."
+          "cues": "<b>Setup:</b> Forearms on floor, elbows under shoulders. <b>Body:</b> Straight line from head to heel - no hips in the air, no sagging. <b>Activation:</b> Squeeze glutes, brace abs as if about to take a punch. <b>Breathe:</b> Don't hold your breath. Steady inhale/exhale throughout.",
+          "logMode": "duration",
+          "presetMin": 3
         }
       ],
       "cooldown": [
@@ -185,7 +192,9 @@
           "tempo": "Conversational pace - ~130-140 BPM",
           "rest": "N/A - continuous",
           "weight": "Bodyweight. Incline 2-3 to increase effort without raising HR too much.",
-          "cues": "<b>Target HR:</b> 130-140 BPM. If you don't have a monitor, use the talk test - you can speak in full sentences but wouldn't want to sing. <b>Treadmill:</b> Speed ~5.5-6.5 km/h at incline 2-3. <b>Outdoor:</b> Brisk walk pace where you're breathing noticeably but not panting. <b>Consistency:</b> Don't let pace surge - keep it steady the entire time."
+          "cues": "<b>Target HR:</b> 130-140 BPM. If you don't have a monitor, use the talk test - you can speak in full sentences but wouldn't want to sing. <b>Treadmill:</b> Speed ~5.5-6.5 km/h at incline 2-3. <b>Outdoor:</b> Brisk walk pace where you're breathing noticeably but not panting. <b>Consistency:</b> Don't let pace surge - keep it steady the entire time.",
+          "logMode": "duration",
+          "presetMin": 35
         },
         {
           "name": "Single-Leg Romanian Deadlift",
@@ -194,7 +203,8 @@
           "tempo": "Slow and controlled - 3 sec hinge",
           "rest": "60 sec between sets",
           "weight": "Light DB (5-10 kg) or bodyweight to start. Balance first.",
-          "cues": "<b>Stand:</b> On one leg, soft bend in standing knee. <b>Hinge:</b> Push hips back, let torso lower and back leg rise simultaneously - like a seesaw. <b>Spine:</b> Neutral throughout - don't round. <b>Balance cue:</b> Focus on a spot on the floor 1m ahead. <b>Return:</b> Squeeze glute of standing leg to drive back to upright. If wobbling badly, hold a wall to learn the pattern first."
+          "cues": "<b>Stand:</b> On one leg, soft bend in standing knee. <b>Hinge:</b> Push hips back, let torso lower and back leg rise simultaneously - like a seesaw. <b>Spine:</b> Neutral throughout - don't round. <b>Balance cue:</b> Focus on a spot on the floor 1m ahead. <b>Return:</b> Squeeze glute of standing leg to drive back to upright. If wobbling badly, hold a wall to learn the pattern first.",
+          "logMode": "strength"
         },
         {
           "name": "Single-Leg Calf Raises",
@@ -203,7 +213,8 @@
           "tempo": "2 sec up / 1 sec hold / 2 sec down",
           "rest": "45 sec between sets",
           "weight": "Bodyweight on a step edge for full range. Progress to holding a DB.",
-          "cues": "<b>Position:</b> Stand on the ball of one foot on a step edge, other foot crossed behind. <b>Lower:</b> Let heel drop below step level for full stretch. <b>Rise:</b> Drive up as high as possible onto toes. <b>Balance:</b> Use fingertips on wall only for balance, not support. This is your ankle injury prevention exercise - critical for football."
+          "cues": "<b>Position:</b> Stand on the ball of one foot on a step edge, other foot crossed behind. <b>Lower:</b> Let heel drop below step level for full stretch. <b>Rise:</b> Drive up as high as possible onto toes. <b>Balance:</b> Use fingertips on wall only for balance, not support. This is your ankle injury prevention exercise - critical for football.",
+          "logMode": "strength"
         },
         {
           "name": "Bosu Ball / Balance Stand",
@@ -212,7 +223,9 @@
           "tempo": "Hold steady - fight the wobble",
           "rest": "30 sec between sets",
           "weight": "Bodyweight. Progress: eyes open → eyes closed → eyes closed on Bosu.",
-          "cues": "<b>If Bosu available:</b> Stand on flat side (dome down) on one leg. <b>If not:</b> Stand on one leg on flat floor - eyes closed to add challenge. <b>Focus:</b> Micro-adjustments through the foot and ankle - this is the work. <b>Arms:</b> Out to sides for balance. <b>Progression:</b> Week 1 eyes open, Week 2 eyes closed, Week 3+ add small arm movements while balancing."
+          "cues": "<b>If Bosu available:</b> Stand on flat side (dome down) on one leg. <b>If not:</b> Stand on one leg on flat floor - eyes closed to add challenge. <b>Focus:</b> Micro-adjustments through the foot and ankle - this is the work. <b>Arms:</b> Out to sides for balance. <b>Progression:</b> Week 1 eyes open, Week 2 eyes closed, Week 3+ add small arm movements while balancing.",
+          "logMode": "duration",
+          "presetMin": 3
         }
       ],
       "cooldown": [
@@ -267,7 +280,8 @@
           "tempo": "2 sec down / press up strong",
           "rest": "90 sec between sets",
           "weight": "Start at a weight you can do 10 reps cleanly. Add 2.5 kg/week.",
-          "cues": "<b>Setup:</b> Feet flat on floor, slight arch in lower back, shoulder blades pinched and pulled down. <b>Grip:</b> Slightly wider than shoulder width. <b>Descent:</b> Bar to lower chest (nipple line), elbows at 45-75° from torso - not flared out wide. <b>Drive:</b> Push bar up and very slightly back. <b>Common mistake:</b> Letting shoulder blades unpin at bottom - keep them retracted throughout the rep."
+          "cues": "<b>Setup:</b> Feet flat on floor, slight arch in lower back, shoulder blades pinched and pulled down. <b>Grip:</b> Slightly wider than shoulder width. <b>Descent:</b> Bar to lower chest (nipple line), elbows at 45-75° from torso - not flared out wide. <b>Drive:</b> Push bar up and very slightly back. <b>Common mistake:</b> Letting shoulder blades unpin at bottom - keep them retracted throughout the rep.",
+          "logMode": "strength"
         },
         {
           "name": "Bent Over Barbell Row",
@@ -276,7 +290,8 @@
           "tempo": "Pull 1 sec / lower 2 sec controlled",
           "rest": "90 sec between sets",
           "weight": "Match your bench press weight to start. Balance pushing and pulling.",
-          "cues": "<b>Setup:</b> Hip-width stance, hinge forward to 45°, slight knee bend, back flat. <b>Grip:</b> Just outside shoulder width, overhand (or underhand to hit biceps more). <b>Pull:</b> Drive elbows back and toward hips - not up. Row to lower rib cage. <b>Squeeze:</b> 1 sec hold at top with shoulder blades squeezed. <b>Lower:</b> Fully extend arms - full range matters."
+          "cues": "<b>Setup:</b> Hip-width stance, hinge forward to 45°, slight knee bend, back flat. <b>Grip:</b> Just outside shoulder width, overhand (or underhand to hit biceps more). <b>Pull:</b> Drive elbows back and toward hips - not up. Row to lower rib cage. <b>Squeeze:</b> 1 sec hold at top with shoulder blades squeezed. <b>Lower:</b> Fully extend arms - full range matters.",
+          "logMode": "strength"
         },
         {
           "name": "Overhead Press (DB or BB)",
@@ -285,7 +300,8 @@
           "tempo": "Strict - no leg drive",
           "rest": "75 sec between sets",
           "weight": "Lighter than bench. Strict press - no bouncing from legs.",
-          "cues": "<b>Standing preferred</b> (more core engagement). <b>Start:</b> Bar at shoulder height, elbows slightly forward. <b>Press:</b> Drive bar straight up - slightly behind head at top (bar travels over the head, not in front). <b>Core:</b> Brace hard - don't hyperextend lower back. <b>Seated DB option:</b> Both DBs pressed simultaneously, end position with pinkies slightly higher than thumbs."
+          "cues": "<b>Standing preferred</b> (more core engagement). <b>Start:</b> Bar at shoulder height, elbows slightly forward. <b>Press:</b> Drive bar straight up - slightly behind head at top (bar travels over the head, not in front). <b>Core:</b> Brace hard - don't hyperextend lower back. <b>Seated DB option:</b> Both DBs pressed simultaneously, end position with pinkies slightly higher than thumbs.",
+          "logMode": "strength"
         },
         {
           "name": "Lat Pulldown",
@@ -294,7 +310,8 @@
           "tempo": "Pull 1 sec / stretch up 2 sec",
           "rest": "75 sec between sets",
           "weight": "Should be challenging by rep 10. Don't use momentum.",
-          "cues": "<b>Grip:</b> Slightly wider than shoulder width, overhand. <b>Lean:</b> Very slight backward lean (10-15°). <b>Pull:</b> Drive elbows down and back - imagine trying to put elbows in back pockets. Pull bar to upper chest. <b>Stretch:</b> Let arms fully extend at top - feel the lat stretch. <b>Common mistake:</b> Pulling with biceps not lats - focus on the elbow driving down."
+          "cues": "<b>Grip:</b> Slightly wider than shoulder width, overhand. <b>Lean:</b> Very slight backward lean (10-15°). <b>Pull:</b> Drive elbows down and back - imagine trying to put elbows in back pockets. Pull bar to upper chest. <b>Stretch:</b> Let arms fully extend at top - feel the lat stretch. <b>Common mistake:</b> Pulling with biceps not lats - focus on the elbow driving down.",
+          "logMode": "strength"
         },
         {
           "name": "Incline DB Curl",
@@ -303,7 +320,8 @@
           "tempo": "Slow eccentric - 3 sec down",
           "rest": "60 sec between sets",
           "weight": "Light-moderate. The incline increases stretch - you'll need less weight.",
-          "cues": "<b>Setup:</b> Bench at 45-60°, arms hang straight down behind body. <b>Curl:</b> Supinate (rotate) wrist as you curl up - pinky higher than thumb at top. <b>Squeeze:</b> Hard contraction at top for 1 sec. <b>Lower:</b> 3 sec controlled - don't let gravity drop your arms. The stretch at the bottom is the growth stimulus."
+          "cues": "<b>Setup:</b> Bench at 45-60°, arms hang straight down behind body. <b>Curl:</b> Supinate (rotate) wrist as you curl up - pinky higher than thumb at top. <b>Squeeze:</b> Hard contraction at top for 1 sec. <b>Lower:</b> 3 sec controlled - don't let gravity drop your arms. The stretch at the bottom is the growth stimulus.",
+          "logMode": "strength"
         },
         {
           "name": "Tricep Pushdowns (cable) / Dips",
@@ -312,7 +330,8 @@
           "tempo": "Lock out at bottom / 2 sec return",
           "rest": "60 sec between sets",
           "weight": "Cable pushdown: medium weight. Full lockout every rep.",
-          "cues": "<b>Pushdown:</b> Elbows pinned to sides - they must not move. Push handle straight down until arms fully locked. <b>Return:</b> Slow and controlled back to start. <b>Dip alternative:</b> Bench dip or parallel bar dip, going deep enough to feel tricep stretch at top. <b>Key:</b> The lockout at the bottom is where triceps fully contract - don't cut it short."
+          "cues": "<b>Pushdown:</b> Elbows pinned to sides - they must not move. Push handle straight down until arms fully locked. <b>Return:</b> Slow and controlled back to start. <b>Dip alternative:</b> Bench dip or parallel bar dip, going deep enough to feel tricep stretch at top. <b>Key:</b> The lockout at the bottom is where triceps fully contract - don't cut it short.",
+          "logMode": "strength"
         }
       ],
       "cooldown": [
@@ -355,7 +374,9 @@
           "tempo": "Conversational pace - ~130-140 BPM",
           "rest": "N/A - continuous",
           "weight": "Bodyweight. Bike at resistance level 5-7 or treadmill at 5.5-6.5 km/h incline 2.",
-          "cues": "<b>Same rules as Tuesday Zone 2.</b> Target 130-140 BPM. You should be able to speak in complete sentences. <b>Variety tip:</b> Alternate between treadmill and bike week-to-week to reduce boredom. <b>No music with a fast BPM</b> - it unconsciously drives you to go harder than Zone 2. Podcasts work better for this session."
+          "cues": "<b>Same rules as Tuesday Zone 2.</b> Target 130-140 BPM. You should be able to speak in complete sentences. <b>Variety tip:</b> Alternate between treadmill and bike week-to-week to reduce boredom. <b>No music with a fast BPM</b> - it unconsciously drives you to go harder than Zone 2. Podcasts work better for this session.",
+          "logMode": "duration",
+          "presetMin": 35
         },
         {
           "name": "Dead Bug",
@@ -364,7 +385,8 @@
           "tempo": "Slow and deliberate - 3 sec per rep",
           "rest": "45 sec between sets",
           "weight": "Bodyweight. Can hold a small plate above chest to progress.",
-          "cues": "<b>Setup:</b> Lie on back, arms pointing at ceiling, knees bent 90° above hips. <b>Move:</b> Simultaneously lower opposite arm (overhead) and opposite leg (extend to hover above floor). <b>Key:</b> Lower back must stay flat on floor throughout - if it arches, you're going too far. <b>Return:</b> Slowly back to start. Exhale as you extend. This trains the exact core stability needed for football contact situations."
+          "cues": "<b>Setup:</b> Lie on back, arms pointing at ceiling, knees bent 90° above hips. <b>Move:</b> Simultaneously lower opposite arm (overhead) and opposite leg (extend to hover above floor). <b>Key:</b> Lower back must stay flat on floor throughout - if it arches, you're going too far. <b>Return:</b> Slowly back to start. Exhale as you extend. This trains the exact core stability needed for football contact situations.",
+          "logMode": "strength"
         },
         {
           "name": "Pallof Press",
@@ -373,7 +395,8 @@
           "tempo": "Press out / hold 2 sec / return",
           "rest": "45 sec between sets",
           "weight": "Cable or resistance band at chest height. Light enough to hold position steady.",
-          "cues": "<b>Setup:</b> Stand side-on to cable/band anchor, hold handle at chest with both hands. <b>Press:</b> Extend arms straight out in front of chest - the cable tries to rotate you, resist it. <b>Hold:</b> 2 sec extended, feel the anti-rotation work. <b>Return:</b> Controlled back to chest. <b>Key:</b> Hips and shoulders stay square throughout. This is exactly the core pattern used when shielding the ball in football."
+          "cues": "<b>Setup:</b> Stand side-on to cable/band anchor, hold handle at chest with both hands. <b>Press:</b> Extend arms straight out in front of chest - the cable tries to rotate you, resist it. <b>Hold:</b> 2 sec extended, feel the anti-rotation work. <b>Return:</b> Controlled back to chest. <b>Key:</b> Hips and shoulders stay square throughout. This is exactly the core pattern used when shielding the ball in football.",
+          "logMode": "strength"
         },
         {
           "name": "Side Plank",
@@ -382,7 +405,9 @@
           "tempo": "Hold position, breathe steady",
           "rest": "30 sec between sets",
           "weight": "Bodyweight. Progress to 50 sec, then add a hip dip for reps.",
-          "cues": "<b>Setup:</b> Forearm on floor, elbow under shoulder, feet stacked or staggered. <b>Lift:</b> Raise hips - body in a straight diagonal line from head to feet. <b>Don't:</b> Let hips sag down or pike up. <b>Stack:</b> Hips fully extended, core braced. <b>Breathe:</b> Don't hold breath. <b>Progress:</b> When 35 sec feels easy, add a hip dip - lower hip to tap floor and raise back up."
+          "cues": "<b>Setup:</b> Forearm on floor, elbow under shoulder, feet stacked or staggered. <b>Lift:</b> Raise hips - body in a straight diagonal line from head to feet. <b>Don't:</b> Let hips sag down or pike up. <b>Stack:</b> Hips fully extended, core braced. <b>Breathe:</b> Don't hold breath. <b>Progress:</b> When 35 sec feels easy, add a hip dip - lower hip to tap floor and raise back up.",
+          "logMode": "duration",
+          "presetMin": 3
         }
       ],
       "cooldown": [
@@ -433,7 +458,8 @@
           "tempo": "Controlled setup / drive hard / lower with control",
           "rest": "2 min between sets - this one earns full rest",
           "weight": "Build from 70% of estimated max. Add 5 kg/week. Form > weight always.",
-          "cues": "<b>Setup:</b> Hip-width stance, bar over mid-foot, hinge and grip just outside legs. <b>Brace:</b> Big breath into belly (360° brace), chest up, lats locked (imagine protecting your armpits). <b>Pull:</b> Push the floor away - don't think 'pull up'. <b>Hip hinge:</b> Bar stays dragging up your shins and thighs the entire lift. <b>Lockout:</b> Hips and knees extend simultaneously - squeeze glutes hard. <b>Lower:</b> Hinge back, controlled. Don't drop the bar."
+          "cues": "<b>Setup:</b> Hip-width stance, bar over mid-foot, hinge and grip just outside legs. <b>Brace:</b> Big breath into belly (360° brace), chest up, lats locked (imagine protecting your armpits). <b>Pull:</b> Push the floor away - don't think 'pull up'. <b>Hip hinge:</b> Bar stays dragging up your shins and thighs the entire lift. <b>Lockout:</b> Hips and knees extend simultaneously - squeeze glutes hard. <b>Lower:</b> Hinge back, controlled. Don't drop the bar.",
+          "logMode": "strength"
         },
         {
           "name": "Bulgarian Split Squat",
@@ -442,7 +468,8 @@
           "tempo": "3 sec down / drive up",
           "rest": "75 sec between sets",
           "weight": "Bodyweight first session. Add DBs once balance is secure. Hardest exercise in the plan.",
-          "cues": "<b>Setup:</b> Rear foot elevated on bench, front foot far enough forward that front shin is vertical at bottom. <b>Descend:</b> Drop straight down - don't lunge forward. Back knee toward floor. <b>Front knee:</b> Tracks over toes, doesn't cave in. <b>Drive:</b> Push through front heel to stand. <b>Common mistake:</b> Front foot too close - causes forward lean and knee stress. If knees hurting, step forward more."
+          "cues": "<b>Setup:</b> Rear foot elevated on bench, front foot far enough forward that front shin is vertical at bottom. <b>Descend:</b> Drop straight down - don't lunge forward. Back knee toward floor. <b>Front knee:</b> Tracks over toes, doesn't cave in. <b>Drive:</b> Push through front heel to stand. <b>Common mistake:</b> Front foot too close - causes forward lean and knee stress. If knees hurting, step forward more.",
+          "logMode": "strength"
         },
         {
           "name": "Farmer Carry",
@@ -451,7 +478,8 @@
           "tempo": "Walk tall - not too fast",
           "rest": "60 sec between carries",
           "weight": "Heavy DBs or plates - aim for challenging. Start at 20 kg/hand.",
-          "cues": "<b>Pick up:</b> Deadlift them up - don't round back to grab. <b>Walk:</b> Tall posture, shoulders back and down, core braced. <b>Don't:</b> Let shoulders creep up to ears or let the load pull you sideways. <b>This builds:</b> Grip strength (helps all pulling lifts), upper trap thickness, and spinal stability under load. One of the highest-return exercises for overall strength."
+          "cues": "<b>Pick up:</b> Deadlift them up - don't round back to grab. <b>Walk:</b> Tall posture, shoulders back and down, core braced. <b>Don't:</b> Let shoulders creep up to ears or let the load pull you sideways. <b>This builds:</b> Grip strength (helps all pulling lifts), upper trap thickness, and spinal stability under load. One of the highest-return exercises for overall strength.",
+          "logMode": "strength"
         },
         {
           "name": "Cable Face Pulls",
@@ -460,7 +488,8 @@
           "tempo": "Pull slow / squeeze / return slow",
           "rest": "45 sec between sets",
           "weight": "Light. This is health work, not a strength exercise.",
-          "cues": "<b>Setup:</b> Cable at forehead height, rope attachment, step back. <b>Pull:</b> Elbows up and back - pull rope toward face, hands ending beside ears. <b>External rotation:</b> At the end of the pull, rotate hands so thumbs point back (like a 'double bicep' pose). <b>Squeeze:</b> 1 sec hold at full contraction. <b>Why:</b> Counters the internal rotation from all the pressing this week. Keeps shoulders healthy long-term."
+          "cues": "<b>Setup:</b> Cable at forehead height, rope attachment, step back. <b>Pull:</b> Elbows up and back - pull rope toward face, hands ending beside ears. <b>External rotation:</b> At the end of the pull, rotate hands so thumbs point back (like a 'double bicep' pose). <b>Squeeze:</b> 1 sec hold at full contraction. <b>Why:</b> Counters the internal rotation from all the pressing this week. Keeps shoulders healthy long-term.",
+          "logMode": "strength"
         },
         {
           "name": "Ab Wheel Rollout",
@@ -469,7 +498,8 @@
           "tempo": "Slow out (3 sec) / pull back",
           "rest": "60 sec between sets",
           "weight": "Bodyweight. Start with partial range if needed (wall stop).",
-          "cues": "<b>Start:</b> Kneeling, wheel directly under shoulders, arms straight. <b>Roll out:</b> Let wheel roll forward as you lower body toward floor - spine absolutely neutral (no sagging hips). <b>Range:</b> Start at 50% extension, build to full over weeks. <b>Pull back:</b> Contract abs hard to pull wheel back to start. <b>Key:</b> This is NOT a hip flexor exercise - the abs must be the anchor. If lower back hurts, reduce range immediately."
+          "cues": "<b>Start:</b> Kneeling, wheel directly under shoulders, arms straight. <b>Roll out:</b> Let wheel roll forward as you lower body toward floor - spine absolutely neutral (no sagging hips). <b>Range:</b> Start at 50% extension, build to full over weeks. <b>Pull back:</b> Contract abs hard to pull wheel back to start. <b>Key:</b> This is NOT a hip flexor exercise - the abs must be the anchor. If lower back hurts, reduce range immediately.",
+          "logMode": "strength"
         }
       ],
       "cooldown": [
@@ -512,7 +542,9 @@
           "tempo": "Easy conversational pace - RPE 4/10",
           "rest": "N/A",
           "weight": "Bodyweight. No treadmill today if possible - outdoor walk preferred.",
-          "cues": "<b>Purpose today:</b> Flush the legs from the week's training, get blood moving, without digging into the recovery you need for Sunday football. <b>Pace:</b> Notably easier than Tuesday/Thursday Zone 2. If HR is above 130, slow down. <b>Outdoor benefit:</b> Uneven terrain activates ankle stabilisers passively - good pre-football stimulus. <b>Target:</b> 6,000-8,000 steps minimum."
+          "cues": "<b>Purpose today:</b> Flush the legs from the week's training, get blood moving, without digging into the recovery you need for Sunday football. <b>Pace:</b> Notably easier than Tuesday/Thursday Zone 2. If HR is above 130, slow down. <b>Outdoor benefit:</b> Uneven terrain activates ankle stabilisers passively - good pre-football stimulus. <b>Target:</b> 6,000-8,000 steps minimum.",
+          "logMode": "duration",
+          "presetMin": 30
         },
         {
           "name": "Full Body Stretch Routine",
@@ -521,7 +553,9 @@
           "tempo": "Static holds - breathe into each stretch",
           "rest": "Move directly from one to next",
           "weight": "Bodyweight.",
-          "cues": "In order: <b>1)</b> Kneeling hip flexor stretch (60 sec/side) - most important for football. <b>2)</b> Standing quad stretch (45 sec/side). <b>3)</b> Seated hamstring stretch (45 sec/side). <b>4)</b> Lying glute/piriformis stretch - figure 4 (45 sec/side). <b>5)</b> Doorframe chest opener (60 sec). <b>6)</b> Child's pose (60 sec). Do this in order. Don't rush it - this is your Sunday prep."
+          "cues": "In order: <b>1)</b> Kneeling hip flexor stretch (60 sec/side) - most important for football. <b>2)</b> Standing quad stretch (45 sec/side). <b>3)</b> Seated hamstring stretch (45 sec/side). <b>4)</b> Lying glute/piriformis stretch - figure 4 (45 sec/side). <b>5)</b> Doorframe chest opener (60 sec). <b>6)</b> Child's pose (60 sec). Do this in order. Don't rush it - this is your Sunday prep.",
+          "logMode": "duration",
+          "presetMin": 15
         },
         {
           "name": "Dead Hang",
@@ -530,7 +564,9 @@
           "tempo": "Passive hang - fully relax",
           "rest": "45 sec between hangs",
           "weight": "Bodyweight on any pull-up bar.",
-          "cues": "<b>Let go:</b> Fully decompress - shoulders should rise toward ears, entire spine lengthens. <b>Don't:</b> Engage lats or try to hold a tight position. This is passive. <b>Benefit:</b> After a week of loading, hanging passively reverses the compressive forces on the spine. <b>Also:</b> Grip endurance improves weekly - helps your Thursday and Friday lifts."
+          "cues": "<b>Let go:</b> Fully decompress - shoulders should rise toward ears, entire spine lengthens. <b>Don't:</b> Engage lats or try to hold a tight position. This is passive. <b>Benefit:</b> After a week of loading, hanging passively reverses the compressive forces on the spine. <b>Also:</b> Grip endurance improves weekly - helps your Thursday and Friday lifts.",
+          "logMode": "duration",
+          "presetMin": 3
         }
       ],
       "cooldown": [
@@ -581,7 +617,9 @@
           "tempo": "Variable - follow the session",
           "rest": "As given by session structure",
           "weight": "N/A",
-          "cues": "<b>Treat drills seriously:</b> Every direction change is balance training. Every passing drill is coordination work. <b>Focus areas:</b> First touch, receiving under pressure, quick release, positioning. <b>Your gym work pays off here:</b> The Bulgarian split squats = better deceleration. The core work = better balance under contact. <b>Don't hold back</b> - this is an active training session, not a social warmup."
+          "cues": "<b>Treat drills seriously:</b> Every direction change is balance training. Every passing drill is coordination work. <b>Focus areas:</b> First touch, receiving under pressure, quick release, positioning. <b>Your gym work pays off here:</b> The Bulgarian split squats = better deceleration. The core work = better balance under contact. <b>Don't hold back</b> - this is an active training session, not a social warmup.",
+          "logMode": "duration",
+          "presetMin": 60
         },
         {
           "name": "Match Play",
@@ -590,7 +628,9 @@
           "tempo": "Match intensity - full effort",
           "rest": "Substitutions / natural breaks",
           "weight": "N/A",
-          "cues": "<b>This is your HIIT session for the week.</b> Heart rate will spike to Zone 4-5 (165-185 BPM) during sprints and defensive pressures. <b>Positioning:</b> Use your improving fitness to work hard off the ball - this is where matches are won. <b>Hydration:</b> Drink water at every break - at 105 kg you sweat significantly. <b>Half-time:</b> Light jog / walk - don't sit down completely or legs will stiffen."
+          "cues": "<b>This is your HIIT session for the week.</b> Heart rate will spike to Zone 4-5 (165-185 BPM) during sprints and defensive pressures. <b>Positioning:</b> Use your improving fitness to work hard off the ball - this is where matches are won. <b>Hydration:</b> Drink water at every break - at 105 kg you sweat significantly. <b>Half-time:</b> Light jog / walk - don't sit down completely or legs will stiffen.",
+          "logMode": "duration",
+          "presetMin": 30
         }
       ],
       "cooldown": [
