@@ -2590,18 +2590,21 @@ function hxSetView(v) {
 }
 
 function renderHealth() {
-  const hd = document.getElementById('h-date');
-  if (hd && !hd.value) hd.value = new Date().toISOString().slice(0,10);
-  renderSnapshot();
-  renderHealthChart();
-  renderDayPills();
-  renderDietPlan();
-  renderWorkoutPlan();
-  hxSetView(hxView);
-  renderSupplements();
+  const steps = ['renderSnapshot','renderHealthChart','renderDayPills','renderDietPlan','renderWorkoutPlan'];
+  const hd0 = document.getElementById('h-date');
+  if (hd0 && !hd0.value) hd0.value = new Date().toISOString().slice(0,10);
+  for (const fn of steps) {
+    try { window[fn](); }
+    catch(err){ console.error(fn+' error:', err);
+      const t=document.getElementById('hx-snapshot');
+      if(t) t.innerHTML += '<div style="color:#e57373;font-size:0.7rem;padding:4px;">'+fn+': '+(err.message||err)+'</div>';
+    }
+  }
+  try { hxSetView(hxView); renderSupplements(); } catch(e){ console.error(e); }
   const reports = DATA.health.medicalReports || [];
-  document.getElementById('reports-list').innerHTML = reports.length ?
-    reports.map(r => `<div style="padding:0.4rem 0; border-bottom:1px solid var(--hx-border); color:var(--hx-dim);">${r.name} · <span style="color:var(--hx-faint);">${r.date}</span></div>`).join('') :
+  const rl=document.getElementById('reports-list');
+  if(rl) rl.innerHTML = reports.length ?
+    reports.map(r => '<div style="padding:0.4rem 0;border-bottom:1px solid var(--hx-border);color:var(--hx-dim);">'+r.name+'</div>').join('') :
     'No reports uploaded yet.';
 }
 
@@ -2888,6 +2891,16 @@ function rollingAvg(points, windowDays){
 }
 
 function renderHealthChart() {
+  try { return _renderHealthChart(); }
+  catch(err) {
+    console.error('renderHealthChart error:', err);
+    var dbg = document.getElementById('weight-empty');
+    if (dbg) { dbg.style.display='block'; dbg.style.color='#e57373';
+      dbg.textContent = 'Chart error: ' + (err && err.message ? err.message : err); }
+    var cv = document.getElementById('weight-chart'); if(cv) cv.style.display='none';
+  }
+}
+function _renderHealthChart() {
   renderWeightRangePills();
   let logs = (DATA.health.dailyLog || []).filter(l => l.weight)
     .map(l => ({ t: new Date(l.date), y: l.weight }))
