@@ -921,6 +921,68 @@ html, body {
 .load-area:hover{border-color:var(--accent2);}
 .load-area-text{font-size:0.82rem;color:var(--text3);margin-top:0.5rem;}
 
+/* ═══════════════════════════════════════════════════════════
+   HEALTH REDESIGN — scoped design system (.hx)
+   Calm dark palette · one accent · legible type scale · progressive disclosure
+   ═══════════════════════════════════════════════════════════ */
+#sec-health {
+  --hx-bg:#0c0d10; --hx-surface:#15161d; --hx-surface2:#1c1e27;
+  --hx-border:rgba(255,255,255,0.07); --hx-border-strong:rgba(255,255,255,0.14);
+  --hx-text:#ececef; --hx-dim:#a2a4af; --hx-faint:#6c6f7c;
+  --hx-accent:#aab4ff; --hx-accent-soft:rgba(170,180,255,0.12);
+  --hx-pos:#6fcf8e; --hx-warn:#e5b567; --hx-neg:#e57373;
+  --hx-strength:#e58a8a; --hx-cardio:#6fc7c2; --hx-football:#e0bd6a; --hx-rest:#8b8e9b;
+  --hx-r:14px; --hx-r-sm:10px;
+  font-family:'Outfit',sans-serif; color:var(--hx-text);
+}
+#sec-health .section-heading{ font-family:'DM Serif Display',serif; font-size:1.7rem; color:var(--hx-text); letter-spacing:-0.01em; }
+#sec-health .section-sub{ font-size:0.82rem; color:var(--hx-faint); letter-spacing:0.04em; margin-bottom:1.1rem; }
+#sec-health .hx-card{ background:var(--hx-surface); border:1px solid var(--hx-border); border-radius:var(--hx-r); padding:1.1rem; margin-bottom:0.85rem; }
+#sec-health .hx-card-title{ font-size:0.7rem; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:var(--hx-faint); margin-bottom:0.85rem; }
+#sec-health .hx-row{ display:flex; align-items:center; justify-content:space-between; gap:0.75rem; }
+#sec-health .hx-label{ font-size:0.68rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--hx-faint); margin-bottom:0.35rem; display:block; }
+#sec-health .hx-input,#sec-health .hx-select{ width:100%; background:var(--hx-surface2); border:1px solid var(--hx-border); border-radius:var(--hx-r-sm); padding:0.7rem 0.8rem; color:var(--hx-text); font-size:0.95rem; font-family:'Outfit',sans-serif; -webkit-appearance:none; }
+#sec-health .hx-input:focus,#sec-health .hx-select:focus{ outline:none; border-color:var(--hx-accent); }
+#sec-health .hx-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:0.7rem; }
+#sec-health .hx-btn{ width:100%; border:none; border-radius:var(--hx-r-sm); padding:0.8rem; font-size:0.92rem; font-weight:600; font-family:'Outfit',sans-serif; cursor:pointer; transition:opacity 0.15s; }
+#sec-health .hx-btn:active{ opacity:0.7; }
+#sec-health .hx-btn-primary{ background:var(--hx-accent); color:#15161d; }
+#sec-health .hx-btn-ghost{ background:var(--hx-surface2); color:var(--hx-dim); border:1px solid var(--hx-border); }
+#sec-health .hx-num{ font-family:'DM Mono',monospace; }
+/* snapshot stat strip */
+#sec-health .hx-stats{ display:flex; gap:0.6rem; }
+#sec-health .hx-stat{ flex:1; background:var(--hx-surface2); border-radius:var(--hx-r-sm); padding:0.7rem 0.65rem; }
+#sec-health .hx-stat-val{ font-family:'DM Mono',monospace; font-size:1.2rem; color:var(--hx-text); line-height:1; }
+#sec-health .hx-stat-lbl{ font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--hx-faint); margin-top:0.35rem; }
+/* day pills */
+#sec-health .hx-pills{ display:flex; gap:0.4rem; overflow-x:auto; padding-bottom:0.3rem; -ms-overflow-style:none; scrollbar-width:none; }
+#sec-health .hx-pills::-webkit-scrollbar{ display:none; }
+#sec-health .hx-pill{ flex:0 0 auto; cursor:pointer; text-align:center; padding:0.5rem 0.7rem; border-radius:var(--hx-r-sm); border:1.5px solid var(--hx-border); background:var(--hx-surface2); min-width:3rem; transition:all 0.15s; }
+#sec-health .hx-pill-d{ font-size:0.62rem; font-family:'DM Mono',monospace; letter-spacing:0.05em; color:var(--hx-faint); }
+#sec-health .hx-pill-t{ font-size:0.6rem; text-transform:capitalize; color:var(--hx-dim); margin-top:2px; }
+/* expandable rows (progressive disclosure) */
+#sec-health .hx-ex{ border:1px solid var(--hx-border); border-radius:var(--hx-r-sm); margin-bottom:0.45rem; overflow:hidden; background:var(--hx-surface2); }
+#sec-health .hx-ex-head{ display:flex; align-items:center; gap:0.7rem; padding:0.8rem 0.85rem; cursor:pointer; }
+#sec-health .hx-ex-num{ width:1.5rem; height:1.5rem; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; font-family:'DM Mono',monospace; flex-shrink:0; }
+#sec-health .hx-ex-name{ flex:1; font-size:0.92rem; font-weight:500; color:var(--hx-text); }
+#sec-health .hx-ex-sets{ font-size:0.8rem; font-family:'DM Mono',monospace; font-weight:600; flex-shrink:0; }
+#sec-health .hx-ex-body{ display:none; padding:0 0.85rem 0.85rem; }
+#sec-health .hx-ex.open .hx-ex-body{ display:block; }
+#sec-health .hx-ex.open .hx-chev{ transform:rotate(180deg); }
+#sec-health .hx-chev{ color:var(--hx-faint); font-size:0.7rem; transition:transform 0.2s; flex-shrink:0; }
+#sec-health .hx-meta{ display:flex; gap:1.2rem; padding:0.55rem 0; border-top:1px solid var(--hx-border); margin-top:0.2rem; }
+#sec-health .hx-meta-l{ font-size:0.58rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--hx-faint); }
+#sec-health .hx-meta-v{ font-size:0.8rem; color:var(--hx-dim); margin-top:2px; }
+#sec-health .hx-cue{ font-size:0.82rem; line-height:1.55; color:var(--hx-dim); }
+#sec-health .hx-cue b{ color:var(--hx-accent); font-weight:600; }
+#sec-health .hx-sub{ font-size:0.82rem; line-height:1.5; color:var(--hx-dim); }
+#sec-health .hx-sub b{ color:var(--hx-text); font-weight:600; }
+/* meal option */
+#sec-health .hx-meal{ background:var(--hx-surface2); border-radius:var(--hx-r-sm); padding:0.55rem 0.7rem; margin-bottom:0.35rem; display:flex; justify-content:space-between; gap:0.6rem; align-items:flex-start; }
+#sec-health .hx-meal-txt{ font-size:0.86rem; line-height:1.4; color:var(--hx-text); }
+#sec-health .hx-meal-macro{ font-size:0.66rem; font-family:'DM Mono',monospace; color:var(--hx-faint); white-space:nowrap; padding-top:2px; }
+#sec-health .hx-toggle{ cursor:pointer; font-family:'DM Mono',monospace; font-size:0.76rem; padding:0.3rem 0.8rem; border-radius:20px; }
+#sec-health .hx-seg{ font-size:0.66rem; font-weight:600; letter-spacing:0.05em; padding:0.2rem 0.55rem; border-radius:6px; }
 </style>
 </head>
 <body>
@@ -1283,118 +1345,117 @@ html, body {
     <!-- HEALTH -->
     <div class="section" id="sec-health">
       <div class="section-heading">Health</div>
-      <div class="section-sub">weight · diet · sleep · energy</div>
+      <div class="section-sub">weight · training · diet · recovery</div>
 
-      <div class="card">
-        <div class="card-title">Today's log</div>
-        <div class="log-form">
-          <div>
-            <label class="field-label">Date</label>
-            <input class="field-input" id="h-date" type="date">
+      <!-- SNAPSHOT -->
+      <div class="hx-card">
+        <div class="hx-card-title">Today</div>
+        <div class="hx-stats" id="hx-snapshot"></div>
+      </div>
+
+      <!-- DAILY LOG (collapsed by default) -->
+      <div class="hx-card">
+        <div class="hx-row" onclick="hxToggle('hx-log-body')" style="cursor:pointer;">
+          <div class="hx-card-title" style="margin-bottom:0;">Log a day</div>
+          <span class="hx-chev" id="hx-log-chev">▾</span>
+        </div>
+        <div id="hx-log-body" style="display:none; margin-top:0.9rem;">
+          <div style="margin-bottom:0.7rem;">
+            <label class="hx-label">Date</label>
+            <input class="hx-input" id="h-date" type="date">
           </div>
-          <div class="health-grid">
-            <div>
-              <label class="field-label">Weight (kg)</label>
-              <input class="field-input" id="h-weight" type="number" step="0.1" placeholder="105.0">
-            </div>
-            <div>
-              <label class="field-label">Sleep (hrs)</label>
-              <input class="field-input" id="h-sleep" type="number" step="0.5" placeholder="7.0">
-            </div>
+          <div class="hx-grid2" style="margin-bottom:0.7rem;">
+            <div><label class="hx-label">Weight (kg)</label><input class="hx-input" id="h-weight" type="number" step="0.1" placeholder="105.0"></div>
+            <div><label class="hx-label">Sleep (hrs)</label><input class="hx-input" id="h-sleep" type="number" step="0.5" placeholder="7.0"></div>
           </div>
-          <div>
-            <label class="field-label">Protein estimate (g)</label>
-            <input class="field-input" id="h-protein" type="number" placeholder="170">
-          </div>
-          <div>
-            <label class="field-label">Energy level</label>
+          <div style="margin-bottom:0.7rem;"><label class="hx-label">Protein (g)</label><input class="hx-input" id="h-protein" type="number" placeholder="170"></div>
+          <div style="margin-bottom:0.7rem;">
+            <label class="hx-label">Energy</label>
             <div class="rating-row" id="energy-rating">
-              <div class="rating-dot" onclick="setRating('energy',1,this)">1</div>
-              <div class="rating-dot" onclick="setRating('energy',2,this)">2</div>
-              <div class="rating-dot" onclick="setRating('energy',3,this)">3</div>
-              <div class="rating-dot" onclick="setRating('energy',4,this)">4</div>
-              <div class="rating-dot" onclick="setRating('energy',5,this)">5</div>
+              <div class="rating-dot" onclick="setRating('energy',1,this)">1</div><div class="rating-dot" onclick="setRating('energy',2,this)">2</div><div class="rating-dot" onclick="setRating('energy',3,this)">3</div><div class="rating-dot" onclick="setRating('energy',4,this)">4</div><div class="rating-dot" onclick="setRating('energy',5,this)">5</div>
             </div>
           </div>
-          <div>
-            <label class="field-label">Diet accuracy today</label>
+          <div style="margin-bottom:0.7rem;">
+            <label class="hx-label">Diet adherence</label>
             <div class="rating-row" id="diet-rating">
-              <div class="rating-dot" onclick="setRating('diet',1,this)">1</div>
-              <div class="rating-dot" onclick="setRating('diet',2,this)">2</div>
-              <div class="rating-dot" onclick="setRating('diet',3,this)">3</div>
-              <div class="rating-dot" onclick="setRating('diet',4,this)">4</div>
-              <div class="rating-dot" onclick="setRating('diet',5,this)">5</div>
+              <div class="rating-dot" onclick="setRating('diet',1,this)">1</div><div class="rating-dot" onclick="setRating('diet',2,this)">2</div><div class="rating-dot" onclick="setRating('diet',3,this)">3</div><div class="rating-dot" onclick="setRating('diet',4,this)">4</div><div class="rating-dot" onclick="setRating('diet',5,this)">5</div>
             </div>
           </div>
-          <div>
-            <label class="field-label">Notes (meals, slip-ups, anything)</label>
-            <textarea class="field-textarea" id="h-notes" placeholder="What did you eat today? Any slip-ups?"></textarea>
+          <div style="margin-bottom:0.85rem;"><label class="hx-label">Notes</label><textarea class="hx-input" id="h-notes" rows="2" placeholder="Meals, slip-ups, anything"></textarea></div>
+          <button class="hx-btn hx-btn-primary" onclick="logHealth()">Save log</button>
+        </div>
+      </div>
+
+      <!-- WEIGHT TREND -->
+      <div class="hx-card">
+        <div class="hx-row" style="margin-bottom:0.9rem;">
+          <div class="hx-card-title" style="margin-bottom:0;">Weight trend</div>
+          <div style="text-align:right;"><div class="hx-stat-lbl">Target</div><div class="hx-num" style="color:var(--hx-pos); font-size:1rem;">88 kg</div></div>
+        </div>
+        <div style="height:160px;"><canvas id="weight-chart"></canvas></div>
+        <div id="weight-stats" style="margin-top:0.85rem; display:flex; gap:0.6rem;"></div>
+      </div>
+
+      <!-- TRAINING PLAN + DIET (unified day view) -->
+      <div class="hx-card">
+        <div class="hx-row" style="margin-bottom:0.6rem;">
+          <div class="hx-card-title" style="margin-bottom:0;">This week</div>
+          <div class="hx-num" id="hx-kcal-badge" style="font-size:0.8rem; color:var(--hx-accent);"></div>
+        </div>
+        <div class="hx-pills" id="hx-day-pills"></div>
+        <div id="hx-train-toggle" style="margin:0.8rem 0;"></div>
+        <!-- segmented: Workout | Diet -->
+        <div style="display:flex; gap:0.4rem; margin-bottom:0.9rem;">
+          <button class="hx-btn" id="hx-tab-workout" onclick="hxSetView('workout')" style="flex:1;">Workout</button>
+          <button class="hx-btn" id="hx-tab-diet" onclick="hxSetView('diet')" style="flex:1;">Diet</button>
+        </div>
+        <div id="hx-workout-view"></div>
+        <div id="hx-diet-view" style="display:none;"></div>
+      </div>
+
+      <!-- LOG WORKOUT (collapsed) -->
+      <div class="hx-card">
+        <div class="hx-row" onclick="hxToggle('hx-wl-body')" style="cursor:pointer;">
+          <div class="hx-card-title" style="margin-bottom:0;">Log workout · progressive load</div>
+          <span class="hx-chev" id="hx-wl-chev">▾</span>
+        </div>
+        <div id="hx-wl-body" style="display:none; margin-top:0.9rem;">
+          <div id="wl-day-label" style="font-size:0.78rem; color:var(--hx-faint); margin-bottom:0.7rem;"></div>
+          <div style="margin-bottom:0.7rem;"><label class="hx-label">Date</label><input class="hx-input" id="wl-date" type="date"></div>
+          <div style="margin-bottom:0.7rem;"><label class="hx-label">Exercise</label><select class="hx-select" id="wl-exercise"></select></div>
+          <div class="hx-grid2" style="margin-bottom:0.7rem;">
+            <div><label class="hx-label">Reps</label><input class="hx-input" id="wl-reps" type="number" placeholder="8"></div>
+            <div><label class="hx-label">Weight (kg)</label><input class="hx-input" id="wl-weight" type="number" step="0.5" placeholder="40"></div>
           </div>
-          <button class="btn btn-primary" onclick="logHealth()">Save today's log</button>
+          <button class="hx-btn hx-btn-ghost" style="margin-bottom:0.6rem;" onclick="addSet()">+ Add set</button>
+          <div id="wl-pending-sets" style="margin-bottom:0.6rem;"></div>
+          <button class="hx-btn hx-btn-primary" onclick="saveWorkout()">Save workout</button>
+          <div id="wl-history" style="margin-top:1rem;"></div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title" style="margin-bottom:0">Weight trend</div>
-          <div>
-            <div class="fire-label">Target</div>
-            <div style="font-family:var(--mono); font-size:1rem; color:var(--green);">88 kg</div>
-          </div>
+      <!-- SUPPLEMENTS (collapsed) -->
+      <div class="hx-card">
+        <div class="hx-row" onclick="hxToggle('hx-supp-body')" style="cursor:pointer;">
+          <div class="hx-card-title" style="margin-bottom:0;">Supplements</div>
+          <span class="hx-chev" id="hx-supp-chev">▾</span>
         </div>
-        <div class="chart-area">
-          <canvas id="weight-chart"></canvas>
+        <div id="hx-supp-body" style="display:none; margin-top:0.9rem;">
+          <div id="supplements-list"></div>
         </div>
-        <div id="weight-stats" style="margin-top:0.75rem; display:flex; gap:1rem; flex-wrap:wrap;"></div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title" style="margin-bottom:0">Diet &amp; training day</div>
-          <div id="diet-kcal-badge" style="font-family:var(--mono); font-size:0.8rem; color:var(--gold);"></div>
+      <!-- MEDICAL REPORTS (collapsed) -->
+      <div class="hx-card">
+        <div class="hx-row" onclick="hxToggle('hx-rep-body')" style="cursor:pointer;">
+          <div class="hx-card-title" style="margin-bottom:0;">Medical reports</div>
+          <span class="hx-chev" id="hx-rep-chev">▾</span>
         </div>
-        <div id="diet-day-pills" style="display:flex; gap:6px; overflow-x:auto; padding:0.5rem 0 0.65rem;"></div>
-        <div id="diet-train-toggle" style="margin-bottom:0.75rem;"></div>
-        <div id="diet-plan-display"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Workout log — progressive load</div>
-        <div id="wl-day-label" style="font-size:0.8rem; color:var(--text3); margin-bottom:0.6rem;"></div>
-        <div>
-          <label class="field-label">Date</label>
-          <input class="field-input" id="wl-date" type="date">
+        <div id="hx-rep-body" style="display:none; margin-top:0.9rem;">
+          <div id="reports-list" style="margin-bottom:0.75rem; font-size:0.82rem; color:var(--hx-faint);"></div>
+          <input type="file" id="report-upload" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadReport(this)">
+          <button class="hx-btn hx-btn-ghost" onclick="document.getElementById('report-upload').click()">+ Upload report</button>
         </div>
-        <div>
-          <label class="field-label">Exercise</label>
-          <select class="field-input" id="wl-exercise"></select>
-        </div>
-        <div class="health-grid">
-          <div>
-            <label class="field-label">Reps</label>
-            <input class="field-input" id="wl-reps" type="number" placeholder="8">
-          </div>
-          <div>
-            <label class="field-label">Weight (kg)</label>
-            <input class="field-input" id="wl-weight" type="number" step="0.5" placeholder="40">
-          </div>
-        </div>
-        <button class="btn btn-ghost" style="width:100%; margin-bottom:0.6rem" onclick="addSet()">+ Add set</button>
-        <div id="wl-pending-sets" style="margin-bottom:0.6rem;"></div>
-        <button class="btn btn-primary" style="width:100%" onclick="saveWorkout()">Save workout</button>
-        <div id="wl-history" style="margin-top:1rem;"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Supplements</div>
-        <div id="supplements-list"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Medical reports</div>
-        <div id="reports-list" style="margin-bottom:0.75rem; font-size:0.82rem; color:var(--text3);"></div>
-        <input type="file" id="report-upload" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadReport(this)">
-        <button class="btn btn-ghost" onclick="document.getElementById('report-upload').click()">+ Upload report</button>
       </div>
     </div>
 
@@ -2446,17 +2507,111 @@ function logHealth() {
   renderHealthChart(); saveData(); showToast('Health logged ✓');
 }
 
+// ─── HEALTH (redesigned) ──────────────────────────────────────────────────────
+let hxView = 'workout';
+function hxToggle(id) {
+  const el = document.getElementById(id);
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  const chev = document.getElementById(id.replace('-body','-chev'));
+  if (chev) chev.style.transform = open ? '' : 'rotate(180deg)';
+}
+function hxSetView(v) {
+  hxView = v;
+  const wv = document.getElementById('hx-workout-view'), dv = document.getElementById('hx-diet-view');
+  const tw = document.getElementById('hx-tab-workout'), td = document.getElementById('hx-tab-diet');
+  if (v === 'workout') {
+    wv.style.display='block'; dv.style.display='none';
+    tw.className='hx-btn hx-btn-primary'; td.className='hx-btn hx-btn-ghost';
+  } else {
+    wv.style.display='none'; dv.style.display='block';
+    tw.className='hx-btn hx-btn-ghost'; td.className='hx-btn hx-btn-primary';
+  }
+}
+
 function renderHealth() {
   const hd = document.getElementById('h-date');
   if (hd && !hd.value) hd.value = new Date().toISOString().slice(0,10);
+  renderSnapshot();
   renderHealthChart();
+  renderDayPills();
   renderDietPlan();
+  renderWorkoutPlan();
+  hxSetView(hxView);
   initWorkoutLogger();
   renderSupplements();
   const reports = DATA.health.medicalReports || [];
   document.getElementById('reports-list').innerHTML = reports.length ?
-    reports.map(r => `<div style="padding:0.4rem 0; border-bottom:1px solid var(--border); color:var(--text2);">${r.name} · <span style="color:var(--text3);">${r.date}</span></div>`).join('') :
+    reports.map(r => `<div style="padding:0.4rem 0; border-bottom:1px solid var(--hx-border); color:var(--hx-dim);">${r.name} · <span style="color:var(--hx-faint);">${r.date}</span></div>`).join('') :
     'No reports uploaded yet.';
+}
+
+function renderSnapshot() {
+  const logs = (DATA.health.dailyLog || []).filter(l => l.weight);
+  const curr = logs.length ? logs[logs.length-1].weight : (DATA.health.startWeight || 105.7);
+  const start = DATA.health.startWeight || 105.7;
+  const target = DATA.health.targetWeight || 88;
+  const lost = start - curr;
+  const toGo = curr - target;
+  const todayName = DIET_DAYS[(new Date().getDay()+6)%7];
+  const effType = effectiveDietType(todayName);
+  const kcalType = (effType === 'rest') ? 'rest' : DATA.health.weekTypeMap[todayName];
+  const kcal = DATA.health.calorieTargets[kcalType] || 2300;
+  document.getElementById('hx-snapshot').innerHTML = `
+    <div class="hx-stat"><div class="hx-stat-val">${curr.toFixed(1)}</div><div class="hx-stat-lbl">Weight kg</div></div>
+    <div class="hx-stat"><div class="hx-stat-val" style="color:${lost>0?'var(--hx-pos)':'var(--hx-dim)'}">${lost>0?'−':''}${Math.abs(lost).toFixed(1)}</div><div class="hx-stat-lbl">Lost kg</div></div>
+    <div class="hx-stat"><div class="hx-stat-val">${toGo.toFixed(1)}</div><div class="hx-stat-lbl">To target</div></div>
+    <div class="hx-stat"><div class="hx-stat-val" style="font-size:0.95rem; padding-top:0.18rem;">${kcal}</div><div class="hx-stat-lbl">kcal today</div></div>`;
+}
+
+const TYPE_LABEL = { strength:'Strength', cardio:'Cardio', football:'Football', rest:'Rest' };
+function typeColor(t){ return getComputedStyle(document.getElementById('sec-health')).getPropertyValue('--hx-'+t).trim() || '#8b8e9b'; }
+
+function renderDayPills() {
+  document.getElementById('hx-day-pills').innerHTML = DIET_DAYS.map(dn => {
+    const t = DATA.health.weekTypeMap[dn];
+    const active = dn === dietActiveDay;
+    const c = typeColor(t);
+    return `<div class="hx-pill" onclick="selectDietDay('${dn}')" style="border-color:${active?c:'var(--hx-border)'}; background:${active?c+'20':'var(--hx-surface2)'}">
+      <div class="hx-pill-d" style="color:${active?c:'var(--hx-faint)'}">${dn.slice(0,3).toUpperCase()}</div>
+      <div class="hx-pill-t" style="color:${active?c:'var(--hx-dim)'}">${TYPE_LABEL[t]}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderWorkoutPlan() {
+  const tp = (DATA.health.trainingPlan || []).find(d => d.day === dietActiveDay);
+  const el = document.getElementById('hx-workout-view');
+  if (!tp) { el.innerHTML = '<div class="hx-sub">No plan for this day.</div>'; return; }
+  const c = typeColor(DATA.health.weekTypeMap[dietActiveDay]);
+  const head = `<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.85rem;">
+      <div><div style="font-size:1.05rem; font-weight:600; color:var(--hx-text);">${tp.label}</div>
+      <div class="hx-sub" style="color:var(--hx-faint); margin-top:1px;">${tp.focus||''}</div></div>
+      <div style="text-align:right; flex-shrink:0;"><div class="hx-stat-lbl">Time</div><div class="hx-num" style="color:${c};">${tp.duration||''}</div></div>
+    </div>`;
+  const ex = (tp.exercises||[]).map((e,i) => {
+    const detail = e.cues ? `
+        <div class="hx-meta">
+          ${e.tempo?`<div><div class="hx-meta-l">Tempo</div><div class="hx-meta-v">${e.tempo}</div></div>`:''}
+          ${e.rest?`<div><div class="hx-meta-l">Rest</div><div class="hx-meta-v">${e.rest}</div></div>`:''}
+        </div>
+        ${e.weight?`<div style="padding:0.45rem 0; border-top:1px solid var(--hx-border);"><div class="hx-meta-l">Load</div><div class="hx-meta-v">${e.weight}</div></div>`:''}
+        <div class="hx-cue" style="border-top:1px solid var(--hx-border); padding-top:0.55rem; margin-top:0.2rem;">${e.cues}</div>` : '';
+    return `<div class="hx-ex" onclick="this.classList.toggle('open')">
+      <div class="hx-ex-head">
+        <div class="hx-ex-num" style="background:${c}22; color:${c};">${i+1}</div>
+        <div class="hx-ex-name">${e.name}</div>
+        <div class="hx-ex-sets" style="color:${c};">${e.sets||''}</div>
+        <span class="hx-chev">▾</span>
+      </div>
+      <div class="hx-ex-body">${detail || `<div class="hx-cue">${e.short||''}</div>`}</div>
+    </div>`;
+  }).join('');
+  const warm = (tp.warmup||[]).length ? `<div class="hx-card-title" style="margin:0.9rem 0 0.5rem;">Warm-up</div>` +
+    (tp.warmup||[]).map(w => `<div class="hx-sub" style="padding:0.3rem 0;"><b>${w.text}</b><div style="color:var(--hx-faint); font-size:0.78rem;">${w.sub||''}</div></div>`).join('') : '';
+  const cool = (tp.cooldown||[]).length ? `<div class="hx-card-title" style="margin:0.9rem 0 0.5rem;">Cool-down</div>` +
+    (tp.cooldown||[]).map(w => `<div class="hx-sub" style="padding:0.3rem 0;"><b>${w.text}</b><div style="color:var(--hx-faint); font-size:0.78rem;">${w.sub||''}</div></div>`).join('') : '';
+  el.innerHTML = head + ex + warm + cool;
 }
 
 function renderHealthChart() {
@@ -2468,15 +2623,15 @@ function renderHealthChart() {
   weightChart = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets: [{
-      data: weights, borderColor: '#c8b8ff', backgroundColor: 'rgba(200,184,255,0.08)',
-      borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#c8b8ff', tension: 0.4, fill: true
+      data: weights, borderColor: '#aab4ff', backgroundColor: 'rgba(170,180,255,0.10)',
+      borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#aab4ff', tension: 0.4, fill: true
     }]},
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         x: { display: false },
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#5a5870', font: { family: 'DM Mono', size: 10 } } }
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6c6f7c', font: { family: 'DM Mono', size: 10 } } }
       },
       animation: { duration: 600 }
     }
@@ -2486,18 +2641,9 @@ function renderHealthChart() {
     const target = DATA.health.targetWeight || 88;
     const lost = weights[0] - curr;
     document.getElementById('weight-stats').innerHTML = `
-      <div class="stat-box" style="flex:1; text-align:left; padding:0.6rem 0.75rem;">
-        <div class="stat-val" style="font-size:1rem; color:var(--accent);">${curr.toFixed(1)} kg</div>
-        <div class="stat-label">Current</div>
-      </div>
-      <div class="stat-box" style="flex:1; text-align:left; padding:0.6rem 0.75rem;">
-        <div class="stat-val" style="font-size:1rem; color:var(--green);">${target} kg</div>
-        <div class="stat-label">Target</div>
-      </div>
-      <div class="stat-box" style="flex:1; text-align:left; padding:0.6rem 0.75rem;">
-        <div class="stat-val" style="font-size:1rem; color:${lost>0?'var(--green)':'var(--text3)'};">${lost>0?'-':''}${Math.abs(lost).toFixed(1)} kg</div>
-        <div class="stat-label">Lost</div>
-      </div>`;
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem;">${curr.toFixed(1)}</div><div class="hx-stat-lbl">Current kg</div></div>
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem; color:var(--hx-pos);">${target}</div><div class="hx-stat-lbl">Target kg</div></div>
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem; color:${lost>0?'var(--hx-pos)':'var(--hx-faint)'};">${lost>0?'−':''}${Math.abs(lost).toFixed(1)}</div><div class="hx-stat-lbl">Lost kg</div></div>`;
   }
 }
 
@@ -2530,65 +2676,57 @@ function effectiveDietType(dayName) {
 }
 
 function renderDietPlan() {
-  const pills = DIET_DAYS.map(dn => {
-    const t = DATA.health.weekTypeMap[dn];
-    const active = dn === dietActiveDay;
-    const c = DAY_COLORS[t] || '#9896a0';
-    return `<div onclick="selectDietDay('${dn}')" style="flex:0 0 auto; cursor:pointer; text-align:center; padding:0.45rem 0.6rem; border-radius:10px; border:1.5px solid ${active?c:'var(--border)'}; background:${active?c+'18':'var(--bg3)'};">
-      <div style="font-size:0.6rem; font-family:var(--mono); letter-spacing:0.06em; color:${active?c:'var(--text3)'}">${dn.slice(0,3).toUpperCase()}</div>
-      <div style="font-size:0.62rem; color:${active?c:'var(--text2)'}; text-transform:capitalize; margin-top:1px;">${t}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('diet-day-pills').innerHTML = pills;
-
   const planned = DATA.health.weekTypeMap[dietActiveDay];
   const trained = dayTrainedState(dietActiveDay);
   const effType = effectiveDietType(dietActiveDay);
-  const kcal = DATA.health.calorieTargets[effType] || DATA.health.calorieTargets.rest;
-  document.getElementById('diet-kcal-badge').textContent = `~${kcal} kcal · ${effType}`;
 
-  // toggle (only meaningful on planned training days)
-  const toggleEl = document.getElementById('diet-train-toggle');
+  // train/rest toggle
+  const toggleEl = document.getElementById('hx-train-toggle');
   if (planned === 'rest') {
-    toggleEl.innerHTML = `<div style="font-size:0.78rem; color:var(--text3);">Planned rest day — recovery meals.</div>`;
+    toggleEl.innerHTML = `<div class="hx-sub" style="color:var(--hx-faint);">Planned rest day — recovery meals.</div>`;
   } else {
-    toggleEl.innerHTML = `<div style="display:flex; align-items:center; justify-content:space-between; background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:0.6rem 0.8rem;">
-      <span style="font-size:0.82rem; color:var(--text2);">Did you train ${dietActiveDay}?</span>
-      <span onclick="toggleTrained('${dietActiveDay}')" style="cursor:pointer; font-family:var(--mono); font-size:0.78rem; padding:0.25rem 0.7rem; border-radius:20px; background:${trained?'var(--green)':'var(--bg4)'}22; color:${trained?'var(--green)':'var(--text3)'}; border:1px solid ${trained?'var(--green)':'var(--border2)'};">${trained?'✓ Trained':'✗ Rested'}</span>
+    toggleEl.innerHTML = `<div class="hx-row" style="background:var(--hx-surface2); border:1px solid var(--hx-border); border-radius:var(--hx-r-sm); padding:0.6rem 0.85rem;">
+      <span class="hx-sub" style="color:var(--hx-dim);">Trained ${dietActiveDay}?</span>
+      <span class="hx-toggle" onclick="toggleTrained('${dietActiveDay}')" style="background:${trained?'var(--hx-pos)':'var(--hx-surface)'}22; color:${trained?'var(--hx-pos)':'var(--hx-faint)'}; border:1px solid ${trained?'var(--hx-pos)':'var(--hx-border-strong)'};">${trained?'✓ Trained':'✗ Rested'}</span>
     </div>`;
   }
 
-  // meals for effective type
   const dp = DATA.health.dietPlan[effType];
+  const planned2 = DATA.health.weekTypeMap[dietActiveDay];
+  // calorie target keyed by workout type (strength/cardio/football/rest); rest if untrained
+  const kcalType = (effType === 'rest') ? 'rest' : planned2;
+  const kcal = DATA.health.calorieTargets[kcalType] || DATA.health.calorieTargets.rest;
+  const badge = document.getElementById('hx-kcal-badge');
+  if (badge) badge.textContent = `~${kcal} kcal`;
   const slotOrder = effType === 'rest'
     ? [['breakfast','Breakfast'],['snack1','Mid-morning'],['lunch','Lunch'],['snack2','Afternoon'],['dinner','Dinner']]
     : effType === 'football'
     ? [['breakfast','Breakfast'],['lunch','Lunch (main fuel-up)'],['preFootball','Pre-football'],['dinner','Post-football dinner']]
     : [['preWorkout','Pre-workout'],['breakfast','Post-workout breakfast'],['lunch','Lunch'],['snack','Afternoon snack'],['dinner','Dinner']];
 
-  document.getElementById('diet-plan-display').innerHTML = slotOrder.map(([slot,label]) => {
+  document.getElementById('hx-diet-view').innerHTML = slotOrder.map(([slot,label]) => {
     const s = dp[slot]; if (!s) return '';
-    const opts = s.options.map((o,i) => `<div style="padding:0.4rem 0.55rem; border-radius:8px; background:var(--bg2); margin-bottom:0.3rem; display:flex; justify-content:space-between; gap:0.5rem;">
-        <span style="font-size:0.78rem; color:var(--text); line-height:1.35;">${o.label}</span>
-        <span style="font-size:0.66rem; font-family:var(--mono); color:var(--text3); white-space:nowrap;">${o.kcal}k · ${o.protein}p</span>
+    const opts = s.options.map(o => `<div class="hx-meal">
+        <span class="hx-meal-txt">${o.label}</span>
+        <span class="hx-meal-macro">${o.kcal}k · ${o.protein}p</span>
       </div>`).join('');
-    return `<div style="margin-bottom:0.85rem;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
-        <span style="font-size:0.7rem; font-family:var(--mono); letter-spacing:0.05em; color:var(--accent); text-transform:uppercase;">${label}</span>
-        <span style="font-size:0.66rem; color:var(--text3);">${s.time}</span>
+    return `<div style="margin-bottom:1rem;">
+      <div class="hx-row" style="margin-bottom:0.4rem;">
+        <span style="font-size:0.7rem; font-weight:600; letter-spacing:0.08em; color:var(--hx-accent); text-transform:uppercase;">${label}</span>
+        <span style="font-size:0.66rem; color:var(--hx-faint);">${s.time}</span>
       </div>${opts}
     </div>`;
   }).join('');
 }
 
-function selectDietDay(dn) { dietActiveDay = dn; renderDietPlan(); }
+function selectDietDay(dn) { dietActiveDay = dn; renderDayPills(); renderDietPlan(); renderWorkoutPlan(); }
 function toggleTrained(dn) {
   const key = isoForDay(dn);
   if (!DATA.health.workoutLog) DATA.health.workoutLog = {};
   if (!DATA.health.workoutLog[key]) DATA.health.workoutLog[key] = { type: DATA.health.weekTypeMap[dn], exercises: [] };
   const cur = dayTrainedState(dn);
   DATA.health.workoutLog[key].trained = !cur;
-  renderDietPlan(); saveData();
+  renderDietPlan(); renderSnapshot(); saveData();
 }
 
 // ─── WORKOUT LOG: progressive load ────────────────────────────────────────────
@@ -2625,10 +2763,10 @@ function addSet() {
 function renderPendingSets() {
   const el = document.getElementById('wl-pending-sets');
   if (!pendingSets.length) { el.innerHTML = ''; return; }
-  el.innerHTML = `<div style="font-size:0.66rem; font-family:var(--mono); color:var(--text3); margin-bottom:0.3rem;">PENDING SETS</div>` +
-    pendingSets.map((s,i) => `<div style="display:flex; justify-content:space-between; padding:0.3rem 0.5rem; background:var(--bg3); border-radius:7px; margin-bottom:0.25rem;">
-      <span style="font-size:0.76rem; color:var(--text);">${s.exercise}</span>
-      <span style="font-size:0.72rem; font-family:var(--mono); color:var(--accent);">${s.reps} × ${s.weight}kg <span onclick="rmSet(${i})" style="color:var(--coral); cursor:pointer; margin-left:0.4rem;">✕</span></span>
+  el.innerHTML = `<div style="font-size:0.62rem; letter-spacing:0.1em; color:var(--hx-faint); margin-bottom:0.35rem;">PENDING SETS</div>` +
+    pendingSets.map((s,i) => `<div class="hx-row" style="padding:0.4rem 0.6rem; background:var(--hx-surface2); border-radius:8px; margin-bottom:0.3rem;">
+      <span style="font-size:0.84rem; color:var(--hx-text);">${s.exercise}</span>
+      <span class="hx-num" style="font-size:0.8rem; color:var(--hx-accent);">${s.reps} × ${s.weight}kg <span onclick="rmSet(${i})" style="color:var(--hx-neg); cursor:pointer; margin-left:0.5rem;">✕</span></span>
     </div>`).join('');
 }
 function rmSet(i) { pendingSets.splice(i,1); renderPendingSets(); }
@@ -2657,15 +2795,15 @@ function renderWorkoutHistory() {
   const keys = Object.keys(wl).filter(k => (wl[k].exercises||[]).length)
     .sort((a,b)=>new Date(b)-new Date(a)).slice(0,8);
   const el = document.getElementById('wl-history');
-  if (!keys.length) { el.innerHTML = '<div style="font-size:0.76rem; color:var(--text3);">No workouts logged yet.</div>'; return; }
-  el.innerHTML = `<div style="font-size:0.66rem; font-family:var(--mono); color:var(--text3); margin-bottom:0.4rem;">RECENT WORKOUTS</div>` +
+  if (!keys.length) { el.innerHTML = '<div class="hx-sub" style="color:var(--hx-faint);">No workouts logged yet.</div>'; return; }
+  el.innerHTML = `<div style="font-size:0.62rem; letter-spacing:0.1em; color:var(--hx-faint); margin-bottom:0.45rem;">RECENT WORKOUTS</div>` +
     keys.map(k => {
       const w = wl[k];
       const exs = (w.exercises||[]).map(e =>
-        `<div style="margin:0.2rem 0;"><span style="font-size:0.76rem; color:var(--text2);">${e.name}</span>
-          <span style="font-size:0.7rem; font-family:var(--mono); color:var(--text3);"> — ${e.sets.map(s=>`${s.reps}×${s.weight}`).join(', ')}</span></div>`).join('');
-      return `<div style="padding:0.5rem 0.6rem; background:var(--bg3); border-radius:9px; margin-bottom:0.4rem;">
-        <div style="font-size:0.68rem; font-family:var(--mono); color:var(--accent); margin-bottom:0.2rem;">${k} · ${w.type||''}</div>${exs}
+        `<div style="margin:0.25rem 0;"><span style="font-size:0.84rem; color:var(--hx-dim);">${e.name}</span>
+          <span class="hx-num" style="font-size:0.76rem; color:var(--hx-faint);"> — ${e.sets.map(s=>`${s.reps}×${s.weight}`).join(', ')}</span></div>`).join('');
+      return `<div style="padding:0.6rem 0.7rem; background:var(--hx-surface2); border-radius:10px; margin-bottom:0.45rem;">
+        <div class="hx-num" style="font-size:0.7rem; color:var(--hx-accent); margin-bottom:0.25rem;">${k} · ${w.type||''}</div>${exs}
       </div>`;
     }).join('');
 }
