@@ -1413,26 +1413,7 @@ html, body {
         <div id="hx-diet-view" style="display:none;"></div>
       </div>
 
-      <!-- LOG WORKOUT (collapsed) -->
-      <div class="hx-card">
-        <div class="hx-row" onclick="hxToggle('hx-wl-body')" style="cursor:pointer;">
-          <div class="hx-card-title" style="margin-bottom:0;">Log workout · progressive load</div>
-          <span class="hx-chev" id="hx-wl-chev">▾</span>
-        </div>
-        <div id="hx-wl-body" style="display:none; margin-top:0.9rem;">
-          <div id="wl-day-label" style="font-size:0.78rem; color:var(--hx-faint); margin-bottom:0.7rem;"></div>
-          <div style="margin-bottom:0.7rem;"><label class="hx-label">Date</label><input class="hx-input" id="wl-date" type="date"></div>
-          <div style="margin-bottom:0.7rem;"><label class="hx-label">Exercise</label><select class="hx-select" id="wl-exercise"></select></div>
-          <div class="hx-grid2" style="margin-bottom:0.7rem;">
-            <div><label class="hx-label">Reps</label><input class="hx-input" id="wl-reps" type="number" placeholder="8"></div>
-            <div><label class="hx-label">Weight (kg)</label><input class="hx-input" id="wl-weight" type="number" step="0.5" placeholder="40"></div>
-          </div>
-          <button class="hx-btn hx-btn-ghost" style="margin-bottom:0.6rem;" onclick="addSet()">+ Add set</button>
-          <div id="wl-pending-sets" style="margin-bottom:0.6rem;"></div>
-          <button class="hx-btn hx-btn-primary" onclick="saveWorkout()">Save workout</button>
-          <div id="wl-history" style="margin-top:1rem;"></div>
-        </div>
-      </div>
+      <!-- LOG WORKOUT now lives inside the Workout tab (hx-workout-view) -->
 
       <!-- SUPPLEMENTS (collapsed) -->
       <div class="hx-card">
@@ -2053,6 +2034,24 @@ html, body {
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-other-ex">
+  <div class="modal">
+    <div class="modal-title">Log a different exercise</div>
+    <div class="log-form">
+      <div><label class="field-label">Exercise</label><select class="field-input" id="oe-select"></select></div>
+      <div><label class="field-label">Custom name (if "(custom)")</label><input class="field-input" id="oe-custom" placeholder="e.g. Leg Press"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">
+        <div><label class="field-label">Reps *</label><input class="field-input" id="oe-reps" type="number" placeholder="8"></div>
+        <div><label class="field-label">Weight (kg)</label><input class="field-input" id="oe-wt" type="number" step="0.5" placeholder="0 if bodyweight"></div>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="logOtherExercise()">Log set</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-other-ex')">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-custom-meal">
   <div class="modal">
     <div class="modal-title">Log a meal</div>
@@ -2170,6 +2169,7 @@ async function loadData() {
     const json = await res.json();
     DATA = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\n/g, '')))));
     DATA._sha = json.sha;
+    await loadRoutines();
     safeInitApp();
   } catch(e) {
     console.error('loadData error:', e);
@@ -2179,7 +2179,48 @@ async function loadData() {
     }
     // Still launch with default data so UI works
     DATA = getDefaultData();
+    await loadRoutines();
     safeInitApp();
+  }
+}
+
+// Fetch the versioned routine files (public repo, same origin as index.html) and
+// graft their content onto DATA.health. Routine files are the canonical source for
+// the workout/diet TEMPLATES; logs live in data.json and are never touched here.
+async function loadRoutines() {
+  const fb = (DATA.health && DATA.health._routineFallback) || {};
+  // sensible fallback if a routine file is missing/unreachable
+  const applyFallback = () => {
+    DATA.health.weekTypeMap = DATA.health.weekTypeMap || fb.weekTypeMap || {};
+    DATA.health.calorieTargets = DATA.health.calorieTargets || fb.calorieTargets || {};
+    DATA.health.nutrientTargets = DATA.health.nutrientTargets || fb.nutrientTargets || {kcal:2450,protein:170,carbs:285,fat:70,fibre:35};
+    DATA.health.energyExpenditure = DATA.health.energyExpenditure || fb.energyExpenditure || {};
+    DATA.health.trainingPlan = DATA.health.trainingPlan || [];
+    DATA.health.dietPlan = DATA.health.dietPlan || {};
+    DATA.health.exerciseLibrary = DATA.health.exerciseLibrary || {};
+  };
+  try {
+    const [tr, dr] = await Promise.all([
+      fetch('training_routine.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
+      fetch('diet_routine.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
+    ]);
+    if (tr) {
+      DATA.health.trainingPlan = tr.days || [];
+      DATA.health.weekTypeMap = tr.weekTypeMap || {};
+      DATA.health.exerciseLibrary = tr.exerciseLibrary || {};
+      DATA.health.trainingRoutineVersion = tr.version || 1;
+    }
+    if (dr) {
+      DATA.health.dietPlan = dr.plan || {};
+      DATA.health.calorieTargets = dr.calorieTargets || {};
+      DATA.health.nutrientTargets = dr.nutrientTargets || {kcal:2450,protein:170,carbs:285,fat:70,fibre:35};
+      DATA.health.energyExpenditure = dr.energyExpenditure || {};
+      DATA.health.dietRoutineVersion = dr.version || 1;
+    }
+    applyFallback();
+  } catch(e) {
+    console.warn('loadRoutines fallback:', e);
+    applyFallback();
   }
 }
 
@@ -2190,6 +2231,14 @@ async function saveData() {
     const sha = DATA._sha;
     const payload = { ...DATA };
     delete payload._sha;
+    // Strip routine TEMPLATE content that was grafted on at load from the public
+    // routine files — it must not be written back into data.json (logs-only store).
+    if (payload.health) {
+      payload.health = { ...payload.health };
+      ['trainingPlan','dietPlan','exerciseLibrary','weekTypeMap','calorieTargets',
+       'nutrientTargets','energyExpenditure','trainingRoutineVersion','dietRoutineVersion']
+        .forEach(k => delete payload.health[k]);
+    }
     payload.meta.lastUpdated = new Date().toISOString();
     const body = { message: `update ${new Date().toLocaleDateString()}`, content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))) };
     if (sha) body.sha = sha;
@@ -2562,7 +2611,6 @@ function renderHealth() {
   renderDietPlan();
   renderWorkoutPlan();
   hxSetView(hxView);
-  initWorkoutLogger();
   renderSupplements();
   const reports = DATA.health.medicalReports || [];
   document.getElementById('reports-list').innerHTML = reports.length ?
@@ -2603,39 +2651,152 @@ function renderDayPills() {
   }).join('');
 }
 
+// MET-based calorie estimate (rough, labelled as estimate). Uses live bodyweight.
+function bodyWeight(){
+  const logs=(DATA.health.dailyLog||[]).filter(l=>l.weight);
+  return logs.length?logs[logs.length-1].weight:(DATA.health.startWeight||105.7);
+}
+function estKcalForSets(sets, isWeighted){
+  // Rough estimate (labelled est). Per-set energy incl. work + rest recovery.
+  // Compound weighted ~8-10 kcal/set, accessory/bodyweight ~5-6 kcal/set, scaled by bodyweight.
+  const perSet = isWeighted ? 9 : 5.5;
+  const bwScale = bodyWeight()/90; // normalize around 90kg
+  return Math.round(sets.length * perSet * bwScale);
+}
+function allExerciseNames(){
+  const lib=DATA.health.exerciseLibrary||{};
+  const set=new Set();
+  Object.values(lib).forEach(arr=>(arr||[]).forEach(n=>set.add(n)));
+  // include any historically logged names too (retired routines)
+  Object.values(DATA.health.workoutLog||{}).forEach(w=>(w.exercises||[]).forEach(e=>set.add(e.name)));
+  return [...set].sort();
+}
+function lastLoggedSet(exName){
+  const wl=DATA.health.workoutLog||{};
+  const keys=Object.keys(wl).sort((a,b)=>new Date(b)-new Date(a));
+  for(const k of keys){
+    const ex=(wl[k].exercises||[]).find(e=>e.name===exName);
+    if(ex&&ex.sets&&ex.sets.length){ const s=ex.sets[ex.sets.length-1]; return {date:k, reps:s.reps, weight:s.weight}; }
+  }
+  return null;
+}
+
+let wlDate = null; // selected log date (ISO)
 function renderWorkoutPlan() {
   const tp = (DATA.health.trainingPlan || []).find(d => d.day === dietActiveDay);
   const el = document.getElementById('hx-workout-view');
   if (!tp) { el.innerHTML = '<div class="hx-sub">No plan for this day.</div>'; return; }
   const c = typeColor(DATA.health.weekTypeMap[dietActiveDay]);
-  const head = `<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.85rem;">
+  if(!wlDate) wlDate=new Date().toISOString().slice(0,10);
+
+  const head = `<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem;">
       <div><div style="font-size:1.05rem; font-weight:600; color:var(--hx-text);">${tp.label}</div>
       <div class="hx-sub" style="color:var(--hx-faint); margin-top:1px;">${tp.focus||''}</div></div>
       <div style="text-align:right; flex-shrink:0;"><div class="hx-stat-lbl">Time</div><div class="hx-num" style="color:${c};">${tp.duration||''}</div></div>
     </div>`;
+
+  // log-date selector (lets you log for any date)
+  const dateRow = `<div class="hx-row" style="background:var(--hx-surface2); border-radius:var(--hx-r-sm); padding:0.55rem 0.75rem; margin-bottom:0.85rem;">
+      <span class="hx-sub" style="color:var(--hx-dim);">Logging for</span>
+      <input type="date" id="wl-date" value="${wlDate}" onchange="wlDate=this.value; renderWorkoutPlan();" style="background:transparent; border:none; color:var(--hx-accent); font-family:'DM Mono',monospace; font-size:0.82rem;">
+    </div>`;
+
   const ex = (tp.exercises||[]).map((e,i) => {
+    const isW = !!e.weight || /squat|deadlift|bench|press|row|lunge|curl|pulldown|carry|split/i.test(e.name);
+    const last = lastLoggedSet(e.name);
+    const lastTxt = last ? `last: ${last.weight?last.weight+'kg × ':''}${last.reps}` : 'no log yet';
+    const todayLog = ((DATA.health.workoutLog||{})[new Date(wlDate+'T00:00:00').toLocaleDateString()]||{}).exercises||[];
+    const logged = todayLog.find(x=>x.name===e.name);
+    const loggedTxt = logged ? logged.sets.map(s=>`${s.reps}×${s.weight||0}`).join('  ') : '';
     const detail = e.cues ? `
         <div class="hx-meta">
           ${e.tempo?`<div><div class="hx-meta-l">Tempo</div><div class="hx-meta-v">${e.tempo}</div></div>`:''}
           ${e.rest?`<div><div class="hx-meta-l">Rest</div><div class="hx-meta-v">${e.rest}</div></div>`:''}
         </div>
-        ${e.weight?`<div style="padding:0.45rem 0; border-top:1px solid var(--hx-border);"><div class="hx-meta-l">Load</div><div class="hx-meta-v">${e.weight}</div></div>`:''}
-        <div class="hx-cue" style="border-top:1px solid var(--hx-border); padding-top:0.55rem; margin-top:0.2rem;">${e.cues}</div>` : '';
-    return `<div class="hx-ex" onclick="this.classList.toggle('open')">
-      <div class="hx-ex-head">
+        ${e.weight?`<div style="padding:0.4rem 0; border-top:1px solid var(--hx-border);"><div class="hx-meta-l">Load guide</div><div class="hx-meta-v">${e.weight}</div></div>`:''}
+        <div class="hx-cue" style="border-top:1px solid var(--hx-border); padding-top:0.5rem; margin-top:0.2rem;">${e.cues}</div>` : `<div class="hx-cue">${e.short||''}</div>`;
+    return `<div class="hx-ex">
+      <div class="hx-ex-head" onclick="this.parentElement.classList.toggle('open')">
         <div class="hx-ex-num" style="background:${c}22; color:${c};">${i+1}</div>
-        <div class="hx-ex-name">${e.name}</div>
-        <div class="hx-ex-sets" style="color:${c};">${e.sets||''}</div>
+        <div style="flex:1;"><div class="hx-ex-name">${e.name}</div>
+          <div style="font-size:0.68rem; font-family:'DM Mono',monospace; color:var(--hx-faint); margin-top:1px;">${e.sets||''} · ${lastTxt}</div></div>
         <span class="hx-chev">▾</span>
       </div>
-      <div class="hx-ex-body">${detail || `<div class="hx-cue">${e.short||''}</div>`}</div>
+      <div class="hx-ex-body">
+        ${detail}
+        <div style="border-top:1px solid var(--hx-border); margin-top:0.6rem; padding-top:0.6rem;">
+          ${loggedTxt?`<div style="font-size:0.72rem; color:var(--hx-pos); margin-bottom:0.5rem;">✓ logged: ${loggedTxt}</div>`:''}
+          <div style="display:flex; gap:0.4rem; align-items:flex-end;">
+            <div style="flex:1;"><label class="hx-label">Reps</label><input class="hx-input" id="set-reps-${i}" type="number" placeholder="8" style="padding:0.5rem;"></div>
+            <div style="flex:1;"><label class="hx-label">Weight (kg)</label><input class="hx-input" id="set-wt-${i}" type="number" step="0.5" placeholder="${last&&last.weight?last.weight:''}" style="padding:0.5rem;"></div>
+            <button class="hx-btn hx-btn-primary" style="flex:0 0 auto; width:auto; padding:0.5rem 0.9rem;" onclick="logSetInline('${e.name.replace(/'/g,"\\'")}', ${i}, ${isW})">Log set</button>
+          </div>
+        </div>
+      </div>
     </div>`;
   }).join('');
+
+  // log a different exercise
+  const otherBtn = `<button class="hx-btn hx-btn-ghost" style="margin:0.6rem 0;" onclick="openOtherExercise()">+ Log a different exercise</button>`;
+
+  // today's workout summary (for selected date)
+  const dayKey=new Date(wlDate+'T00:00:00').toLocaleDateString();
+  const dayLog=(DATA.health.workoutLog||{})[dayKey];
+  let summary='';
+  if(dayLog&&(dayLog.exercises||[]).length){
+    const totKcal=(dayLog.exercises||[]).reduce((a,e)=>a+(e.estKcal||0),0);
+    summary=`<div style="background:var(--hx-surface2); border-radius:var(--hx-r-sm); padding:0.8rem; margin-top:0.6rem;">
+      <div class="hx-row" style="margin-bottom:0.5rem;"><span style="font-size:0.66rem; letter-spacing:0.1em; color:var(--hx-faint); text-transform:uppercase;">Logged ${dayKey}</span>
+      <span class="hx-num" style="font-size:0.74rem; color:var(--hx-warn);">~${totKcal} kcal est</span></div>
+      ${(dayLog.exercises||[]).map(e=>`<div style="margin:0.25rem 0;"><span style="font-size:0.84rem; color:var(--hx-dim);">${e.name}</span> <span class="hx-num" style="font-size:0.74rem; color:var(--hx-faint);">${e.sets.map(s=>`${s.reps}×${s.weight||0}`).join(', ')}</span></div>`).join('')}
+    </div>`;
+  }
+
   const warm = (tp.warmup||[]).length ? `<div class="hx-card-title" style="margin:0.9rem 0 0.5rem;">Warm-up</div>` +
     (tp.warmup||[]).map(w => `<div class="hx-sub" style="padding:0.3rem 0;"><b>${w.text}</b><div style="color:var(--hx-faint); font-size:0.78rem;">${w.sub||''}</div></div>`).join('') : '';
   const cool = (tp.cooldown||[]).length ? `<div class="hx-card-title" style="margin:0.9rem 0 0.5rem;">Cool-down</div>` +
     (tp.cooldown||[]).map(w => `<div class="hx-sub" style="padding:0.3rem 0;"><b>${w.text}</b><div style="color:var(--hx-faint); font-size:0.78rem;">${w.sub||''}</div></div>`).join('') : '';
-  el.innerHTML = head + ex + warm + cool;
+  el.innerHTML = head + dateRow + ex + otherBtn + summary + warm + cool;
+}
+
+function logSetInline(name, idx, isWeighted){
+  const reps=parseInt(document.getElementById('set-reps-'+idx).value);
+  const wt=parseFloat(document.getElementById('set-wt-'+idx).value)||0;
+  if(!reps){ showToast('Enter reps'); return; }
+  writeSet(name, reps, wt, isWeighted);
+}
+function writeSet(name, reps, wt, isWeighted){
+  const dayKey=new Date(wlDate+'T00:00:00').toLocaleDateString();
+  const dayName=DIET_DAYS[(new Date(wlDate+'T00:00:00').getDay()+6)%7];
+  if(!DATA.health.workoutLog) DATA.health.workoutLog={};
+  if(!DATA.health.workoutLog[dayKey]) DATA.health.workoutLog[dayKey]={type:DATA.health.weekTypeMap[dayName],exercises:[],trained:true};
+  const log=DATA.health.workoutLog[dayKey];
+  log.trained=true;
+  let ex=log.exercises.find(e=>e.name===name);
+  if(!ex){ ex={name,sets:[],estKcal:0}; log.exercises.push(ex); }
+  ex.sets.push({reps,weight:wt});
+  ex.estKcal=estKcalForSets(ex.sets, isWeighted);
+  renderWorkoutPlan(); renderSnapshot(); saveData();
+  showToast('Set logged: '+name.slice(0,18));
+}
+function openOtherExercise(){
+  const names=allExerciseNames();
+  document.getElementById('oe-select').innerHTML=names.map(n=>`<option>${n}</option>`).concat('<option>(custom)</option>').join('');
+  document.getElementById('oe-custom').value='';
+  document.getElementById('oe-reps').value='';
+  document.getElementById('oe-wt').value='';
+  document.getElementById('modal-other-ex').classList.add('active');
+}
+function logOtherExercise(){
+  let name=document.getElementById('oe-select').value;
+  const custom=document.getElementById('oe-custom').value.trim();
+  if(name==='(custom)'){ if(!custom){showToast('Enter exercise name');return;} name=custom; }
+  const reps=parseInt(document.getElementById('oe-reps').value);
+  const wt=parseFloat(document.getElementById('oe-wt').value)||0;
+  if(!reps){ showToast('Enter reps'); return; }
+  const isW=wt>0||/squat|deadlift|bench|press|row|lunge|curl|pulldown|carry|split/i.test(name);
+  writeSet(name, reps, wt, isW);
+  document.getElementById('modal-other-ex').classList.remove('active');
 }
 
 function renderHealthChart() {
@@ -2843,83 +3004,8 @@ function toggleTrained(dn) {
 }
 
 // ─── WORKOUT LOG: progressive load ────────────────────────────────────────────
-let pendingSets = [];
-function initWorkoutLogger() {
-  const todayName = DIET_DAYS[(new Date().getDay()+6)%7];
-  document.getElementById('wl-day-label').textContent = `${todayName} · ${DATA.health.weekTypeMap[todayName]} day`;
-  const dateEl = document.getElementById('wl-date');
-  if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
-  populateExerciseDropdown();
-  dateEl.onchange = populateExerciseDropdown;
-  renderPendingSets(); renderWorkoutHistory();
-}
-function populateExerciseDropdown() {
-  const dateVal = document.getElementById('wl-date').value;
-  const d = dateVal ? new Date(dateVal+'T00:00:00') : new Date();
-  const dayName = DIET_DAYS[(d.getDay()+6)%7];
-  const lib = (DATA.health.exerciseLibrary || {})[dayName] || [];
-  const allExtra = ['(other / custom)'];
-  document.getElementById('wl-exercise').innerHTML =
-    lib.concat(allExtra).map(e => `<option>${e}</option>`).join('');
-  document.getElementById('wl-day-label').textContent = `${dayName} · ${DATA.health.weekTypeMap[dayName]} day`;
-}
-function addSet() {
-  const ex = document.getElementById('wl-exercise').value;
-  const reps = parseInt(document.getElementById('wl-reps').value);
-  const wt = parseFloat(document.getElementById('wl-weight').value);
-  if (!reps) { showToast('Enter reps'); return; }
-  pendingSets.push({ exercise: ex, reps, weight: wt || 0 });
-  document.getElementById('wl-reps').value = '';
-  document.getElementById('wl-weight').value = '';
-  renderPendingSets();
-}
-function renderPendingSets() {
-  const el = document.getElementById('wl-pending-sets');
-  if (!pendingSets.length) { el.innerHTML = ''; return; }
-  el.innerHTML = `<div style="font-size:0.62rem; letter-spacing:0.1em; color:var(--hx-faint); margin-bottom:0.35rem;">PENDING SETS</div>` +
-    pendingSets.map((s,i) => `<div class="hx-row" style="padding:0.4rem 0.6rem; background:var(--hx-surface2); border-radius:8px; margin-bottom:0.3rem;">
-      <span style="font-size:0.84rem; color:var(--hx-text);">${s.exercise}</span>
-      <span class="hx-num" style="font-size:0.8rem; color:var(--hx-accent);">${s.reps} × ${s.weight}kg <span onclick="rmSet(${i})" style="color:var(--hx-neg); cursor:pointer; margin-left:0.5rem;">✕</span></span>
-    </div>`).join('');
-}
-function rmSet(i) { pendingSets.splice(i,1); renderPendingSets(); }
-function saveWorkout() {
-  if (!pendingSets.length) { showToast('Add at least one set'); return; }
-  const dateVal = document.getElementById('wl-date').value;
-  const d = dateVal ? new Date(dateVal+'T00:00:00') : new Date();
-  const key = d.toLocaleDateString();
-  const dayName = DIET_DAYS[(d.getDay()+6)%7];
-  if (!DATA.health.workoutLog) DATA.health.workoutLog = {};
-  if (!DATA.health.workoutLog[key]) DATA.health.workoutLog[key] = { type: DATA.health.weekTypeMap[dayName], exercises: [] };
-  const log = DATA.health.workoutLog[key];
-  log.trained = true;
-  // merge sets into exercises grouped by name
-  pendingSets.forEach(ps => {
-    let ex = log.exercises.find(e => e.name === ps.exercise);
-    if (!ex) { ex = { name: ps.exercise, sets: [] }; log.exercises.push(ex); }
-    ex.sets.push({ reps: ps.reps, weight: ps.weight });
-  });
-  pendingSets = [];
-  renderPendingSets(); renderWorkoutHistory(); renderDietPlan(); saveData();
-  showToast('Workout saved ✓');
-}
-function renderWorkoutHistory() {
-  const wl = DATA.health.workoutLog || {};
-  const keys = Object.keys(wl).filter(k => (wl[k].exercises||[]).length)
-    .sort((a,b)=>new Date(b)-new Date(a)).slice(0,8);
-  const el = document.getElementById('wl-history');
-  if (!keys.length) { el.innerHTML = '<div class="hx-sub" style="color:var(--hx-faint);">No workouts logged yet.</div>'; return; }
-  el.innerHTML = `<div style="font-size:0.62rem; letter-spacing:0.1em; color:var(--hx-faint); margin-bottom:0.45rem;">RECENT WORKOUTS</div>` +
-    keys.map(k => {
-      const w = wl[k];
-      const exs = (w.exercises||[]).map(e =>
-        `<div style="margin:0.25rem 0;"><span style="font-size:0.84rem; color:var(--hx-dim);">${e.name}</span>
-          <span class="hx-num" style="font-size:0.76rem; color:var(--hx-faint);"> — ${e.sets.map(s=>`${s.reps}×${s.weight}`).join(', ')}</span></div>`).join('');
-      return `<div style="padding:0.6rem 0.7rem; background:var(--hx-surface2); border-radius:10px; margin-bottom:0.45rem;">
-        <div class="hx-num" style="font-size:0.7rem; color:var(--hx-accent); margin-bottom:0.25rem;">${k} · ${w.type||''}</div>${exs}
-      </div>`;
-    }).join('');
-}
+// (legacy workout-logger functions removed — replaced by inline logging)
+
 
 function renderSupplements() {
   const sups = DATA.health.supplements || [];
