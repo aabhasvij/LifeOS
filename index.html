@@ -2114,8 +2114,6 @@ html, body {
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/3.6.0/cdn.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 let CFG = {};
@@ -2911,12 +2909,12 @@ function renderHealthChart() {
   if (emptyEl) emptyEl.style.display = 'none';
   canvas.style.display = 'block';
 
-  const raw = logs.map(p=>({x:p.t, y:p.y}));
+  const raw = logs.map(p=>({x:p.t.getTime(), y:p.y}));
   const weights = logs.map(p=>p.y);
   // rolling average only when data is dense enough to be meaningful (>=5 points & spans >=10d)
   const spanDays = (logs[logs.length-1].t - logs[0].t)/86400000;
   const showAvg = logs.length >= 5 && spanDays >= 10;
-  const avg = showAvg ? rollingAvg(logs, 7) : null;
+  const avg = showAvg ? rollingAvg(logs, 7).map(p=>({x:p.x.getTime(), y:p.y})) : null;
 
   const datasets = [{
     label:'Weight', data: raw, borderColor:'#aab4ff', backgroundColor:'rgba(170,180,255,0.10)',
@@ -2928,17 +2926,28 @@ function renderHealthChart() {
     pointRadius:0, tension:0.4, fill:false
   });
 
+  const fmtDate = (ts) => {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  };
+
   const ctx = canvas.getContext('2d');
   if (weightChart) weightChart.destroy();
-  const unit = days && days<=30 ? 'day' : days && days<=90 ? 'week' : 'month';
   weightChart = new Chart(ctx, {
     type:'line', data:{datasets},
     options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ display:showAvg, labels:{ color:'#a2a4af', font:{family:'DM Mono', size:9}, boxWidth:10, usePointStyle:true } } },
+      responsive:true, maintainAspectRatio:false, parsing:false,
+      plugins:{
+        legend:{ display:showAvg, labels:{ color:'#a2a4af', font:{family:'DM Mono', size:9}, boxWidth:10, usePointStyle:true } },
+        tooltip:{ callbacks:{ title:(items)=> items.length?fmtDate(items[0].parsed.x):'' } }
+      },
       scales:{
-        x:{ type:'time', time:{ unit, tooltipFormat:'dd MMM', displayFormats:{day:'dd MMM', week:'dd MMM', month:'MMM yy'} },
-            grid:{ display:false }, ticks:{ color:'#6c6f7c', font:{family:'DM Mono', size:9}, maxRotation:0, autoSkip:true, maxTicksLimit:6 } },
+        x:{ type:'linear',
+            min: raw.length>1 ? raw[0].x : raw[0].x - 86400000,
+            max: raw.length>1 ? raw[raw.length-1].x : raw[0].x + 86400000,
+            grid:{ display:false },
+            ticks:{ color:'#6c6f7c', font:{family:'DM Mono', size:9}, maxRotation:0, autoSkip:true, maxTicksLimit:6,
+                    callback:(val)=>fmtDate(val) } },
         y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#6c6f7c', font:{family:'DM Mono', size:10} },
             suggestedMin: Math.min(...weights, DATA.health.targetWeight||88)-1,
             suggestedMax: Math.max(...weights)+1 }
