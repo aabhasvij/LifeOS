@@ -2563,7 +2563,7 @@ function renderDietPlan() {
   const slotOrder = effType === 'rest'
     ? [['breakfast','Breakfast'],['snack1','Mid-morning'],['lunch','Lunch'],['snack2','Afternoon'],['dinner','Dinner']]
     : effType === 'football'
-    ? [['preWorkout','Pre-match'],['breakfast','Post-match'],['lunch','Lunch'],['snack','Snack'],['dinner','Dinner']]
+    ? [['breakfast','Breakfast'],['lunch','Lunch (main fuel-up)'],['preFootball','Pre-football'],['dinner','Post-football dinner']]
     : [['preWorkout','Pre-workout'],['breakfast','Post-workout breakfast'],['lunch','Lunch'],['snack','Afternoon snack'],['dinner','Dinner']];
 
   document.getElementById('diet-plan-display').innerHTML = slotOrder.map(([slot,label]) => {
