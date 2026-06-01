@@ -2584,8 +2584,28 @@ function setRating(type, val, el) {
 
 // Canonical date key — YYYY-MM-DD, locale-independent, always matches for the same day.
 function dayKeyOf(d){
-  const x = d ? new Date(d) : new Date();
-  if (isNaN(x)) return new Date().toISOString().slice(0,10);
+  // No arg or Date object → use local Y-M-D directly (never stringify-then-reparse).
+  if (d == null || d instanceof Date) {
+    const x = d instanceof Date ? d : new Date();
+    if (isNaN(x)) return localYMD(new Date());
+    return localYMD(x);
+  }
+  const s = String(d).trim();
+  // Already canonical YYYY-MM-DD (optionally with time) → take the date part as-is. No reparse.
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  // Slash format D/M/Y or DD/MM/YYYY (India/en-GB locale = DAY first) → parse day-first.
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) {
+    const dd = m[1].padStart(2,'0'), mm = m[2].padStart(2,'0');
+    return `${m[3]}-${mm}-${dd}`;
+  }
+  // Anything with explicit time/ISO → safe to parse.
+  const x = new Date(s);
+  if (!isNaN(x)) return localYMD(x);
+  return localYMD(new Date());
+}
+function localYMD(x){
   const y=x.getFullYear(), m=String(x.getMonth()+1).padStart(2,'0'), dd=String(x.getDate()).padStart(2,'0');
   return `${y}-${m}-${dd}`;
 }
@@ -3049,9 +3069,10 @@ function _renderHealthChart() {
       },
       scales:{
         x:{ type:'linear',
-            min: raw.length>1 ? raw[0].x : raw[0].x - 86400000,
-            max: raw.length>1 ? raw[raw.length-1].x : raw[0].x + 86400000,
+            min: raw.length>1 ? raw[0].x : raw[0].x - 43200000,
+            max: raw.length>1 ? raw[raw.length-1].x : raw[0].x + 43200000,
             grid:{ display:false },
+            afterBuildTicks: (axis)=>{ if (raw.length <= 4) axis.ticks = raw.map(p=>({value:p.x})); },
             ticks:{ color:'#6c6f7c', font:{family:'DM Mono', size:9}, maxRotation:0, autoSkip:true, maxTicksLimit:6,
                     callback:(val)=>fmtDate(val) } },
         y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#6c6f7c', font:{family:'DM Mono', size:10} },
