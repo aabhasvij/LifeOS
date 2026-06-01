@@ -1393,18 +1393,43 @@ html, body {
         <div id="hx-dash-body" style="display:none; margin-top:0.9rem;">
           <div class="hx-pills" id="dash-range-pills" style="margin-bottom:0.9rem;"></div>
 
+          <!-- TODAY AT A GLANCE (works day 1) -->
+          <div class="hx-card-title" style="margin:0.2rem 0 0.6rem;">Today at a glance</div>
+          <div style="display:flex; gap:0.9rem; align-items:center; background:var(--hx-surface2); border-radius:var(--hx-r-sm); padding:0.9rem; margin-bottom:0.9rem;">
+            <div style="position:relative; width:120px; height:120px; flex-shrink:0;">
+              <canvas id="dash-today-ring" width="120" height="120"></canvas>
+              <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none;">
+                <div class="hx-num" id="dash-today-kcal" style="font-size:1.05rem; color:var(--hx-text); line-height:1;">0</div>
+                <div style="font-size:0.55rem; color:var(--hx-faint); letter-spacing:0.06em;">KCAL IN</div>
+              </div>
+            </div>
+            <div style="flex:1;" id="dash-today-legend"></div>
+          </div>
+          <div id="dash-today-bal" style="margin-bottom:1.1rem;"></div>
+
+          <!-- THIS WEEK SUMMARY (works day 1) -->
+          <div class="hx-card-title" style="margin:0.2rem 0 0.6rem;">This week</div>
+          <div id="dash-week-cards" style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:0.9rem;"></div>
+          <div style="display:flex; gap:0.9rem; align-items:center; background:var(--hx-surface2); border-radius:var(--hx-r-sm); padding:0.9rem; margin-bottom:1.1rem;">
+            <div style="position:relative; width:110px; height:110px; flex-shrink:0;">
+              <canvas id="dash-mix-ring" width="110" height="110"></canvas>
+              <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none;">
+                <div class="hx-num" id="dash-mix-center" style="font-size:0.95rem; color:var(--hx-text); line-height:1;">0</div>
+                <div style="font-size:0.52rem; color:var(--hx-faint); letter-spacing:0.06em;">DAYS</div>
+              </div>
+            </div>
+            <div style="flex:1;"><div class="hx-card-title" style="margin-bottom:0.5rem; font-size:0.62rem;">Training mix</div><div id="dash-mix-legend"></div></div>
+          </div>
+
+          <!-- TRENDS -->
           <div class="hx-card-title" style="margin:0.2rem 0 0.5rem;">Weight &amp; calories</div>
-          <div class="hx-sub" style="color:var(--hx-faint); margin-bottom:0.5rem; font-size:0.74rem;">Weight line vs daily calories in (bars) and estimated out.</div>
+          <div class="hx-sub" style="color:var(--hx-faint); margin-bottom:0.5rem; font-size:0.74rem;">Calories in (bars) vs estimated out, weight overlaid.</div>
           <div style="height:190px;"><canvas id="dash-wtcal"></canvas></div>
           <div id="dash-wtcal-empty" class="hx-sub" style="display:none; color:var(--hx-faint); text-align:center; padding:1.5rem 0;">Log weight and meals to see this.</div>
 
           <div class="hx-card-title" style="margin:1.3rem 0 0.5rem;">Macro hit-rate</div>
-          <div class="hx-sub" style="color:var(--hx-faint); margin-bottom:0.5rem; font-size:0.74rem;">Avg intake vs target over the range. 100% = on target.</div>
+          <div class="hx-sub" style="color:var(--hx-faint); margin-bottom:0.5rem; font-size:0.74rem;">Daily-average intake vs target over the range.</div>
           <div id="dash-macro"></div>
-
-          <div class="hx-card-title" style="margin:1.3rem 0 0.5rem;">Workout consistency</div>
-          <div id="dash-consistency"></div>
-          <div style="height:60px; margin-top:0.5rem;"><canvas id="dash-streak"></canvas></div>
 
           <div class="hx-card-title" style="margin:1.3rem 0 0.5rem;">Progressive load</div>
           <select class="hx-select" id="dash-ex-select" onchange="renderProgressiveLoad()" style="margin-bottom:0.6rem;"></select>
@@ -1412,7 +1437,7 @@ html, body {
           <div id="dash-load-empty" class="hx-sub" style="display:none; color:var(--hx-faint); text-align:center; padding:1.5rem 0;">No logged sets for this exercise yet.</div>
 
           <div class="hx-card-title" style="margin:1.3rem 0 0.5rem;">Sleep vs weight</div>
-          <div class="hx-sub" style="color:var(--hx-faint); margin-bottom:0.5rem; font-size:0.74rem;">Does more sleep track with lower weight? Each dot is a day.</div>
+          <div class="hx-sub" style="color:var(--hx-faint); margin-bottom:0.5rem; font-size:0.74rem;">Each dot is a day. Pattern only, not causation.</div>
           <div style="height:190px;"><canvas id="dash-sleepwt"></canvas></div>
           <div id="dash-sleepwt-empty" class="hx-sub" style="display:none; color:var(--hx-faint); text-align:center; padding:1.5rem 0;">Need several days logging both sleep and weight.</div>
           <div id="dash-sleepwt-corr" class="hx-num" style="font-size:0.74rem; color:var(--hx-cardio); margin-top:0.5rem;"></div>
@@ -2078,11 +2103,36 @@ html, body {
 <div class="modal-overlay" id="modal-custom-meal">
   <div class="modal">
     <div class="modal-title">Log a meal</div>
-    <div style="font-size:0.7rem; letter-spacing:0.1em; color:#6c6f7c; text-transform:uppercase; margin-bottom:0.5rem;">Quick-pick saved</div>
+
+    <!-- FOOD DATABASE SEARCH -->
+    <div style="font-size:0.7rem; letter-spacing:0.1em; color:#6c6f7c; text-transform:uppercase; margin-bottom:0.5rem;">Search food database</div>
+    <input class="field-input" id="cm-search" placeholder="e.g. paneer, roti, banana, biryani" oninput="searchFoodDb()" autocomplete="off">
+    <div id="cm-search-results" style="margin-top:0.5rem; max-height:170px; overflow-y:auto;"></div>
+
+    <!-- SELECTED FOOD + QUANTITY + LIVE CALC -->
+    <div id="cm-selected" style="display:none; margin-top:0.75rem; background:var(--bg3); border:1px solid var(--accent2); border-radius:var(--radius-sm); padding:0.75rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+        <div style="font-size:0.88rem; font-weight:500; color:var(--text);" id="cm-sel-name"></div>
+        <button onclick="clearFoodSelection()" style="background:none; border:none; color:var(--coral); cursor:pointer; font-size:0.9rem;">×</button>
+      </div>
+      <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+        <div style="flex:1;"><label class="field-label" id="cm-qty-label">Quantity (g)</label><input class="field-input" id="cm-qty" type="number" inputmode="decimal" step="1" oninput="updateFoodCalc()"></div>
+        <div style="flex:1.4; text-align:right;" id="cm-calc-preview"></div>
+      </div>
+      <label style="display:flex; align-items:center; gap:0.4rem; margin-top:0.6rem; font-size:0.75rem; color:var(--text2); cursor:pointer;">
+        <input type="checkbox" id="cm-cheat-db" style="width:13px; height:13px;"> Mark as cheat / treat meal
+      </label>
+      <button class="btn btn-primary" style="width:100%; margin-top:0.6rem;" onclick="logFromDatabase()">Log this</button>
+    </div>
+
+    <!-- SAVED LIBRARY -->
+    <div style="font-size:0.7rem; letter-spacing:0.1em; color:#6c6f7c; text-transform:uppercase; margin:1rem 0 0.5rem;">Quick-pick saved</div>
     <div id="cm-library" style="margin-bottom:1rem;"></div>
-    <div style="font-size:0.7rem; letter-spacing:0.1em; color:#6c6f7c; text-transform:uppercase; margin-bottom:0.5rem;">Or log new</div>
+
+    <!-- MANUAL ENTRY -->
+    <div style="font-size:0.7rem; letter-spacing:0.1em; color:#6c6f7c; text-transform:uppercase; margin-bottom:0.5rem;">Or enter manually</div>
     <div class="log-form">
-      <div><label class="field-label">Meal name *</label><input class="field-input" id="cm-name" placeholder="McVeggie Burger"></div>
+      <div><label class="field-label">Meal name *</label><input class="field-input" id="cm-name" placeholder="Restaurant dish, etc."></div>
       <div><label class="field-label">Calories * (kcal)</label><input class="field-input" id="cm-kcal" type="number" placeholder="450"></div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">
         <div><label class="field-label">Protein (g)</label><input class="field-input" id="cm-protein" type="number" placeholder="optional"></div>
@@ -2090,10 +2140,13 @@ html, body {
         <div><label class="field-label">Fat (g)</label><input class="field-input" id="cm-fat" type="number" placeholder="optional"></div>
         <div><label class="field-label">Fibre (g)</label><input class="field-input" id="cm-fibre" type="number" placeholder="optional"></div>
       </div>
-      <div style="font-size:0.72rem; color:#6c6f7c; line-height:1.4;">Add macros once and this meal is saved for one-tap logging next time.</div>
+      <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--text2); cursor:pointer;">
+        <input type="checkbox" id="cm-cheat" style="width:13px; height:13px;"> Mark as cheat / treat meal
+      </label>
+      <div style="font-size:0.72rem; color:#6c6f7c; line-height:1.4;">Saved for one-tap logging next time.</div>
     </div>
     <div class="btn-row" style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="saveCustomMeal()">Log meal</button>
+      <button class="btn btn-primary" onclick="saveCustomMeal()">Log manual entry</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-custom-meal')">Cancel</button>
     </div>
   </div>
@@ -2259,9 +2312,10 @@ async function loadRoutines() {
   };
   try {
     migrateHealthDates();
-    const [tr, dr] = await Promise.all([
+    const [tr, dr, fdb] = await Promise.all([
       fetch('training_routine.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
-      fetch('diet_routine.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
+      fetch('diet_routine.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
+      fetch('food_database.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
     ]);
     if (tr) {
       DATA.health.trainingPlan = tr.days || [];
@@ -2275,6 +2329,10 @@ async function loadRoutines() {
       DATA.health.nutrientTargets = dr.nutrientTargets || {kcal:2450,protein:170,carbs:285,fat:70,fibre:35};
       DATA.health.energyExpenditure = dr.energyExpenditure || {};
       DATA.health.dietRoutineVersion = dr.version || 1;
+    }
+    if (fdb) {
+      DATA.health.foodDatabase = fdb.items || [];
+      DATA.health.foodDatabaseVersion = fdb.version || 1;
     }
     applyFallback();
   } catch(e) {
@@ -2295,7 +2353,8 @@ async function saveData() {
     if (payload.health) {
       payload.health = { ...payload.health };
       ['trainingPlan','dietPlan','exerciseLibrary','weekTypeMap','calorieTargets',
-       'nutrientTargets','energyExpenditure','trainingRoutineVersion','dietRoutineVersion']
+       'nutrientTargets','energyExpenditure','trainingRoutineVersion','dietRoutineVersion',
+       'foodDatabase','foodDatabaseVersion']
         .forEach(k => delete payload.health[k]);
     }
     payload.meta.lastUpdated = new Date().toISOString();
@@ -2761,10 +2820,6 @@ function estKcalForSets(sets, isWeighted){
   const bwScale = bodyWeight()/90; // normalize around 90kg
   return Math.round(sets.length * perSet * bwScale);
 }
-function estKcalForDuration(minutes, intensity){
-  const MET = {easy:4, moderate:7, hard:10}[intensity] || 6;
-  return Math.round(MET * 3.5 * bodyWeight() / 200 * minutes);
-}
 function allExerciseNames(){
   const lib=DATA.health.exerciseLibrary||{};
   const set=new Set();
@@ -2779,7 +2834,7 @@ function lastLoggedSet(exName){
   for(const k of keys){
     const ex=(wl[k].exercises||[]).find(e=>e.name===exName);
     if(ex){
-      if(ex.mode==='duration' && ex.entries && ex.entries.length){ const s=ex.entries[ex.entries.length-1]; return {date:k, mode:'duration', minutes:s.minutes, intensity:s.intensity}; }
+      if(ex.mode==='duration' && ex.entries && ex.entries.length){ const s=ex.entries[ex.entries.length-1]; return {date:k, mode:'duration', minutes:s.minutes, speed:s.speed, kcal:s.kcal}; }
       if(ex.sets && ex.sets.length){ const s=ex.sets[ex.sets.length-1]; return {date:k, mode:'strength', reps:s.reps, weight:s.weight}; }
     }
   }
@@ -2819,7 +2874,7 @@ function renderWorkoutPlan() {
     let loggedTxt='';
     if(logged){
       loggedTxt = logged.mode==='duration'
-        ? logged.entries.map(s=>`${s.minutes}min ${s.intensity||''}`).join('  ')
+        ? logged.entries.map(s=>`${s.minutes}min${s.speed?' @'+s.speed+'km/h':''} · ${s.kcal}kcal${s.estimated?'~':''}`).join('  ')
         : logged.sets.map(s=>`${s.reps}×${s.weight||0}`).join('  ');
     }
     const detail = e.cues ? `
@@ -2840,12 +2895,14 @@ function renderWorkoutPlan() {
       </div>`;
     } else {
       const preset = e.presetMin || (parseInt((e.sets||'').match(/\d+/)?.[0])||30);
-      logInput = `<div style="display:flex; gap:0.4rem; align-items:flex-end; flex-wrap:wrap;">
-        <div style="flex:1; min-width:90px;"><label class="hx-label">Minutes</label><input class="hx-input" id="dur-min-${i}" type="number" inputmode="numeric" placeholder="${preset}" value="${preset}" style="padding:0.5rem;"></div>
-        <div style="flex:1.3; min-width:120px;"><label class="hx-label">Intensity</label>
-          <select class="hx-select" id="dur-int-${i}" style="padding:0.5rem;"><option value="easy">Easy</option><option value="moderate" selected>Moderate</option><option value="hard">Hard</option></select></div>
-        <button class="hx-btn hx-btn-primary" style="flex:0 0 auto; width:auto; padding:0.5rem 0.9rem;" onclick="logDurationInline('${e.name.replace(/'/g,"\\'")}', ${i})">Log</button>
-      </div>`;
+      logInput = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; align-items:flex-end;">
+        <div><label class="hx-label">Minutes</label><input class="hx-input" id="dur-min-${i}" type="number" inputmode="numeric" placeholder="${preset}" value="${preset}" style="padding:0.5rem;"></div>
+        <div><label class="hx-label">Speed (km/h)</label><input class="hx-input" id="dur-spd-${i}" type="number" inputmode="decimal" step="0.1" placeholder="5.5" style="padding:0.5rem;"></div>
+        <div><label class="hx-label">Incline (%)</label><input class="hx-input" id="dur-inc-${i}" type="number" inputmode="decimal" step="0.5" placeholder="0" style="padding:0.5rem;"></div>
+        <div><label class="hx-label">kcal (machine, optional)</label><input class="hx-input" id="dur-kcal-${i}" type="number" inputmode="numeric" placeholder="auto-est" style="padding:0.5rem;"></div>
+        <button class="hx-btn hx-btn-primary" style="grid-column:1 / -1; padding:0.5rem 0.9rem;" onclick="logDurationInline('${e.name.replace(/'/g,"\\'")}', ${i})">Log</button>
+      </div>
+      <div class="hx-sub" style="color:var(--hx-faint); font-size:0.7rem; margin-top:0.4rem;">Leave kcal blank for an automatic estimate (uses speed, incline &amp; your bodyweight).</div>`;
     }
     return `<div class="hx-ex">
       <div class="hx-ex-head" onclick="this.parentElement.classList.toggle('open')">
@@ -2878,7 +2935,7 @@ function renderWorkoutPlan() {
       <span class="hx-num" style="font-size:0.74rem; color:var(--hx-warn);">~${totKcal} kcal est</span></div>
       ${(dayLog.exercises||[]).map(e=>{
         const detail = e.mode==='duration'
-          ? (e.entries||[]).map(s=>`${s.minutes}min ${s.intensity||''}`).join(', ')
+          ? (e.entries||[]).map(s=>`${s.minutes}min${s.speed?' @'+s.speed:''} · ${s.kcal}kcal`).join(', ')
           : (e.sets||[]).map(s=>`${s.reps}x${s.weight||0}`).join(', ');
         return `<div style="margin:0.25rem 0;"><span style="font-size:0.84rem; color:var(--hx-dim);">${e.name}</span> <span class="hx-num" style="font-size:0.74rem; color:var(--hx-faint);">${detail}</span></div>`;
       }).join('')}
@@ -2908,9 +2965,11 @@ function logSetInline(name, idx){
 }
 function logDurationInline(name, idx){
   const mins=parseInt(document.getElementById('dur-min-'+idx).value);
-  const intensity=document.getElementById('dur-int-'+idx).value;
+  const speed=parseFloat(document.getElementById('dur-spd-'+idx).value)||0;
+  const incline=parseFloat(document.getElementById('dur-inc-'+idx).value)||0;
+  const machineKcal=parseFloat(document.getElementById('dur-kcal-'+idx).value)||0;
   if(!mins){ showToast('Enter minutes'); return; }
-  writeDuration(name, mins, intensity);
+  writeDuration(name, {minutes:mins, speed, incline, machineKcal});
 }
 function ensureDayLog(){
   const dayKey=dayKeyOf(wlDate+'T00:00:00');
@@ -2931,22 +2990,39 @@ function writeSet(name, reps, wt){
   renderWorkoutPlan(); renderSnapshot(); saveData();
   showToast('Set logged: '+name.slice(0,18));
 }
-function writeDuration(name, mins, intensity){
+function writeDuration(name, entry){
   const log=ensureDayLog();
   let ex=log.exercises.find(e=>e.name===name);
   if(!ex){ ex={name,mode:'duration',entries:[],estKcal:0}; log.exercises.push(ex); }
   if(!ex.entries) ex.entries=[];
   ex.mode='duration';
-  ex.entries.push({minutes:mins, intensity});
-  ex.estKcal=estKcalForDuration(ex.entries);
+  // compute per-entry kcal: prefer machine reading, else ACSM estimate
+  entry.kcal = entry.machineKcal>0 ? Math.round(entry.machineKcal) : acsmKcal(entry.speed, entry.incline, entry.minutes);
+  entry.estimated = !(entry.machineKcal>0);
+  ex.entries.push(entry);
+  ex.estKcal=ex.entries.reduce((a,e)=>a+(e.kcal||0),0);
   renderWorkoutPlan(); renderSnapshot(); saveData();
-  showToast('Logged: '+name.slice(0,18)+' '+mins+'min');
+  showToast('Logged: '+name.slice(0,16)+' '+entry.minutes+'min · '+entry.kcal+'kcal');
 }
-function estKcalForDuration(entries){
-  // MET by intensity: easy 4, moderate 7, hard 10; x bodyweight x time
-  const bw=bodyWeight(); let kcal=0;
-  entries.forEach(e=>{ const met=e.intensity==='hard'?10:e.intensity==='easy'?4:7; kcal+=met*3.5*bw/200*(e.minutes||0); });
-  return Math.round(kcal);
+// ACSM metabolic equations for treadmill walking/running. Uses speed (km/h),
+// grade (% incline) and live bodyweight. Falls back to a flat MET if no speed.
+function acsmKcal(speedKmh, inclinePct, minutes){
+  const bw = bodyWeight();
+  if(!minutes) return 0;
+  if(!speedKmh){
+    // no speed given → moderate-effort fallback (~7 MET)
+    return Math.round(7 * 3.5 * bw / 200 * minutes);
+  }
+  const S = speedKmh * 1000 / 60;       // m/min
+  const G = (inclinePct||0) / 100;      // fractional grade
+  let vo2;                              // ml/kg/min
+  if (speedKmh >= 7) {                  // running equation
+    vo2 = 3.5 + 0.2*S + 0.9*S*G;
+  } else {                             // walking equation
+    vo2 = 3.5 + 0.1*S + 1.8*S*G;
+  }
+  // kcal = VO2(ml/kg/min) /1000 (L) × bw(kg) × 5 (kcal/L O2) × minutes
+  return Math.round(vo2/1000 * bw * 5 * minutes);
 }
 function openOtherExercise(){
   const names=allExerciseNames();
@@ -3160,11 +3236,114 @@ function renderDashRangePills(){
 function renderDashboard(){
   renderDashRangePills();
   populateLoadPicker();
+  try { renderTodayRing(); } catch(e){ console.error('todayring', e); }
+  try { renderTodayBalance(); } catch(e){ console.error('todaybal', e); }
+  try { renderWeekCards(); } catch(e){ console.error('weekcards', e); }
+  try { renderTrainingMix(); } catch(e){ console.error('mix', e); }
   try { renderWtCalChart(); } catch(e){ console.error('wtcal', e); }
   try { renderMacroHitRate(); } catch(e){ console.error('macro', e); }
-  try { renderConsistency(); } catch(e){ console.error('consistency', e); }
   try { renderProgressiveLoad(); } catch(e){ console.error('load', e); }
   try { renderSleepWeight(); } catch(e){ console.error('sleepwt', e); }
+}
+
+// TODAY: macro doughnut (by calorie contribution) + calorie balance
+function renderTodayRing(){
+  destroyDash('todayring');
+  const log = getFoodLog(dayKeyOf());
+  const s = sumNutrients(log);
+  const pCal=s.protein*4, cCal=s.carbs*4, fCal=s.fat*9;
+  const totalMacroCal = pCal+cCal+fCal;
+  document.getElementById('dash-today-kcal').textContent = Math.round(s.kcal||0);
+  const canvas=document.getElementById('dash-today-ring'); if(!canvas) return;
+  const legend=document.getElementById('dash-today-legend');
+  if(totalMacroCal<=0){
+    legend.innerHTML='<div class="hx-sub" style="color:var(--hx-faint); font-size:0.78rem;">No meals logged today yet. Log a meal to see your macro split.</div>';
+    dashCharts.todayring=new Chart(canvas.getContext('2d'),{type:'doughnut',data:{labels:['—'],datasets:[{data:[1],backgroundColor:['rgba(255,255,255,0.06)'],borderWidth:0}]},options:{cutout:'70%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+    return;
+  }
+  const cols=['#aab4ff','#6fc7c2','#e0bd6a'];
+  const labs=['Protein','Carbs','Fat'];
+  const cals=[pCal,cCal,fCal];
+  const grams=[s.protein,s.carbs,s.fat];
+  dashCharts.todayring=new Chart(canvas.getContext('2d'),{
+    type:'doughnut',
+    data:{labels:labs,datasets:[{data:cals,backgroundColor:cols,borderWidth:0,hoverOffset:4}]},
+    options:{cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` ${c.label}: ${Math.round(grams[c.dataIndex])}g (${Math.round(c.raw/totalMacroCal*100)}%)`}}},animation:{duration:400}}
+  });
+  legend.innerHTML = labs.map((l,i)=>`<div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+    <span style="width:9px;height:9px;border-radius:50%;background:${cols[i]};flex-shrink:0;"></span>
+    <span style="flex:1; font-size:0.78rem; color:var(--hx-dim);">${l}</span>
+    <span class="hx-num" style="font-size:0.76rem; color:var(--hx-text);">${Math.round(grams[i])}g</span>
+    <span class="hx-num" style="font-size:0.68rem; color:var(--hx-faint); min-width:30px; text-align:right;">${Math.round(cals[i]/totalMacroCal*100)}%</span>
+  </div>`).join('');
+}
+function renderTodayBalance(){
+  const key=dayKeyOf();
+  const inK = dayCaloriesIn(key);
+  const outK = dayCaloriesOut(key);
+  const tgt = (DATA.health.nutrientTargets||{}).kcal || 2450;
+  const net = inK - outK;
+  const col = net<=0 ? 'var(--hx-pos)' : net<=200 ? 'var(--hx-warn)' : 'var(--hx-neg)';
+  const verdict = inK===0 ? 'No food logged yet today' : net<0 ? `${Math.abs(net)} kcal deficit — on track` : net<=200 ? `${net} kcal over maintenance` : `${net} kcal surplus`;
+  document.getElementById('dash-today-bal').innerHTML = `
+    <div style="display:flex; gap:0.5rem;">
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem;">${inK}</div><div class="hx-stat-lbl">In</div></div>
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem; color:var(--hx-warn);">${outK}</div><div class="hx-stat-lbl">Est. out</div></div>
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem; color:${col};">${net>0?'+':''}${net}</div><div class="hx-stat-lbl">Net</div></div>
+      <div class="hx-stat"><div class="hx-stat-val" style="font-size:1rem;">${tgt}</div><div class="hx-stat-lbl">Target</div></div>
+    </div>
+    <div class="hx-sub" style="color:${col}; font-size:0.74rem; margin-top:0.5rem; text-align:center;">${verdict}</div>`;
+}
+
+// THIS WEEK: cards (training days, rest days, cheat meals, avg sleep) + training mix doughnut
+function last7Keys(){
+  const keys=[]; for(let i=0;i<7;i++){ const d=new Date(); d.setDate(d.getDate()-i); keys.push(dayKeyOf(d)); } return keys;
+}
+function renderWeekCards(){
+  const keys=last7Keys();
+  const wl=DATA.health.workoutLog||{};
+  const trainingDays = keys.filter(k=>wl[k] && wl[k].trained).length;
+  const restDays = keys.filter(k=>!(wl[k] && wl[k].trained)).length;
+  // cheat meals across last 7 days
+  let cheats=0; keys.forEach(k=>getFoodLog(k).forEach(m=>{ if(m.cheat) cheats++; }));
+  // avg sleep across logged days in last 7
+  const sleeps=(DATA.health.dailyLog||[]).filter(l=>l.sleep!=null && keys.includes(l.date)).map(l=>l.sleep);
+  const avgSleep = sleeps.length ? (sleeps.reduce((a,b)=>a+b,0)/sleeps.length).toFixed(1) : '—';
+  const card=(val,label,col)=>`<div class="hx-stat" style="text-align:center;"><div class="hx-stat-val" style="font-size:1.3rem; ${col?'color:'+col:''}">${val}</div><div class="hx-stat-lbl">${label}</div></div>`;
+  document.getElementById('dash-week-cards').innerHTML =
+    card(trainingDays,'Training days','var(--hx-pos)') +
+    card(restDays,'Rest days','var(--hx-faint)') +
+    card(cheats,'Cheat meals', cheats>3?'var(--hx-neg)':'var(--hx-warn)') +
+    card(avgSleep,'Avg sleep (h)','var(--hx-cardio)');
+}
+function renderTrainingMix(){
+  destroyDash('mix');
+  const keys=last7Keys();
+  const wl=DATA.health.workoutLog||{};
+  const counts={strength:0,cardio:0,football:0,rest:0};
+  keys.forEach(k=>{
+    const dayName=DIET_DAYS[(parseDayKey(k).getDay()+6)%7];
+    const planned=DATA.health.weekTypeMap[dayName];
+    if(wl[k] && wl[k].trained){
+      const t = (planned==='football'?'football':planned==='cardio'?'cardio':'strength');
+      counts[t]++;
+    } else counts.rest++;
+  });
+  const canvas=document.getElementById('dash-mix-ring'); if(!canvas) return;
+  const total=Object.values(counts).reduce((a,b)=>a+b,0);
+  document.getElementById('dash-mix-center').textContent = total;
+  const order=[['strength','Strength','#e58a8a'],['cardio','Cardio','#6fc7c2'],['football','Football','#e0bd6a'],['rest','Rest','#8b8e9b']];
+  const shown=order.filter(([k])=>counts[k]>0);
+  dashCharts.mix=new Chart(canvas.getContext('2d'),{
+    type:'doughnut',
+    data:{labels:shown.map(s=>s[1]),datasets:[{data:shown.map(s=>counts[s[0]]),backgroundColor:shown.map(s=>s[2]),borderWidth:0,hoverOffset:3}]},
+    options:{cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` ${c.label}: ${c.raw} day${c.raw>1?'s':''}`}}},animation:{duration:400}}
+  });
+  document.getElementById('dash-mix-legend').innerHTML = order.map(([k,l,c])=>`<div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
+    <span style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0;"></span>
+    <span style="flex:1; font-size:0.74rem; color:var(--hx-dim);">${l}</span>
+    <span class="hx-num" style="font-size:0.72rem; color:var(--hx-text);">${counts[k]}</span>
+  </div>`).join('');
 }
 
 // 1. WEIGHT + CALORIES IN/OUT
@@ -3233,43 +3412,6 @@ function renderMacroHitRate(){
         <div style="height:6px; background:var(--hx-surface2); border-radius:3px; overflow:hidden;"><div style="height:100%; width:${shown}%; background:${col}; border-radius:3px;"></div></div>
       </div>`;
     }).join('');
-}
-
-// 3. WORKOUT CONSISTENCY + streak
-function renderConsistency(){
-  const wl = DATA.health.workoutLog||{};
-  const days = DASH_RANGE_DAYS[dashRange] || 90;
-  const trainedKeys = Object.keys(wl).filter(k=>inDashRange(k) && wl[k].trained);
-  const sessions = trainedKeys.length;
-  const weeks = Math.max(1, days/7);
-  const perWeek = (sessions/weeks).toFixed(1);
-  let streak=0;
-  for(let i=0;i<60;i++){
-    const d=new Date(); d.setDate(d.getDate()-i);
-    const k=dayKeyOf(d);
-    if(wl[k] && wl[k].trained) streak++;
-    else if(i>0) break;
-  }
-  document.getElementById('dash-consistency').innerHTML = `<div style="display:flex; gap:0.6rem;">
-    <div class="hx-stat"><div class="hx-stat-val" style="font-size:1.1rem;">${sessions}</div><div class="hx-stat-lbl">Sessions</div></div>
-    <div class="hx-stat"><div class="hx-stat-val" style="font-size:1.1rem; color:var(--hx-accent);">${perWeek}</div><div class="hx-stat-lbl">Per week</div></div>
-    <div class="hx-stat"><div class="hx-stat-val" style="font-size:1.1rem; color:var(--hx-pos);">${streak}</div><div class="hx-stat-lbl">Day streak</div></div>
-  </div>`;
-  destroyDash('streak');
-  const canvas=document.getElementById('dash-streak'); if(!canvas) return;
-  const data=[];
-  for(let i=13;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const k=dayKeyOf(d);
-    data.push({x:parseDayKey(k).getTime(), y:1, trained: !!(wl[k]&&wl[k].trained)});
-  }
-  dashCharts.streak = new Chart(canvas.getContext('2d'), {
-    type:'scatter',
-    data:{ datasets:[{ data, pointRadius:6, pointBackgroundColor:(c)=> c.raw && c.raw.trained ? '#6fcf8e' : 'rgba(255,255,255,0.08)', pointBorderWidth:0 }] },
-    options:{ responsive:true, maintainAspectRatio:false, parsing:false,
-      plugins:{legend:{display:false}, tooltip:{callbacks:{ label:(i)=> (i.raw.trained?'Trained · ':'Rest · ')+new Date(i.parsed.x).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) }}},
-      scales:{ x:{type:'linear', grid:{display:false}, ticks:{color:'#6c6f7c', font:{family:'DM Mono',size:8}, maxTicksLimit:5, callback:(v)=>new Date(v).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}},
-        y:{display:false, min:0.5, max:1.5} }, animation:{duration:300} }
-  });
-  requestAnimationFrame(()=>{ try{dashCharts.streak.resize();}catch(e){} });
 }
 
 // 4. PROGRESSIVE LOAD
@@ -3492,9 +3634,77 @@ function openCustomMeal(){
   const lib = DATA.health.foodLibrary||[];
   const chips = lib.length ? lib.map((m,i)=>`<span onclick="logFromLibrary(${i})" style="cursor:pointer; display:inline-block; font-size:0.76rem; background:var(--hx-surface2); border:1px solid var(--hx-border); border-radius:16px; padding:0.35rem 0.8rem; margin:0 0.35rem 0.4rem 0; color:var(--hx-text);">${m.name} <span style="color:var(--hx-faint);">${m.kcal}k</span></span>`).join('') : '<div class="hx-sub" style="color:var(--hx-faint);">No saved meals yet. Log one below and it gets saved for next time.</div>';
   document.getElementById('cm-library').innerHTML = chips;
-  ['cm-name','cm-kcal','cm-protein','cm-carbs','cm-fat','cm-fibre'].forEach(id=>document.getElementById(id).value='');
+  ['cm-name','cm-kcal','cm-protein','cm-carbs','cm-fat','cm-fibre','cm-search','cm-qty'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
+  const cb=document.getElementById('cm-cheat'); if(cb) cb.checked=false;
+  const cb2=document.getElementById('cm-cheat-db'); if(cb2) cb2.checked=false;
+  document.getElementById('cm-search-results').innerHTML='';
+  clearFoodSelection();
   openModal('modal-custom-meal');
 }
+
+// ── Food database search + portion calc ──
+let cmSelectedFood = null;
+function searchFoodDb(){
+  const q = (document.getElementById('cm-search').value||'').trim().toLowerCase();
+  const el = document.getElementById('cm-search-results');
+  const db = DATA.health.foodDatabase||[];
+  if(q.length < 2){ el.innerHTML = db.length ? '' : '<div class="hx-sub" style="color:var(--hx-faint); font-size:0.74rem;">Food database not loaded — use manual entry below.</div>'; return; }
+  const words = q.split(/\s+/);
+  const matches = db.filter(it=>{ const n=it.name.toLowerCase(); return words.every(w=>n.includes(w)) || it.cat.includes(q); }).slice(0,14);
+  if(!matches.length){ el.innerHTML='<div class="hx-sub" style="color:var(--hx-faint); font-size:0.74rem;">No match. Try a simpler term, or enter manually below.</div>'; return; }
+  el.innerHTML = matches.map(it=>{
+    const portion = it.per==='piece' ? (it.unit||'1') : it.defaultg+'g';
+    return `<div onclick='selectFood(${JSON.stringify(it).replace(/'/g,"&#39;")})' style="cursor:pointer; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; gap:0.6rem;">
+      <span style="font-size:0.82rem; color:var(--text);">${it.name}</span>
+      <span style="font-size:0.68rem; color:var(--text3); font-family:var(--mono); white-space:nowrap;">${it.kcal}k/${it.per==='piece'?'pc':'100g'}</span>
+    </div>`;
+  }).join('');
+}
+function selectFood(it){
+  cmSelectedFood = it;
+  document.getElementById('cm-search-results').innerHTML='';
+  document.getElementById('cm-sel-name').textContent = it.name;
+  const qtyLabel = document.getElementById('cm-qty-label');
+  const qtyInput = document.getElementById('cm-qty');
+  if(it.per==='piece'){ qtyLabel.textContent = 'Quantity ('+(it.unit||'pieces')+')'; qtyInput.value = 1; qtyInput.step='0.5'; }
+  else { qtyLabel.textContent = 'Quantity (grams)'; qtyInput.value = it.defaultg||100; qtyInput.step='5'; }
+  document.getElementById('cm-selected').style.display='block';
+  updateFoodCalc();
+}
+function clearFoodSelection(){
+  cmSelectedFood = null;
+  const s=document.getElementById('cm-selected'); if(s) s.style.display='none';
+}
+function calcFoodMacros(it, qty){
+  const factor = it.per==='piece' ? qty : qty/100;
+  return {
+    kcal: Math.round(it.kcal*factor),
+    protein: +(it.p*factor).toFixed(1),
+    carbs: +(it.c*factor).toFixed(1),
+    fat: +(it.f*factor).toFixed(1),
+    fibre: +(it.fib*factor).toFixed(1)
+  };
+}
+function updateFoodCalc(){
+  if(!cmSelectedFood) return;
+  const qty = parseFloat(document.getElementById('cm-qty').value)||0;
+  const m = calcFoodMacros(cmSelectedFood, qty);
+  document.getElementById('cm-calc-preview').innerHTML =
+    `<div class="hx-num" style="font-size:1.1rem; color:var(--accent);">${m.kcal} kcal</div>
+     <div style="font-size:0.66rem; color:var(--text3); font-family:var(--mono);">P${m.protein} · C${m.carbs} · F${m.fat} · Fib${m.fibre}</div>`;
+}
+function logFromDatabase(){
+  if(!cmSelectedFood){ showToast('Pick a food first'); return; }
+  const qty = parseFloat(document.getElementById('cm-qty').value)||0;
+  if(!qty){ showToast('Enter a quantity'); return; }
+  const m = calcFoodMacros(cmSelectedFood, qty);
+  const qtyLabel = cmSelectedFood.per==='piece' ? `${qty}× ${cmSelectedFood.unit||'pc'}` : `${qty}g`;
+  const cheat = document.getElementById('cm-cheat-db').checked;
+  pushFood({ name:`${cmSelectedFood.name} (${qtyLabel})`, ...m, source:'database', cheat });
+  closeModal('modal-custom-meal');
+  showToast('Logged: '+cmSelectedFood.name.slice(0,22));
+}
+
 function logFromLibrary(i){
   const m=DATA.health.foodLibrary[i];
   pushFood({...m, source:'library'});
@@ -3506,12 +3716,13 @@ function saveCustomMeal(){
   const kcal=parseInt(document.getElementById('cm-kcal').value);
   if(!name){ showToast('Name required'); return; }
   if(!kcal){ showToast('Calories required'); return; }
+  const cheat=document.getElementById('cm-cheat').checked;
   const entry={name, kcal,
     protein:parseInt(document.getElementById('cm-protein').value)||0,
     carbs:parseInt(document.getElementById('cm-carbs').value)||0,
     fat:parseInt(document.getElementById('cm-fat').value)||0,
-    fibre:parseInt(document.getElementById('cm-fibre').value)||0, source:'custom'};
-  // save to library if macros provided (so it's reusable)
+    fibre:parseInt(document.getElementById('cm-fibre').value)||0, source:'custom', cheat};
+  // save to library if macros provided (so it's reusable) — don't save cheat flag to library
   if(!DATA.health.foodLibrary) DATA.health.foodLibrary=[];
   if(!DATA.health.foodLibrary.find(m=>m.name.toLowerCase()===name.toLowerCase())){
     DATA.health.foodLibrary.push({name, kcal, protein:entry.protein, carbs:entry.carbs, fat:entry.fat, fibre:entry.fibre});
