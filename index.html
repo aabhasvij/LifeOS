@@ -1384,6 +1384,41 @@ html, body {
         <div id="weight-stats" style="margin-top:0.85rem; display:flex; gap:0.6rem;"></div>
       </div>
 
+      <!-- DASHBOARD (collapsed) -->
+      <div class="hx-card">
+        <div class="hx-row" onclick="hxToggle('hx-dash-body'); if(document.getElementById('hx-dash-body').style.display!=='none') renderDashboard();" style="cursor:pointer;">
+          <div class="hx-card-title" style="margin-bottom:0;">Dashboard</div>
+          <span class="hx-chev" id="hx-dash-chev">▾</span>
+        </div>
+        <div id="hx-dash-body" style="display:none; margin-top:0.9rem;">
+          <div class="hx-pills" id="dash-range-pills" style="margin-bottom:0.9rem;"></div>
+
+          <div class="hx-card-title" style="margin:0.2rem 0 0.5rem;">Weight &amp; calories</div>
+          <div class="hx-sub" style="color:var(--hx-faint); margin-bottom:0.5rem; font-size:0.74rem;">Weight line vs daily calories in (bars) and estimated out.</div>
+          <div style="height:190px;"><canvas id="dash-wtcal"></canvas></div>
+          <div id="dash-wtcal-empty" class="hx-sub" style="display:none; color:var(--hx-faint); text-align:center; padding:1.5rem 0;">Log weight and meals to see this.</div>
+
+          <div class="hx-card-title" style="margin:1.3rem 0 0.5rem;">Macro hit-rate</div>
+          <div class="hx-sub" style="color:var(--hx-faint); margin-bottom:0.5rem; font-size:0.74rem;">Avg intake vs target over the range. 100% = on target.</div>
+          <div id="dash-macro"></div>
+
+          <div class="hx-card-title" style="margin:1.3rem 0 0.5rem;">Workout consistency</div>
+          <div id="dash-consistency"></div>
+          <div style="height:60px; margin-top:0.5rem;"><canvas id="dash-streak"></canvas></div>
+
+          <div class="hx-card-title" style="margin:1.3rem 0 0.5rem;">Progressive load</div>
+          <select class="hx-select" id="dash-ex-select" onchange="renderProgressiveLoad()" style="margin-bottom:0.6rem;"></select>
+          <div style="height:170px;"><canvas id="dash-load"></canvas></div>
+          <div id="dash-load-empty" class="hx-sub" style="display:none; color:var(--hx-faint); text-align:center; padding:1.5rem 0;">No logged sets for this exercise yet.</div>
+
+          <div class="hx-card-title" style="margin:1.3rem 0 0.5rem;">Sleep vs weight</div>
+          <div class="hx-sub" style="color:var(--hx-faint); margin-bottom:0.5rem; font-size:0.74rem;">Does more sleep track with lower weight? Each dot is a day.</div>
+          <div style="height:190px;"><canvas id="dash-sleepwt"></canvas></div>
+          <div id="dash-sleepwt-empty" class="hx-sub" style="display:none; color:var(--hx-faint); text-align:center; padding:1.5rem 0;">Need several days logging both sleep and weight.</div>
+          <div id="dash-sleepwt-corr" class="hx-num" style="font-size:0.74rem; color:var(--hx-cardio); margin-top:0.5rem;"></div>
+        </div>
+      </div>
+
       <!-- TRAINING PLAN + DIET (unified day view) -->
       <div class="hx-card">
         <div class="hx-row" style="margin-bottom:0.6rem;">
@@ -3104,6 +3139,215 @@ function _renderHealthChart() {
   }
 }
 
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+let dashRange = '30D';
+let dashCharts = {};
+const DASH_RANGE_DAYS = { '7D':7, '30D':30, '3M':90, 'All':null };
+function setDashRange(r){ dashRange = r; renderDashboard(); }
+function dashCutoff(){ const d = DASH_RANGE_DAYS[dashRange]; return d==null ? 0 : Date.now() - d*86400000; }
+function inDashRange(key){ return parseDayKey(key).getTime() >= dashCutoff(); }
+function destroyDash(id){ if(dashCharts[id]){ try{dashCharts[id].destroy();}catch(e){} dashCharts[id]=null; } }
+
+function renderDashRangePills(){
+  const el = document.getElementById('dash-range-pills'); if(!el) return;
+  el.innerHTML = Object.keys(DASH_RANGE_DAYS).map(r=>{
+    const a = r===dashRange;
+    return `<div class="hx-pill" onclick="setDashRange('${r}')" style="min-width:auto; padding:0.4rem 0.7rem; border-color:${a?'var(--hx-accent)':'var(--hx-border)'}; background:${a?'var(--hx-accent-soft)':'var(--hx-surface2)'}">
+      <div class="hx-pill-d" style="color:${a?'var(--hx-accent)':'var(--hx-faint)'}">${r}</div></div>`;
+  }).join('');
+}
+
+function renderDashboard(){
+  renderDashRangePills();
+  populateLoadPicker();
+  try { renderWtCalChart(); } catch(e){ console.error('wtcal', e); }
+  try { renderMacroHitRate(); } catch(e){ console.error('macro', e); }
+  try { renderConsistency(); } catch(e){ console.error('consistency', e); }
+  try { renderProgressiveLoad(); } catch(e){ console.error('load', e); }
+  try { renderSleepWeight(); } catch(e){ console.error('sleepwt', e); }
+}
+
+// 1. WEIGHT + CALORIES IN/OUT
+function dayCaloriesIn(key){ return sumNutrients(getFoodLog(key)).kcal; }
+function dayCaloriesOut(key){
+  // base target for that day's type + workout estimate
+  const dayName = DIET_DAYS[(parseDayKey(key).getDay()+6)%7];
+  const wl = (DATA.health.workoutLog||{})[key];
+  const trained = wl && wl.trained;
+  const planned = DATA.health.weekTypeMap[dayName];
+  const kcalType = (!trained || planned==='rest') ? 'rest' : planned;
+  const base = (DATA.health.calorieTargets||{})[kcalType] || 2300;
+  const workoutKcal = wl ? (wl.exercises||[]).reduce((a,e)=>a+(e.estKcal||0),0) : 0;
+  return base + workoutKcal;
+}
+function renderWtCalChart(){
+  destroyDash('wtcal');
+  const canvas = document.getElementById('dash-wtcal'); if(!canvas) return;
+  const empty = document.getElementById('dash-wtcal-empty');
+  const wkeys = (DATA.health.dailyLog||[]).filter(l=>l.weight && inDashRange(l.date)).map(l=>l.date);
+  const fkeys = Object.keys(DATA.health.foodLog||{}).filter(k=>inDashRange(k));
+  const allKeys = [...new Set([...wkeys, ...fkeys])].sort();
+  if(!allKeys.length){ canvas.style.display='none'; if(empty) empty.style.display='block'; return; }
+  canvas.style.display='block'; if(empty) empty.style.display='none';
+  const wByDate = {}; (DATA.health.dailyLog||[]).forEach(l=>{ if(l.weight) wByDate[l.date]=l.weight; });
+  const calIn = allKeys.map(k=>({x:parseDayKey(k).getTime(), y: dayCaloriesIn(k) || null}));
+  const calOut = allKeys.map(k=>({x:parseDayKey(k).getTime(), y: dayCaloriesOut(k)}));
+  const wt = allKeys.filter(k=>wByDate[k]!=null).map(k=>({x:parseDayKey(k).getTime(), y:wByDate[k]}));
+  const fmtD = (ts)=> new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+  dashCharts.wtcal = new Chart(canvas.getContext('2d'), {
+    data:{ datasets:[
+      { type:'bar', label:'Calories in', data:calIn, backgroundColor:'rgba(170,180,255,0.45)', yAxisID:'yCal', order:3, maxBarThickness:18 },
+      { type:'line', label:'Est. out', data:calOut, borderColor:'#e5b567', borderDash:[4,3], borderWidth:1.5, pointRadius:0, yAxisID:'yCal', order:2, tension:0.2 },
+      { type:'line', label:'Weight', data:wt, borderColor:'#6fcf8e', borderWidth:2, pointRadius:3, pointBackgroundColor:'#6fcf8e', yAxisID:'yWt', order:1, tension:0.3 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, parsing:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{display:true, labels:{color:'#a2a4af', font:{family:'DM Mono',size:9}, boxWidth:10, usePointStyle:true}},
+        tooltip:{ callbacks:{ title:(i)=>i.length?fmtD(i[0].parsed.x):'' } } },
+      scales:{
+        x:{ type:'linear', grid:{display:false}, ticks:{ color:'#6c6f7c', font:{family:'DM Mono',size:9}, maxTicksLimit:6, callback:(v)=>fmtD(v) } },
+        yCal:{ position:'left', grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#6c6f7c', font:{family:'DM Mono',size:9}}, title:{display:true, text:'kcal', color:'#6c6f7c', font:{size:9}} },
+        yWt:{ position:'right', grid:{display:false}, ticks:{color:'#6fcf8e', font:{family:'DM Mono',size:9}}, title:{display:true, text:'kg', color:'#6fcf8e', font:{size:9}} }
+      }, animation:{duration:350} }
+  });
+  requestAnimationFrame(()=>{ try{dashCharts.wtcal.resize();}catch(e){} });
+}
+
+// 2. MACRO HIT-RATE
+function renderMacroHitRate(){
+  const keys = Object.keys(DATA.health.foodLog||{}).filter(k=>inDashRange(k) && getFoodLog(k).length);
+  const el = document.getElementById('dash-macro');
+  if(!keys.length){ el.innerHTML = '<div class="hx-sub" style="color:var(--hx-faint);">No meals logged in this range.</div>'; return; }
+  const tgt = DATA.health.nutrientTargets;
+  const avg = {kcal:0,protein:0,carbs:0,fat:0,fibre:0};
+  keys.forEach(k=>{ const s=sumNutrients(getFoodLog(k)); NUTRIENTS.forEach(([n])=>avg[n]+=s[n]); });
+  NUTRIENTS.forEach(([n])=>avg[n]=avg[n]/keys.length);
+  el.innerHTML = `<div class="hx-sub" style="color:var(--hx-faint); font-size:0.72rem; margin-bottom:0.5rem;">${keys.length} day${keys.length>1?'s':''} logged · daily average</div>` +
+    NUTRIENTS.map(([n,lbl,u])=>{
+      const have=Math.round(avg[n]), goal=tgt[n], pct=goal?Math.round(have/goal*100):0;
+      const shown=Math.min(100,pct);
+      const col = pct>=90&&pct<=110?'var(--hx-pos)':pct>=70?'var(--hx-accent)':'var(--hx-warn)';
+      return `<div style="margin-bottom:0.55rem;">
+        <div class="hx-row" style="margin-bottom:0.2rem;"><span style="font-size:0.74rem; color:var(--hx-dim);">${lbl}</span>
+        <span class="hx-num" style="font-size:0.72rem; color:${col};">${have}/${goal}${u} · ${pct}%</span></div>
+        <div style="height:6px; background:var(--hx-surface2); border-radius:3px; overflow:hidden;"><div style="height:100%; width:${shown}%; background:${col}; border-radius:3px;"></div></div>
+      </div>`;
+    }).join('');
+}
+
+// 3. WORKOUT CONSISTENCY + streak
+function renderConsistency(){
+  const wl = DATA.health.workoutLog||{};
+  const days = DASH_RANGE_DAYS[dashRange] || 90;
+  const trainedKeys = Object.keys(wl).filter(k=>inDashRange(k) && wl[k].trained);
+  const sessions = trainedKeys.length;
+  const weeks = Math.max(1, days/7);
+  const perWeek = (sessions/weeks).toFixed(1);
+  let streak=0;
+  for(let i=0;i<60;i++){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const k=dayKeyOf(d);
+    if(wl[k] && wl[k].trained) streak++;
+    else if(i>0) break;
+  }
+  document.getElementById('dash-consistency').innerHTML = `<div style="display:flex; gap:0.6rem;">
+    <div class="hx-stat"><div class="hx-stat-val" style="font-size:1.1rem;">${sessions}</div><div class="hx-stat-lbl">Sessions</div></div>
+    <div class="hx-stat"><div class="hx-stat-val" style="font-size:1.1rem; color:var(--hx-accent);">${perWeek}</div><div class="hx-stat-lbl">Per week</div></div>
+    <div class="hx-stat"><div class="hx-stat-val" style="font-size:1.1rem; color:var(--hx-pos);">${streak}</div><div class="hx-stat-lbl">Day streak</div></div>
+  </div>`;
+  destroyDash('streak');
+  const canvas=document.getElementById('dash-streak'); if(!canvas) return;
+  const data=[];
+  for(let i=13;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const k=dayKeyOf(d);
+    data.push({x:parseDayKey(k).getTime(), y:1, trained: !!(wl[k]&&wl[k].trained)});
+  }
+  dashCharts.streak = new Chart(canvas.getContext('2d'), {
+    type:'scatter',
+    data:{ datasets:[{ data, pointRadius:6, pointBackgroundColor:(c)=> c.raw && c.raw.trained ? '#6fcf8e' : 'rgba(255,255,255,0.08)', pointBorderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, parsing:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{ label:(i)=> (i.raw.trained?'Trained · ':'Rest · ')+new Date(i.parsed.x).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) }}},
+      scales:{ x:{type:'linear', grid:{display:false}, ticks:{color:'#6c6f7c', font:{family:'DM Mono',size:8}, maxTicksLimit:5, callback:(v)=>new Date(v).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}},
+        y:{display:false, min:0.5, max:1.5} }, animation:{duration:300} }
+  });
+  requestAnimationFrame(()=>{ try{dashCharts.streak.resize();}catch(e){} });
+}
+
+// 4. PROGRESSIVE LOAD
+function loggedStrengthExercises(){
+  const wl=DATA.health.workoutLog||{}; const set=new Set();
+  Object.values(wl).forEach(w=>(w.exercises||[]).forEach(e=>{ if((e.sets&&e.sets.length)) set.add(e.name); }));
+  return [...set].sort();
+}
+function populateLoadPicker(){
+  const sel=document.getElementById('dash-ex-select'); if(!sel) return;
+  const names=loggedStrengthExercises();
+  const prev=sel.value;
+  sel.innerHTML = names.length ? names.map(n=>`<option>${n}</option>`).join('') : '<option value="">No strength logs yet</option>';
+  if(names.includes(prev)) sel.value=prev;
+}
+function renderProgressiveLoad(){
+  destroyDash('load');
+  const canvas=document.getElementById('dash-load'); if(!canvas) return;
+  const empty=document.getElementById('dash-load-empty');
+  const sel=document.getElementById('dash-ex-select');
+  const name=sel? sel.value : '';
+  const wl=DATA.health.workoutLog||{};
+  const pts=[];
+  Object.keys(wl).filter(k=>inDashRange(k)).sort().forEach(k=>{
+    const ex=(wl[k].exercises||[]).find(e=>e.name===name && e.sets && e.sets.length);
+    if(ex){
+      const best=ex.sets.reduce((a,s)=> (s.weight>a.weight || (s.weight===a.weight && s.reps>a.reps)) ? s : a, ex.sets[0]);
+      pts.push({x:parseDayKey(k).getTime(), y: best.weight||0, reps:best.reps});
+    }
+  });
+  if(!name || pts.length===0){ canvas.style.display='none'; if(empty) empty.style.display='block'; return; }
+  canvas.style.display='block'; if(empty) empty.style.display='none';
+  const fmtD=(ts)=>new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+  dashCharts.load = new Chart(canvas.getContext('2d'), {
+    type:'line',
+    data:{ datasets:[{ label:name, data:pts, borderColor:'#aab4ff', backgroundColor:'rgba(170,180,255,0.1)', borderWidth:2, pointRadius:pts.length===1?6:4, pointBackgroundColor:'#aab4ff', tension:0.3, fill:true }] },
+    options:{ responsive:true, maintainAspectRatio:false, parsing:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{ title:(i)=>i.length?fmtD(i[0].parsed.x):'', label:(i)=>` ${i.parsed.y}kg × ${i.raw.reps}` }}},
+      scales:{ x:{type:'linear', min: pts.length>1?pts[0].x:pts[0].x-43200000, max: pts.length>1?pts[pts.length-1].x:pts[0].x+43200000, grid:{display:false},
+        afterBuildTicks:(a)=>{ if(pts.length<=4) a.ticks=pts.map(p=>({value:p.x})); },
+        ticks:{color:'#6c6f7c', font:{family:'DM Mono',size:9}, maxTicksLimit:6, callback:(v)=>fmtD(v)}},
+        y:{grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#6c6f7c', font:{family:'DM Mono',size:10}}, title:{display:true,text:'kg',color:'#6c6f7c',font:{size:9}}} },
+      animation:{duration:350} }
+  });
+  requestAnimationFrame(()=>{ try{dashCharts.load.resize();}catch(e){} });
+}
+
+// 5. SLEEP vs WEIGHT
+function renderSleepWeight(){
+  destroyDash('sleepwt');
+  const canvas=document.getElementById('dash-sleepwt'); if(!canvas) return;
+  const empty=document.getElementById('dash-sleepwt-empty');
+  const corrEl=document.getElementById('dash-sleepwt-corr');
+  const rows=(DATA.health.dailyLog||[]).filter(l=>l.weight!=null && l.sleep!=null && inDashRange(l.date));
+  if(rows.length<3){ canvas.style.display='none'; if(empty) empty.style.display='block'; if(corrEl) corrEl.textContent=''; return; }
+  canvas.style.display='block'; if(empty) empty.style.display='none';
+  const pts=rows.map(l=>({x:l.sleep, y:l.weight}));
+  const n=pts.length, sx=pts.reduce((a,p)=>a+p.x,0), sy=pts.reduce((a,p)=>a+p.y,0);
+  const sxx=pts.reduce((a,p)=>a+p.x*p.x,0), syy=pts.reduce((a,p)=>a+p.y*p.y,0), sxy=pts.reduce((a,p)=>a+p.x*p.y,0);
+  const denom=Math.sqrt((n*sxx-sx*sx)*(n*syy-sy*sy));
+  const r = denom? (n*sxy-sx*sy)/denom : 0;
+  dashCharts.sleepwt = new Chart(canvas.getContext('2d'), {
+    type:'scatter',
+    data:{ datasets:[{ data:pts, pointRadius:5, pointBackgroundColor:'#6fc7c2', pointBorderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{ label:(i)=>` ${i.parsed.x}h sleep · ${i.parsed.y}kg` }}},
+      scales:{ x:{title:{display:true,text:'sleep (h)',color:'#6c6f7c',font:{size:9}}, grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#6c6f7c', font:{family:'DM Mono',size:9}}},
+        y:{title:{display:true,text:'weight (kg)',color:'#6c6f7c',font:{size:9}}, grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#6c6f7c', font:{family:'DM Mono',size:9}}} },
+      animation:{duration:350} }
+  });
+  requestAnimationFrame(()=>{ try{dashCharts.sleepwt.resize();}catch(e){} });
+  if(corrEl){
+    const strength = Math.abs(r)<0.2?'no':Math.abs(r)<0.4?'a weak':Math.abs(r)<0.6?'a moderate':'a strong';
+    const dir = r<0 ? 'more sleep → lower weight' : 'more sleep → higher weight';
+    corrEl.textContent = `r = ${r.toFixed(2)} — ${strength} ${Math.abs(r)<0.2?'relationship':'correlation'}${Math.abs(r)>=0.2?' ('+dir+')':''}. Pattern only, not causation.`;
+  }
+}
+
 // ─── DIET: day-wise view driven by training type + train/rest toggle ──────────
 const DIET_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const DAY_COLORS = { strength:'#ff6b6b', cardio:'#4ecdc4', football:'#f5c842', rest:'#9896a0' };
@@ -3161,7 +3405,13 @@ function renderDietPlan() {
     ? [['breakfast','Breakfast'],['lunch','Lunch (main fuel-up)'],['preFootball','Pre-football'],['dinner','Post-football dinner']]
     : [['preWorkout','Pre-workout'],['breakfast','Post-workout breakfast'],['lunch','Lunch'],['snack','Afternoon snack'],['dinner','Dinner']];
 
-  document.getElementById('hx-diet-view').innerHTML = renderNutrientTally() + slotOrder.map(([slot,label]) => {
+  const fKey = activeFoodKey();
+  const dateRow = `<div class="hx-row" style="background:var(--hx-surface2); border-radius:var(--hx-r-sm); padding:0.55rem 0.75rem; margin-bottom:0.85rem;">
+      <span class="hx-sub" style="color:var(--hx-dim);">Logging meals for</span>
+      <input type="date" id="food-log-date" value="${fKey}" onchange="setFoodLogDate(this.value)" style="background:transparent; border:none; color:var(--hx-accent); font-family:'DM Mono',monospace; font-size:0.82rem;">
+    </div>`;
+
+  document.getElementById('hx-diet-view').innerHTML = dateRow + renderNutrientTally() + slotOrder.map(([slot,label]) => {
     const s = dp[slot]; if (!s) return '';
     const opts = s.options.map((o,oi) => `<div class="hx-meal">
         <span class="hx-meal-txt">${o.label}</span>
@@ -3181,6 +3431,9 @@ function renderDietPlan() {
 
 // ─── FOOD LOGGING ─────────────────────────────────────────────────────────────
 const NUTRIENTS = [['kcal','Calories','k'],['protein','Protein','g'],['carbs','Carbs','g'],['fat','Fat','g'],['fibre','Fibre','g']];
+let foodLogDate = null; // selected diet log date (YYYY-MM-DD); null → today
+function activeFoodKey(){ return foodLogDate || dayKeyOf(); }
+function setFoodLogDate(v){ foodLogDate = v ? dayKeyOf(v + 'T00:00:00') : dayKeyOf(); renderDietPlan(); }
 function todayKey(){ return dayKeyOf(); }
 function getFoodLog(dateKey){ return (DATA.health.foodLog && DATA.health.foodLog[dateKey]) || []; }
 function sumNutrients(entries){
@@ -3189,7 +3442,7 @@ function sumNutrients(entries){
   return t;
 }
 function renderNutrientTally(){
-  const log = getFoodLog(todayKey());
+  const log = getFoodLog(activeFoodKey());
   const sum = sumNutrients(log);
   const tgt = DATA.health.nutrientTargets;
   const bars = NUTRIENTS.map(([k,lbl,u])=>{
@@ -3207,9 +3460,12 @@ function renderNutrientTally(){
     ${bars}</div>`;
 }
 function renderFoodLogToday(){
-  const log = getFoodLog(todayKey());
+  const key = activeFoodKey();
+  const log = getFoodLog(key);
   if(!log.length) return '';
-  return `<div style="margin-top:0.5rem;"><div style="font-size:0.62rem; letter-spacing:0.1em; color:var(--hx-faint); margin-bottom:0.4rem;">LOGGED TODAY</div>` +
+  const isToday = key === dayKeyOf();
+  const lbl = isToday ? 'LOGGED TODAY' : 'LOGGED ' + new Date(key+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short'}).toUpperCase();
+  return `<div style="margin-top:0.5rem;"><div style="font-size:0.62rem; letter-spacing:0.1em; color:var(--hx-faint); margin-bottom:0.4rem;">${lbl}</div>` +
     log.map((e,i)=>`<div class="hx-row" style="padding:0.45rem 0.6rem; background:var(--hx-surface2); border-radius:8px; margin-bottom:0.3rem;">
       <span style="font-size:0.82rem; color:var(--hx-text);">${e.name}</span>
       <span class="hx-num" style="font-size:0.72rem; color:var(--hx-faint);">${e.kcal}k <span onclick="removeFoodLog(${i})" style="color:var(--hx-neg); cursor:pointer; margin-left:0.4rem;">x</span></span>
@@ -3220,14 +3476,14 @@ function logPlanMeal(o){
   showToast('Logged: '+o.label.slice(0,24));
 }
 function pushFood(entry){
-  const k=todayKey();
+  const k=activeFoodKey();
   if(!DATA.health.foodLog) DATA.health.foodLog={};
   if(!DATA.health.foodLog[k]) DATA.health.foodLog[k]=[];
   DATA.health.foodLog[k].push(entry);
   renderDietPlan(); renderSnapshot(); saveData();
 }
 function removeFoodLog(i){
-  const k=todayKey();
+  const k=activeFoodKey();
   DATA.health.foodLog[k].splice(i,1);
   renderDietPlan(); renderSnapshot(); saveData();
 }
